@@ -91,3 +91,9 @@ export function onToast(cb: (msg: string) => void) {
   window.addEventListener("mm-toast", handler);
   return () => window.removeEventListener("mm-toast", handler);
 }
+
+/* ————— cortina de fios (transição WebGL entre estados) ————— */
+
+export function curtain(midpoint: () => void) {
+  window.dispatchEvent(new CustomEvent("mm-curtain", { detail: midpoint }));
+}

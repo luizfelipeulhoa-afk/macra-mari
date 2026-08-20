@@ -80,7 +80,10 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
     >
       <Tilt className="h-full">
         <div className="tilt-inner group relative flex h-full flex-col border-2 border-ink bg-cream shadow-[5px_7px_0_rgba(44,30,19,0.12)]">
-          <div className="img-zoom relative aspect-[4/5] overflow-hidden border-b-2 border-ink bg-sand">
+          <div
+            data-cursor="ver +"
+            className="img-zoom relative aspect-[4/5] overflow-hidden border-b-2 border-ink bg-sand"
+          >
             <SmartImg
               src={p.img}
               alt={p.name}

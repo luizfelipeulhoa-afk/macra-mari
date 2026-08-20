@@ -161,8 +161,10 @@ export default function Mandala3D({ className = "" }: { className?: string }) {
     ro.observe(mount);
 
     let raf = 0;
+    let running = false;
     const clock = new THREE.Clock();
     const tick = () => {
+      if (!running) return;
       const t = clock.getElapsedTime();
       mouse.x += (target.x - mouse.x) * 0.06;
       mouse.y += (target.y - mouse.y) * 0.06;
@@ -181,15 +183,46 @@ export default function Mandala3D({ className = "" }: { className?: string }) {
       raf = requestAnimationFrame(tick);
     };
 
+    let io: IntersectionObserver | undefined;
+    let onVis: (() => void) | undefined;
+    let visible = true;
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
     if (reduced) {
       group.rotation.y = 0.5;
       renderer.render(scene, camera);
     } else {
-      raf = requestAnimationFrame(tick);
+      /* só renderiza quando visível na viewport e com a aba ativa */
+      io = new IntersectionObserver(
+        ([e]) => {
+          visible = e.isIntersecting;
+          if (visible && !document.hidden) start();
+          else stop();
+        },
+        { threshold: 0 }
+      );
+      io.observe(mount);
+      onVis = () => {
+        if (document.hidden) stop();
+        else if (visible) start();
+      };
+      document.addEventListener("visibilitychange", onVis);
+      start();
     }
 
     return () => {
       cancelAnimationFrame(raf);
+      io?.disconnect();
+      if (onVis) document.removeEventListener("visibilitychange", onVis);
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("scroll", onScroll);

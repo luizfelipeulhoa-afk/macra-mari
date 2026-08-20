@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,6 +14,9 @@ import Atelier from "./components/Atelier";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import Cursor from "./components/Cursor";
+
+/* chunk do Three.js compartilhado pelas experiências 3D */
+const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
 import { onToast } from "./store/useStore";
 import { isCoarsePointer, prefersReducedMotion, scrollToId } from "./lib/motion";
 import { KnotMark } from "./components/Icons";
@@ -85,6 +88,9 @@ export default function App() {
     <div className="min-h-screen">
       <div className="noise-overlay" aria-hidden="true" />
       <Cursor />
+      <Suspense fallback={null}>
+        <ThreadCurtain />
+      </Suspense>
 
       <Header />
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useStore, cartCount } from "../store/useStore";
+import { useStore, cartCount, curtain } from "../store/useStore";
 import {
   BagIcon,
   CloseIcon,
@@ -43,6 +43,12 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bump, setBump] = useState(false);
   const prevCount = useRef(count);
+
+  /* menu abre/fecha atrás da cortina de fios (transição WebGL) */
+  const openMenu = () => curtain(() => setMenuOpen(true));
+  const closeMenu = () => {
+    if (menuOpen) curtain(() => setMenuOpen(false));
+  };
 
   /* header reage ao scroll: encolhe, ganha corpo e sabe quando
      ainda está sobre o intro escuro (para trocar a cor do texto) */
@@ -95,11 +101,11 @@ export default function Header() {
   /* Esc fecha o menu */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") closeMenu();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [menuOpen]);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -156,6 +162,7 @@ export default function Header() {
 
           <div className="flex items-center gap-2.5">
             <button
+              data-magnetic
               onClick={() => setDrawer(true)}
               className={`relative flex h-11 items-center gap-2 border-2 px-3.5 transition-all duration-200 ${
                 overIntro
@@ -180,7 +187,8 @@ export default function Header() {
             </button>
 
             <button
-              onClick={() => setMenuOpen(true)}
+              data-magnetic
+              onClick={openMenu}
               className={`flex h-11 w-11 flex-col items-center justify-center gap-1.5 border-2 transition-colors ${
                 overIntro
                   ? "border-cream bg-transparent hover:bg-cream hover:text-ink"
@@ -235,7 +243,7 @@ export default function Header() {
                 </span>
               </span>
               <button
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 className="flex h-11 w-11 items-center justify-center border-2 border-cream/40 transition-colors hover:border-ocre hover:text-ocre"
                 aria-label="Fechar menu"
               >
@@ -254,7 +262,7 @@ export default function Header() {
                 <motion.a
                   key={l.id}
                   href={l.href}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeMenu}
                   variants={itemVariants}
                   className="group flex items-baseline gap-4 border-b border-dashed border-cream/15 py-3.5 transition-transform duration-300 hover:translate-x-3 sm:py-5"
                 >

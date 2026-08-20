@@ -202,6 +202,7 @@ export default function Hero() {
             <div className="hero-fade mt-8 flex flex-wrap items-center gap-4">
               <a
                 href="#pecas"
+                data-magnetic
                 className="btn-knot inline-flex items-center gap-2 border-2 border-ink bg-ink px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-cream hover:text-ink"
                 style={{ "--fill": "var(--color-ocre)" } as React.CSSProperties}
               >
@@ -210,6 +211,7 @@ export default function Hero() {
               </a>
               <a
                 href="#sob-medida"
+                data-magnetic
                 className="btn-knot inline-flex items-center gap-2 stitch bg-transparent px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-ink hover:text-cream"
                 style={{ "--fill": "var(--color-moss)" } as React.CSSProperties}
               >

@@ -314,6 +314,46 @@ body {
   border-color: var(--color-clay);
   background: rgba(194, 81, 43, 0.09);
 }
+
+.cursor-ring {
+  display: grid;
+  place-items: center;
+}
+
+.cursor-ring.has-label {
+  width: 76px;
+  height: 76px;
+  left: -38px;
+  top: -38px;
+  border-color: transparent;
+  background: rgba(44, 30, 19, 0.9);
+}
+
+.cursor-label {
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s cubic-bezier(0.2, 1.2, 0.3, 1);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  white-space: nowrap;
+}
+
+.cursor-ring.has-label .cursor-label {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* micro-física: elementos atraídos pelo cursor */
+[data-magnetic] {
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.25);
+  will-change: transform;
+}
 @media (pointer: coarse) {
   .cursor-dot,
   .cursor-ring {
