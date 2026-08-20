@@ -1,216 +1,152 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { IMG, TESTIMONIALS } from "../data/products";
-import { useStore } from "../store/useStore";
-import { HandHeartIcon, KnotMark, StarIcon } from "./Icons";
+import { testimonials, atelierImg } from "../data/atelier";
+import Reveal from "./Reveal";
+import {
+  HandIcon,
+  LeafIcon,
+  ScissorsIcon,
+  StarIcon,
+  ThreadIcon,
+} from "./Icons";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const STATS: Array<{ value: number; suffix: string; label: string }> = [
-  { value: 12, suffix: " anos", label: "de ofício diário" },
-  { value: 4800, suffix: "+", label: "peças tecidas e numeradas" },
-  { value: 32, suffix: " km", label: "de fio por mês, reciclado" },
+const steps = [
+  {
+    n: "01",
+    title: "A escolha do fio",
+    icon: LeafIcon,
+    text: "Algodão orgânico de cooperativa do sertão, tingido aqui no tacho com urucum, açafrão e casca de cebola. Nenhum rolo é igual ao outro.",
+    tone: "text-moss",
+  },
+  {
+    n: "02",
+    title: "A urdidura",
+    icon: ThreadIcon,
+    text: "Fios medidos um a um e presos no tear de madeira que foi do avô da Mari. A tensão certa é o segredo que nenhuma máquina copia.",
+    tone: "text-clay",
+  },
+  {
+    n: "03",
+    title: "Milhares de nós",
+    icon: HandIcon,
+    text: "Nó quadrado, meio-nó, nó festonê — repetidos milhares de vezes, em sessões de duas horas com rádio ligada e café passado na hora.",
+    tone: "text-ocre",
+  },
+  {
+    n: "04",
+    title: "Franjas & despedida",
+    icon: ScissorsIcon,
+    text: "Franjas penteadas, vapor pra assentar, etiqueta numerada à mão e um bilhete de despedida. A peça sai do varal direto pra sua parede.",
+    tone: "text-moss",
+  },
 ];
 
 export default function Atelier() {
-  const rootRef = useRef<HTMLElement>(null);
-  const motionOn = useStore((s) => s.motionOn);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (!rootRef.current) return;
-
-      // contadores
-      rootRef.current.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
-        const target = Number(el.dataset.count ?? 0);
-        const render = (v: number) => {
-          el.textContent = Math.round(v).toLocaleString("pt-BR");
-        };
-        if (motionOn) {
-          const proxy = { v: 0 };
-          gsap.to(proxy, {
-            v: target,
-            duration: 1.8,
-            ease: "power2.out",
-            onUpdate: () => render(proxy.v),
-            scrollTrigger: { trigger: el, start: "top 86%", once: true },
-          });
-        } else {
-          render(target);
-        }
-      });
-
-      if (motionOn) {
-        gsap.fromTo(
-          "[data-atelier-main]",
-          { yPercent: -5, scale: 1.1 },
-          {
-            yPercent: 5,
-            scale: 1.1,
-            ease: "none",
-            scrollTrigger: { trigger: rootRef.current, start: "top bottom", end: "bottom top", scrub: 1 },
-          }
-        );
-        gsap.from("[data-reveal-a]", {
-          y: 48,
-          autoAlpha: 0,
-          duration: 0.9,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: { trigger: rootRef.current, start: "top 70%", once: true },
-        });
-        gsap.from("[data-testimonial]", {
-          y: 44,
-          autoAlpha: 0,
-          duration: 0.8,
-          stagger: 0.14,
-          ease: "power3.out",
-          scrollTrigger: { trigger: "[data-testimonial-grid]", start: "top 82%", once: true },
-        });
-      }
-    }, rootRef);
-    return () => ctx.revert();
-  }, [motionOn]);
-
   return (
-    <section ref={rootRef} id="atelier" aria-labelledby="atelier-titulo" className="relative overflow-hidden bg-cream-50 py-24 lg:py-36">
-      <KnotMark
-        aria-hidden="true"
-        className="animate-spin-slower pointer-events-none absolute -top-16 left-[-70px] h-64 w-64 text-sand-200"
-      />
-
-      <div className="mx-auto max-w-7xl px-5 md:px-8">
-        <div className="grid gap-16 lg:grid-cols-12 lg:gap-12">
-          {/* colagem de imagens */}
-          <div className="relative lg:col-span-6">
-            <div data-reveal-a className="overflow-hidden rounded-lg shadow-[0_30px_70px_-28px_rgba(78,55,31,0.5)]">
-              <div className="animate-kenburns">
-                <img
-                  data-atelier-main
-                  src={IMG.atelier}
-                  alt="Mãos de artesã tecendo nós de macramê sobre mesa de madeira, com cordões de algodão cru ao redor"
-                  width={1280}
-                  height={960}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-[4/3] w-full scale-110 object-cover"
-                />
-              </div>
-            </div>
-            <div data-reveal-a className="absolute -bottom-12 -right-4 hidden w-[46%] rotate-3 overflow-hidden rounded-lg border-8 border-cream-50 shadow-2xl sm:block">
-              <img
-                src={IMG.materiais}
-                alt="Novelos de algodão reciclado, contas de madeira e tintura natural de plantas sobre linho"
-                width={1024}
-                height={1024}
-                loading="lazy"
-                decoding="async"
-                className="aspect-square w-full object-cover"
-              />
-            </div>
-          </div>
-
-          {/* narrativa */}
-          <div className="lg:col-span-6 lg:pl-8">
-            <p data-reveal-a className="text-[11px] font-bold tracking-[0.32em] text-olive-600 uppercase">O atelier</p>
-            <h2 id="atelier-titulo" data-reveal-a className="font-display mt-4 text-[clamp(2.1rem,4.2vw,3.6rem)] leading-[1.04] font-light text-bark-900">
-              Mãos que transformam
-              <br />
-              fio em <em className="text-olive-700 italic">memória.</em>
-            </h2>
-            <p data-reveal-a className="mt-6 max-w-xl leading-relaxed text-walnut-600">
-              A Macra Mari nasceu numa varanda em Tiradentes, com dois novelos herdados da avó de Mari
-              e uma parede vazia. Doze anos depois, o atelier continua do mesmo tamanho — porque o
-              luxo aqui nunca foi produzir muito, e sim produzir com tempo.
-            </p>
-            <p data-reveal-a className="mt-4 max-w-xl leading-relaxed text-walnut-600">
-              Cada peça sai com etiqueta numerada à mão e uma carta contando quantas horas de nó ela
-              carrega. Se um dia ela voltar para um conserto — e algumas voltam, dez anos depois —, a
-              gente reata a trama e a história.
-            </p>
-
-            <blockquote data-reveal-a className="mt-9 max-w-xl border-l-2 border-clay-500 pl-6">
-              <p className="font-display text-2xl leading-snug font-light text-bark-800 italic">
-                “Eu não teço decoração. Eu teço o tempo que a gente não tem mais — e penduro na parede.”
+    <section id="atelier" className="relative scroll-mt-24 border-b-2 border-ink bg-paper">
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* coluna fixa */}
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <Reveal>
+              <p className="mb-3 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.24em] text-clay">
+                <HandIcon className="h-4 w-4" /> por dentro do atelier
               </p>
-              <footer className="mt-5 flex items-center gap-4">
+              <h2 className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight">
+                Devagar é
+                <br />
+                <span className="outline-text">o nosso ritmo</span>
+              </h2>
+              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-bark">
+                O atelier fica numa casa de 1948 no centro de Florianópolis, com
+                o varal na varanda e o tacho de tingimento no quintal. Tudo o
+                que sai daqui passou por quatro mãos — as da Mari e as suas,
+                quando pendura.
+              </p>
+            </Reveal>
+
+            <Reveal delay={180} rot={-2} rotFinal={-1}>
+              <figure className="img-zoom relative mt-8 overflow-hidden border-2 border-ink shadow-[8px_10px_0_rgba(44,30,19,0.14)]">
                 <img
-                  src={IMG.fundadora}
-                  alt="Retrato de Mariana Alves, fundadora da Macra Mari, sorrindo em seu atelier"
-                  width={64}
-                  height={64}
+                  src={atelierImg}
+                  alt="Mãos tecendo nós de macramê no atelier"
                   loading="lazy"
-                  decoding="async"
-                  className="h-14 w-14 rounded-full border-2 border-sand-300 object-cover"
+                  className="aspect-[4/3] w-full object-cover"
                 />
-                <div>
-                  <cite className="text-sm font-bold text-bark-900 not-italic">Mariana Alves</cite>
-                  <span className="block text-xs tracking-wide text-walnut-500 uppercase">fundadora & única tecelã</span>
-                </div>
-              </footer>
-            </blockquote>
-
-            <dl data-reveal-a className="mt-12 grid grid-cols-3 gap-6 border-t border-walnut-600/15 pt-8">
-              {STATS.map((stat) => (
-                <div key={stat.label} className="flex flex-col">
-                  <dt className="order-2 mt-2 text-[11px] leading-snug font-semibold tracking-[0.14em] text-walnut-500 uppercase">
-                    {stat.label}
-                  </dt>
-                  <dd className="font-display order-1 text-4xl font-light text-bark-900 md:text-5xl">
-                    <span data-count={stat.value}>0</span>
-                    <span className="text-clay-500">{stat.suffix}</span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-
-        {/* depoimentos */}
-        <div className="mt-28 lg:mt-36">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <p className="text-[11px] font-bold tracking-[0.32em] text-olive-600 uppercase">Cartas de volta</p>
-              <h3 className="font-display mt-3 text-3xl font-light text-bark-900 md:text-4xl">
-                Quem já levou um nó <em className="text-olive-700 italic">para casa.</em>
-              </h3>
-            </div>
-            <p className="flex items-center gap-2 text-sm font-semibold text-walnut-500">
-              <HandHeartIcon className="h-5 w-5 text-clay-500" /> 4,9 de 5 · 312 avaliações
-            </p>
-          </div>
-
-          <div data-testimonial-grid className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
-            {TESTIMONIALS.map((t, i) => (
-              <figure
-                key={t.name}
-                data-testimonial
-                className={`rounded-lg border border-walnut-600/10 bg-white/50 p-7 backdrop-blur-sm ${
-                  i === 1 ? "md:translate-y-10" : i === 2 ? "md:translate-y-4" : ""
-                }`}
-              >
-                <div className="flex gap-1 text-clay-400" aria-label="Avaliação: 5 de 5 estrelas">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <StarIcon key={s} className="h-4 w-4" />
-                  ))}
-                </div>
-                <blockquote className="mt-4">
-                  <p className="font-display text-xl leading-snug font-light text-bark-800 italic">
-                    “{t.quote}”
-                  </p>
-                </blockquote>
-                <figcaption className="mt-5 text-sm">
-                  <strong className="text-bark-900">{t.name}</strong>
-                  <span className="block text-walnut-500">
-                    {t.place} · comprou <em className="font-display italic">{t.product}</em>
-                  </span>
+                <figcaption className="absolute bottom-0 left-0 right-0 border-t-2 border-ink bg-cream/95 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
+                  bancada nº 1 · ter. a sex., 10h–18h · visita com hora marcada
                 </figcaption>
               </figure>
+            </Reveal>
+          </div>
+
+          {/* passos */}
+          <div className="space-y-6">
+            {steps.map((s, i) => (
+              <Reveal key={s.n} delay={i * 100} rot={i % 2 ? 1.5 : -1.5}>
+                <article className="card-lift group flex gap-5 border-2 border-ink bg-cream p-6 sm:p-7">
+                  <span className={`font-display text-5xl font-extrabold leading-none ${s.tone} transition-transform duration-300 group-hover:-rotate-6`}>
+                    {s.n}
+                  </span>
+                  <div>
+                    <h3 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight">
+                      <s.icon className={`h-6 w-6 ${s.tone}`} />
+                      {s.title}
+                    </h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-bark">{s.text}</p>
+                  </div>
+                </article>
+              </Reveal>
             ))}
+
+            {/* depoimentos — cartões postais */}
+            <div className="pt-10">
+              <Reveal>
+                <p className="mb-6 font-mono text-[12px] uppercase tracking-[0.24em] text-bark">
+                  ✳ cartões que chegam pelo correio
+                </p>
+              </Reveal>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {testimonials.map((t, i) => (
+                  <Reveal
+                    key={t.name}
+                    delay={i * 110}
+                    rot={i % 2 ? 3 : -3}
+                    rotFinal={i % 2 ? 1.5 : -1.5}
+                  >
+                    <figure className="relative border-2 border-ink bg-paper p-5 shadow-[5px_6px_0_rgba(44,30,19,0.12)] transition-transform duration-300 hover:z-10 hover:scale-[1.03] hover:!rotate-0">
+                      {/* selo */}
+                      <span className="absolute -right-2.5 -top-2.5 flex h-9 w-9 rotate-12 items-center justify-center border-2 border-ink bg-ocre">
+                        <KnotStamp />
+                      </span>
+                      <span className="flex gap-0.5 text-clay">
+                        {[...Array(5)].map((_, k) => (
+                          <StarIcon key={k} className="h-3.5 w-3.5" />
+                        ))}
+                      </span>
+                      <blockquote className="mt-3 text-[14px] leading-relaxed text-ink">
+                        “{t.quote}”
+                      </blockquote>
+                      <figcaption className="mt-4 border-t border-dashed border-bark/40 pt-3">
+                        <span className="block font-display text-sm font-bold">{t.name}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-bark">
+                          {t.city} · levou: {t.piece}
+                        </span>
+                      </figcaption>
+                    </figure>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function KnotStamp() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-ink" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M7 5c5 1.8 5 4.5 5 7s0 5.2-5 7M17 5c-5 1.8-5 4.5-5 7s0 5.2 5 7" />
+    </svg>
   );
 }

@@ -1,186 +1,213 @@
-import { useState } from "react";
-import { CATEGORIES } from "../data/products";
-import { useStore } from "../store/useStore";
-import { scrollToId } from "../lib/scroll";
-import { CheckIcon, InstagramIcon, KnotMark, PinterestIcon, WhatsAppIcon } from "./Icons";
+import { useState, type FormEvent } from "react";
+import Reveal from "./Reveal";
+import {
+  ArrowIcon,
+  CheckIcon,
+  ClockIcon,
+  InstagramIcon,
+  KnotMark,
+  MailIcon,
+  PinIcon,
+  WhatsIcon,
+} from "./Icons";
 
-const NAV_LINKS = [
-  { id: "inicio", label: "Início" },
-  { id: "colecoes", label: "Coleções" },
-  { id: "loja", label: "Loja" },
-  { id: "atelier", label: "Atelier" },
-  { id: "sustentabilidade", label: "Sustentabilidade" },
+const hours = [
+  { d: "segunda", h: "fechado — dia de tingir" },
+  { d: "terça a sexta", h: "10h – 18h" },
+  { d: "sábado", h: "10h – 14h" },
+  { d: "domingo", h: "fechado — dia de praia" },
 ];
 
 export default function Footer() {
-  const setFilter = useStore((s) => s.setFilter);
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "ok" | "erro">("idle");
+  const [state, setState] = useState<"idle" | "error" | "done">("idle");
 
-  const submit = (e: React.FormEvent) => {
+  const subscribe = (e: FormEvent) => {
     e.preventDefault();
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
-    if (!valid) {
-      setStatus("erro");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+      setState("error");
       return;
     }
-    setStatus("ok");
-    setEmail("");
+    setState("done");
   };
 
   return (
-    <footer id="contato" className="bg-bark-950 text-cream-100">
-      {/* newsletter */}
-      <div className="border-b border-cream-50/10">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:px-8 lg:py-20">
-          <div>
-            <p className="text-[11px] font-bold tracking-[0.32em] text-olive-300 uppercase">Cartas do atelier</p>
-            <h2 className="font-display mt-3 text-[clamp(1.9rem,3.5vw,3rem)] leading-[1.05] font-light text-cream-50">
-              Receba as próximas tramas <em className="text-sand-300 italic">antes de todo mundo.</em>
-            </h2>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-cream-100/65">
-              Uma carta por mês: peças novas, bastidores do tingimento natural e o código de desconto
-              que a Mari só manda por lá.
-            </p>
-          </div>
-
-          {status === "ok" ? (
-            <p role="status" className="flex items-center gap-4 rounded-lg border border-olive-600/50 bg-olive-800/60 px-6 py-5">
-              <CheckIcon className="h-8 w-8 shrink-0 text-olive-300" />
-              <span className="text-sm leading-relaxed">
-                <strong className="font-display text-lg text-cream-50 italic">Obrigada!</strong>
-                <br />
-                Sua primeira carta chega com a próxima fornada de nós.
-              </span>
-            </p>
-          ) : (
-            <form onSubmit={submit} noValidate>
-              <label htmlFor="newsletter-email" className="sr-only">
-                Seu melhor e-mail
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (status === "erro") setStatus("idle");
-                  }}
-                  placeholder="seu@melhoremail.com"
-                  className="h-13 min-h-[52px] flex-1 rounded-full border border-cream-50/15 bg-bark-900 px-6 text-cream-50 placeholder:text-cream-100/35 focus:border-olive-300 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="h-13 min-h-[52px] rounded-full bg-cream-50 px-8 text-sm font-bold tracking-wide text-bark-900 uppercase transition-colors duration-300 hover:bg-sand-300"
-                >
-                  Assinar
-                </button>
-              </div>
-              {status === "erro" && (
-                <p role="alert" className="mt-3 pl-4 text-sm font-semibold text-clay-300">
-                  Hmm, esse e-mail não parece certo. Confere e tenta de novo?
-                </p>
-              )}
-            </form>
-          )}
-        </div>
+    <footer className="relative overflow-hidden bg-ink text-cream">
+      {/* franja de fios no topo */}
+      <div className="flex justify-between border-b border-cream/10 px-1" aria-hidden="true">
+        {Array.from({ length: 60 }).map((_, i) => (
+          <span
+            key={i}
+            className="w-px bg-cream/25"
+            style={{ height: `${14 + ((i * 13) % 22)}px` }}
+          />
+        ))}
       </div>
 
-      {/* rodapé */}
-      <div className="mx-auto max-w-7xl px-5 pt-16 pb-8 md:px-8">
-        <div className="grid gap-12 lg:grid-cols-[2fr_1fr_1fr_1.2fr]">
-          <div>
-            <p className="flex items-center gap-3">
-              <KnotMark className="h-9 w-9 text-olive-400" />
-              <span className="font-display text-3xl font-medium tracking-tight text-cream-50">
-                Macra <em className="text-sand-300 italic">Mari</em>
-              </span>
-            </p>
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-cream-100/60">
-              Atelier de macramê autoral em Tiradentes — MG. Quadros, mandalas, porta-vasos, bolsas e
-              porta-copos tecidos à mão, um nó de cada vez, desde 2013.
-            </p>
-            <div className="mt-6 flex gap-3">
-              {[
-                { label: "Instagram da Macra Mari", Icon: InstagramIcon },
-                { label: "Pinterest da Macra Mari", Icon: PinterestIcon },
-                { label: "Falar com a Macra Mari no WhatsApp", Icon: WhatsAppIcon },
-              ].map(({ label, Icon }) => (
-                <button
-                  key={label}
-                  type="button"
-                  aria-label={label}
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-cream-50/15 text-cream-100/70 transition-all duration-300 hover:border-olive-400 hover:bg-olive-700 hover:text-cream-50"
-                >
-                  <Icon className="h-5 w-5" />
-                </button>
-              ))}
-            </div>
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6">
+        <div className="grid gap-12 lg:grid-cols-12">
+          {/* clube do nó */}
+          <div className="lg:col-span-5">
+            <Reveal>
+              <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-ocre">
+                clube do nó
+              </p>
+              <h2 className="mt-3 font-display text-4xl font-extrabold leading-[0.95] tracking-tight sm:text-5xl">
+                O varal novo
+                <br />
+                chega primeiro
+                <br />
+                no seu e-mail.
+              </h2>
+              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-cream/70">
+                Uma carta por mês: peças novas antes de irem pro site, bastidor
+                do tingimento e 10% off na primeira encomenda.
+              </p>
+
+              {state === "done" ? (
+                <p className="mt-6 flex items-center gap-3 border-2 border-moss bg-moss/20 px-4 py-3.5 text-[15px] font-semibold text-cream">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-moss">
+                    <CheckIcon className="h-4 w-4" />
+                  </span>
+                  Bem-vinda(o) ao clube — a primeira carta já está no tear.
+                </p>
+              ) : (
+                <form onSubmit={subscribe} className="mt-6" noValidate>
+                  <div className="flex max-w-md border-2 border-cream/80 bg-ink focus-within:border-ocre">
+                    <span className="flex items-center pl-3 text-cream/50">
+                      <MailIcon className="h-5 w-5" />
+                    </span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (state === "error") setState("idle");
+                      }}
+                      placeholder="seu@email.com"
+                      aria-label="Seu e-mail"
+                      className="w-full bg-transparent px-3 py-3.5 font-mono text-sm text-cream placeholder:text-cream/35 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="btn-knot flex items-center gap-2 bg-cream px-4 font-mono text-[12px] uppercase tracking-wider text-ink hover:text-cream"
+                      style={{ "--fill": "var(--color-clay)" } as React.CSSProperties}
+                    >
+                      entrar
+                      <ArrowIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {state === "error" && (
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-ocre">
+                      ✳ esse e-mail não parece certo — confere pra gente?
+                    </p>
+                  )}
+                </form>
+              )}
+            </Reveal>
           </div>
 
-          <nav aria-label="Rodapé — navegação">
-            <h3 className="text-[11px] font-bold tracking-[0.28em] text-olive-300 uppercase">Navegação</h3>
-            <ul className="mt-5 space-y-1">
-              {NAV_LINKS.map((l) => (
-                <li key={l.id}>
-                  <button
-                    type="button"
-                    onClick={() => scrollToId(l.id)}
-                    className="inline-flex min-h-[44px] items-center text-sm text-cream-100/70 transition-colors hover:text-cream-50"
-                  >
-                    {l.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {/* navegação + contato */}
+          <div className="grid gap-10 sm:grid-cols-2 lg:col-span-4">
+            <Reveal delay={120}>
+              <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.24em] text-cream/50">
+                atalhos
+              </p>
+              <ul className="space-y-3">
+                {[
+                  ["#pecas", "Peças do varal"],
+                  ["#colecoes", "Coleções"],
+                  ["#sob-medida", "Sob medida"],
+                  ["#atelier", "O atelier"],
+                  ["#inicio", "Voltar ao topo"],
+                ].map(([href, label]) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      className="group inline-flex items-center gap-2 text-[15px] font-semibold text-cream/85 transition-colors hover:text-ocre"
+                    >
+                      <span className="h-1.5 w-1.5 rotate-45 bg-clay transition-transform duration-300 group-hover:rotate-[225deg]" />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
 
-          <nav aria-label="Rodapé — coleções">
-            <h3 className="text-[11px] font-bold tracking-[0.28em] text-olive-300 uppercase">Coleções</h3>
-            <ul className="mt-5 space-y-1">
-              {CATEGORIES.map((c) => (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFilter(c.id);
-                      scrollToId("loja");
-                    }}
-                    className="inline-flex min-h-[44px] items-center text-sm text-cream-100/70 transition-colors hover:text-cream-50"
-                  >
-                    {c.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+            <Reveal delay={200}>
+              <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.24em] text-cream/50">
+                horários
+              </p>
+              <ul className="space-y-2.5">
+                {hours.map((h) => (
+                  <li key={h.d} className="flex items-start gap-2.5 text-[14px]">
+                    <ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-ocre" />
+                    <span>
+                      <span className="block font-semibold capitalize text-cream/90">{h.d}</span>
+                      <span className="font-mono text-[12px] uppercase tracking-wider text-cream/55">
+                        {h.h}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          </div>
 
-          <div>
-            <h3 className="text-[11px] font-bold tracking-[0.28em] text-olive-300 uppercase">Cuidados & contato</h3>
-            <ul className="mt-5 space-y-3 text-sm leading-relaxed text-cream-100/70">
-              <li>Como cuidar do seu macramê: penteie a franja a cada lua cheia e lave à mão, com sabão de coco.</li>
-              <li>Trocas em até 30 dias — peças sob medida, em 7.</li>
-              <li>
+          {/* endereço */}
+          <div className="lg:col-span-3">
+            <Reveal delay={280}>
+              <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.24em] text-cream/50">
+                o endereço
+              </p>
+              <p className="flex items-start gap-2.5 text-[15px] leading-relaxed text-cream/85">
+                <PinIcon className="mt-1 h-5 w-5 shrink-0 text-clay" />
+                Rua do Varal, 48
+                <br />
+                Centro · Florianópolis — SC
+              </p>
+              <div className="mt-6 flex gap-3">
                 <a
-                  href="mailto:ola@macramari.com.br"
-                  className="font-semibold text-sand-300 underline decoration-sand-300/40 underline-offset-4 transition-colors hover:text-cream-50"
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Instagram do atelier"
+                  className="flex h-11 w-11 items-center justify-center border-2 border-cream/40 text-cream/80 transition-all duration-200 hover:-translate-y-1 hover:border-ocre hover:text-ocre"
                 >
-                  ola@macramari.com.br
+                  <InstagramIcon className="h-5 w-5" />
                 </a>
-              </li>
-              <li>Prazo de produção: 5 a 10 dias úteis de nós.</li>
-            </ul>
+                <a
+                  href="https://wa.me/5548999990048"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="WhatsApp do atelier"
+                  className="flex h-11 w-11 items-center justify-center border-2 border-cream/40 text-cream/80 transition-all duration-200 hover:-translate-y-1 hover:border-moss hover:text-moss"
+                >
+                  <WhatsIcon className="h-5 w-5" />
+                </a>
+              </div>
+              <p className="mt-5 font-mono text-[11px] uppercase leading-relaxed tracking-wider text-cream/45">
+                pedidos pelo whatsapp · retirada na porta · envio via correios p/ todo o Brasil
+              </p>
+            </Reveal>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-cream-50/10 pt-6 text-xs text-cream-100/45 sm:flex-row">
-          <p>© {new Date().getFullYear()} Macra Mari — todos os nós reservados.</p>
-          <p className="flex items-center gap-2">
-            <KnotMark className="h-3.5 w-3.5" />
-            Cores e medidas podem variar: cada peça é única, como toda coisa feita à mão.
-          </p>
+        {/* wordmark gigante */}
+        <Reveal delay={100}>
+          <div className="mt-16 select-none border-t border-cream/10 pt-8" aria-hidden="true">
+            <p className="outline-text-cream text-center font-display text-[clamp(3rem,12.5vw,11rem)] font-extrabold leading-none tracking-tight opacity-70">
+              MACRA&nbsp;MARI
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-cream/10 pt-6 font-mono text-[11px] uppercase tracking-wider text-cream/40">
+          <span className="flex items-center gap-2">
+            <KnotMark className="h-4 w-4 text-clay" />
+            © 2026 Macra Mari — tecida com paciência em Floripa
+          </span>
+          <span>algodão orgânico · tingimento natural · zero pressa</span>
         </div>
       </div>
     </footer>

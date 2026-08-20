@@ -1,75 +1,93 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type { Category } from "../data/atelier";
 
-export interface CartLine {
-  id: string;
+export interface CartItem {
+  key: string;
+  name: string;
+  price: number;
+  img: string;
+  meta: string;
   qty: number;
 }
 
 interface StoreState {
-  items: CartLine[];
-  cartOpen: boolean;
-  filter: string; // "todos" ou id de categoria
-  motionOn: boolean;
-  toast: string | null;
-  toastKey: number;
-  ordered: boolean;
-
-  addItem: (id: string) => void;
-  removeItem: (id: string) => void;
-  setQty: (id: string, qty: number) => void;
-  clearCart: () => void;
-  setCartOpen: (open: boolean) => void;
-  setFilter: (filter: string) => void;
-  setMotionOn: (on: boolean) => void;
-  showToast: (msg: string) => void;
-  clearToast: () => void;
-  setOrdered: (v: boolean) => void;
+  items: CartItem[];
+  drawerOpen: boolean;
+  filter: Category | "Todas";
+  addItem: (item: Omit<CartItem, "qty">) => void;
+  inc: (key: string) => void;
+  dec: (key: string) => void;
+  remove: (key: string) => void;
+  clear: () => void;
+  setDrawer: (open: boolean) => void;
+  setFilter: (f: Category | "Todas") => void;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set) => ({
       items: [],
-      cartOpen: false,
-      filter: "todos",
-      motionOn: true,
-      toast: null,
-      toastKey: 0,
-      ordered: false,
+      drawerOpen: false,
+      filter: "Todas",
 
-      addItem: (id) =>
+      addItem: (item) =>
         set((s) => {
-          const existing = s.items.find((l) => l.id === id);
-          return {
-            items: existing
-              ? s.items.map((l) => (l.id === id ? { ...l, qty: Math.min(9, l.qty + 1) } : l))
-              : [...s.items, { id, qty: 1 }],
-          };
+          const existing = s.items.find((i) => i.key === item.key);
+          if (existing) {
+            return {
+              items: s.items.map((i) =>
+                i.key === item.key ? { ...i, qty: i.qty + 1 } : i
+              ),
+            };
+          }
+          return { items: [...s.items, { ...item, qty: 1 }] };
         }),
-      removeItem: (id) => set((s) => ({ items: s.items.filter((l) => l.id !== id) })),
-      setQty: (id, qty) =>
+
+      inc: (key) =>
         set((s) => ({
-          items:
-            qty <= 0
-              ? s.items.filter((l) => l.id !== id)
-              : s.items.map((l) => (l.id === id ? { ...l, qty: Math.min(9, qty) } : l)),
+          items: s.items.map((i) =>
+            i.key === key ? { ...i, qty: i.qty + 1 } : i
+          ),
         })),
-      clearCart: () => set({ items: [], ordered: false }),
-      setCartOpen: (open) => set({ cartOpen: open }),
-      setFilter: (filter) => set({ filter }),
-      setMotionOn: (on) => set({ motionOn: on }),
-      showToast: (msg) => set((s) => ({ toast: msg, toastKey: s.toastKey + 1 })),
-      clearToast: () => set({ toast: null }),
-      setOrdered: (v) => set({ ordered: v }),
+
+      dec: (key) =>
+        set((s) => ({
+          items: s.items
+            .map((i) => (i.key === key ? { ...i, qty: i.qty - 1 } : i))
+            .filter((i) => i.qty > 0),
+        })),
+
+      remove: (key) =>
+        set((s) => ({ items: s.items.filter((i) => i.key !== key) })),
+
+      clear: () => set({ items: [] }),
+
+      setDrawer: (open) => set({ drawerOpen: open }),
+      setFilter: (f) => set({ filter: f }),
     }),
     {
-      name: "macra-mari-store",
+      name: "macra-mari-sacola",
+      storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ items: s.items }),
     }
   )
 );
 
-export function selectCartCount(s: StoreState) {
-  return s.items.reduce((acc, l) => acc + l.qty, 0);
+export const cartCount = (items: CartItem[]) =>
+  items.reduce((acc, i) => acc + i.qty, 0);
+
+export const cartTotal = (items: CartItem[]) =>
+  items.reduce((acc, i) => acc + i.qty * i.price, 0);
+
+/* ————— toasts (evento global simples) ————— */
+
+export function toast(msg: string) {
+  window.dispatchEvent(new CustomEvent("mm-toast", { detail: msg }));
+}
+
+export function onToast(cb: (msg: string) => void) {
+  const handler = (e: Event) => cb((e as CustomEvent<string>).detail);
+  window.addEventListener("mm-toast", handler);
+  return () => window.removeEventListener("mm-toast", handler);
 }

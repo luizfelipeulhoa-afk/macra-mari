@@ -1,228 +1,266 @@
-import { useEffect, useRef } from "react";
-import { selectCartCount, useStore } from "../store/useStore";
-import { FREE_SHIPPING_THRESHOLD, formatBRL, getProduct } from "../data/products";
-import { scrollToId, startScroll, stopScroll } from "../lib/scroll";
-import { BagIcon, CheckIcon, KnotMark, MinusIcon, PlusIcon, TruckIcon, XIcon } from "./Icons";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import confetti from "canvas-confetti";
+import { formatBRL } from "../data/atelier";
+import { useStore, cartTotal, cartCount } from "../store/useStore";
+import {
+  BagIcon,
+  CheckIcon,
+  CloseIcon,
+  MinusIcon,
+  PlusIcon,
+  TruckIcon,
+} from "./Icons";
+
+const FREE_SHIPPING = 250;
+
+type Phase = "cart" | "processing" | "done";
 
 export default function CartDrawer() {
-  const cartOpen = useStore((s) => s.cartOpen);
-  const setCartOpen = useStore((s) => s.setCartOpen);
   const items = useStore((s) => s.items);
-  const setQty = useStore((s) => s.setQty);
-  const removeItem = useStore((s) => s.removeItem);
-  const clearCart = useStore((s) => s.clearCart);
-  const ordered = useStore((s) => s.ordered);
-  const setOrdered = useStore((s) => s.setOrdered);
-  const count = useStore(selectCartCount);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const restoreRef = useRef<HTMLElement | null>(null);
+  const open = useStore((s) => s.drawerOpen);
+  const setDrawer = useStore((s) => s.setDrawer);
+  const inc = useStore((s) => s.inc);
+  const dec = useStore((s) => s.dec);
+  const remove = useStore((s) => s.remove);
+  const clear = useStore((s) => s.clear);
 
-  const subtotal = items.reduce((acc, l) => acc + (getProduct(l.id)?.price ?? 0) * l.qty, 0);
-  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(1, subtotal / FREE_SHIPPING_THRESHOLD);
+  const [phase, setPhase] = useState<Phase>("cart");
+  const [orderCode, setOrderCode] = useState("");
 
-  useEffect(() => {
-    if (cartOpen) {
-      restoreRef.current = (document.activeElement as HTMLElement) ?? null;
-      stopScroll();
-      // dá tempo da transição começar antes de mover o foco
-      const t = setTimeout(() => closeRef.current?.focus(), 60);
-      return () => {
-        clearTimeout(t);
-        startScroll();
-        restoreRef.current?.focus?.();
-      };
-    }
-  }, [cartOpen]);
+  const total = cartTotal(items);
+  const count = cartCount(items);
+  const missing = Math.max(0, FREE_SHIPPING - total);
+  const progress = Math.min(100, (total / FREE_SHIPPING) * 100);
 
   useEffect(() => {
-    if (!cartOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCartOpen(false);
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) setPhase("cart");
+    return () => {
+      document.body.style.overflow = "";
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [cartOpen, setCartOpen]);
+  }, [open]);
 
-  const closeAndGoShop = () => {
-    setCartOpen(false);
-    setTimeout(() => scrollToId("loja"), 80);
+  const checkout = () => {
+    setPhase("processing");
+    window.setTimeout(() => {
+      const code = `MM-${Date.now().toString(36).slice(-5).toUpperCase()}`;
+      setOrderCode(code);
+      setPhase("done");
+      confetti({
+        particleCount: 140,
+        spread: 75,
+        origin: { y: 0.6 },
+        colors: ["#c2512b", "#35573b", "#d89b3d", "#fbf6ea", "#2c1e13"],
+      });
+    }, 1500);
+  };
+
+  const finish = () => {
+    clear();
+    setDrawer(false);
+    setPhase("cart");
   };
 
   return (
-    <>
-      <div
-        aria-hidden="true"
-        onClick={() => setCartOpen(false)}
-        className={`fixed inset-0 z-[70] bg-bark-950/55 backdrop-blur-[2px] transition-opacity duration-500 ${
-          cartOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="carrinho-titulo"
-        className={`fixed top-0 right-0 z-[75] flex h-full w-full max-w-md flex-col bg-cream-50 shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          cartOpen ? "visible translate-x-0" : "invisible translate-x-full"
-        }`}
-      >
-        <header className="flex items-center justify-between border-b border-walnut-600/10 px-6 py-5">
-          <h2 id="carrinho-titulo" className="font-display text-2xl font-medium text-bark-900">
-            Seu carrinho
-            {count > 0 && <span className="ml-2 text-base text-walnut-500">({count})</span>}
-          </h2>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={() => setCartOpen(false)}
-            aria-label="Fechar carrinho"
-            className="flex h-12 w-12 items-center justify-center rounded-full text-walnut-600 transition-colors hover:bg-sand-200/70 hover:text-olive-700"
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-[60] bg-ink/55"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDrawer(false)}
+          />
+          <motion.aside
+            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-md flex-col border-l-2 border-ink bg-paper shadow-[-10px_0_0_rgba(44,30,19,0.15)]"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "tween", duration: 0.38, ease: [0.32, 0.72, 0, 1] }}
+            role="dialog"
+            aria-label="Sacola de compras"
           >
-            <XIcon className="h-6 w-6" />
-          </button>
-        </header>
-
-        {ordered ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 text-center">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-olive-600 text-cream-50">
-              <CheckIcon className="h-10 w-10" />
-            </span>
-            <h3 className="font-display text-3xl font-light text-bark-900">Pedido confirmado!</h3>
-            <p className="text-sm leading-relaxed text-walnut-600">
-              Este é um pedido de demonstração — mas a vontade de tecer para você é de verdade. Em uma
-              loja real, você receberia a confirmação por e-mail agora.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                clearCart();
-                setCartOpen(false);
-              }}
-              className="mt-2 inline-flex h-12 items-center rounded-full bg-bark-900 px-7 text-sm font-bold tracking-wide text-cream-50 uppercase transition-colors hover:bg-olive-700"
-            >
-              Voltar para a loja
-            </button>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 text-center">
-            <span className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-dashed border-walnut-600/25 text-sand-400">
-              <KnotMark className="h-12 w-12" />
-            </span>
-            <h3 className="font-display text-2xl font-light text-bark-900">Seu carrinho está vazio</h3>
-            <p className="text-sm text-walnut-600">
-              Cada peça daqui saiu de um novelo com história. Que tal escolher a sua?
-            </p>
-            <button
-              type="button"
-              onClick={closeAndGoShop}
-              className="mt-2 inline-flex h-12 items-center gap-2 rounded-full bg-bark-900 px-7 text-sm font-bold tracking-wide text-cream-50 uppercase transition-colors hover:bg-olive-700"
-            >
-              <BagIcon className="h-4 w-4" />
-              Ver as peças
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="border-b border-walnut-600/10 px-6 py-4">
-              <p className="flex items-center gap-2 text-sm font-semibold text-walnut-600">
-                <TruckIcon className="h-5 w-5 text-olive-600" />
-                {missing > 0 ? (
-                  <span>
-                    Faltam <strong className="text-bark-900">{formatBRL(missing)}</strong> para frete grátis
-                  </span>
-                ) : (
-                  <span className="text-olive-700">
-                    <CheckIcon className="mr-1 inline h-4 w-4" /> Frete grátis garantido!
+            {/* cabeçalho */}
+            <div className="flex items-center justify-between border-b-2 border-ink bg-cream px-5 py-4">
+              <h2 className="flex items-center gap-2.5 font-display text-2xl font-extrabold tracking-tight">
+                <BagIcon className="h-6 w-6 text-clay" />
+                Sua sacola
+                {count > 0 && (
+                  <span className="border-2 border-ink bg-ocre px-2 py-0.5 font-mono text-[12px] font-semibold">
+                    {count}
                   </span>
                 )}
-              </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sand-200" role="presentation">
-                <div
-                  className="h-full rounded-full bg-olive-600 transition-all duration-700 ease-out"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </div>
+              </h2>
+              <button
+                onClick={() => setDrawer(false)}
+                className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper transition-colors hover:bg-clay hover:text-cream"
+                aria-label="Fechar sacola"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
             </div>
 
-            <ul className="flex-1 divide-y divide-walnut-600/10 overflow-y-auto px-6">
-              {items.map((line) => {
-                const product = getProduct(line.id);
-                if (!product) return null;
-                return (
-                  <li key={line.id} className="flex gap-4 py-5">
-                    <span className="texture-weave flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-walnut-600/15 bg-sand-100 text-clay-500">
-                      <KnotMark className="h-8 w-8" />
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-display text-lg leading-tight font-medium text-bark-900">{product.name}</h3>
-                      <p className="text-sm text-walnut-500">{formatBRL(product.price)} cada</p>
-                      <div className="mt-2.5 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setQty(line.id, line.qty - 1)}
-                          aria-label={`Diminuir quantidade de ${product.name}`}
-                          className="flex h-12 w-12 items-center justify-center rounded-full border border-walnut-600/25 text-walnut-600 transition-colors hover:border-olive-600 hover:text-olive-700"
-                        >
-                          <MinusIcon className="h-4 w-4" />
-                        </button>
-                        <span className="w-8 text-center text-lg font-bold text-bark-900" aria-live="polite">
-                          {line.qty}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setQty(line.id, line.qty + 1)}
-                          aria-label={`Aumentar quantidade de ${product.name}`}
-                          className="flex h-12 w-12 items-center justify-center rounded-full border border-walnut-600/25 text-walnut-600 transition-colors hover:border-olive-600 hover:text-olive-700"
-                        >
-                          <PlusIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end justify-between py-1">
-                      <p className="font-display text-lg font-medium text-bark-900">
-                        {formatBRL(product.price * line.qty)}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(line.id)}
-                        className="inline-flex min-h-[48px] items-center text-xs font-bold tracking-wide text-walnut-500 uppercase underline decoration-walnut-500/40 underline-offset-4 transition-colors hover:text-clay-600"
-                      >
-                        Remover
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <footer className="border-t border-walnut-600/10 bg-cream-100 px-6 py-5">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm font-bold tracking-wide text-walnut-600 uppercase">Subtotal</span>
-                <span className="font-display text-3xl font-medium text-bark-900">{formatBRL(subtotal)}</span>
+            {phase === "done" ? (
+              /* ——— pedido confirmado ——— */
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 14 }}
+                  className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-ink bg-moss text-cream"
+                >
+                  <CheckIcon className="h-10 w-10" strokeWidth={2.4} />
+                </motion.span>
+                <h3 className="font-display text-3xl font-extrabold tracking-tight">
+                  Encomenda no tear!
+                </h3>
+                <p className="text-[15px] leading-relaxed text-bark">
+                  Seu pedido <strong className="font-mono text-clay">{orderCode}</strong> foi
+                  recebido. A Mari te chama no WhatsApp pra combinar pagamento e envio —
+                  e manda foto de cada etapa.
+                </p>
+                <button
+                  onClick={finish}
+                  className="btn-knot mt-2 border-2 border-ink bg-ink px-6 py-3 font-mono text-sm uppercase tracking-wider text-cream hover:text-ink"
+                  style={{ "--fill": "var(--color-ocre)" } as React.CSSProperties}
+                >
+                  continuar tecendo
+                </button>
               </div>
-              <p className="mt-1 text-xs text-walnut-500">
-                Produção artesanal: envio em até 10 dias úteis, com embalagem de papel-semente.
-              </p>
-              <button
-                type="button"
-                onClick={() => setOrdered(true)}
-                className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-bark-900 text-sm font-bold tracking-[0.14em] text-cream-50 uppercase transition-colors duration-300 hover:bg-olive-700"
-              >
-                <CheckIcon className="h-5 w-5" />
-                Finalizar pedido
-              </button>
-              <button
-                type="button"
-                onClick={() => setCartOpen(false)}
-                className="mt-2 flex min-h-[48px] w-full items-center justify-center text-sm font-bold text-walnut-600 underline decoration-clay-400 decoration-2 underline-offset-4 transition-colors hover:text-olive-700"
-              >
-                Continuar olhando as tramas
-              </button>
-            </footer>
-          </>
-        )}
-      </aside>
-    </>
+            ) : items.length === 0 ? (
+              /* ——— sacola vazia ——— */
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+                <span className="flex h-20 w-20 items-center justify-center border-2 border-dashed border-bark/50 text-bark">
+                  <BagIcon className="h-9 w-9" />
+                </span>
+                <h3 className="font-display text-2xl font-extrabold">Sacola vazia…</h3>
+                <p className="text-[15px] text-bark">
+                  O varal está cheio de peças esperando um lugar pra morar.
+                </p>
+                <a
+                  href="#pecas"
+                  onClick={() => setDrawer(false)}
+                  className="btn-knot mt-2 border-2 border-ink bg-clay px-6 py-3 font-mono text-sm uppercase tracking-wider text-cream hover:text-clay"
+                  style={{ "--fill": "var(--color-ink)" } as React.CSSProperties}
+                >
+                  ver o varal
+                </a>
+              </div>
+            ) : (
+              /* ——— itens ——— */
+              <>
+                {/* frete grátis */}
+                <div className="border-b-2 border-dashed border-bark/40 bg-cream px-5 py-4">
+                  <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-bark">
+                    <TruckIcon className="h-4 w-4 text-moss" />
+                    {missing > 0 ? (
+                      <>
+                        faltam <strong className="text-clay">{formatBRL(missing)}</strong> pro frete grátis
+                      </>
+                    ) : (
+                      <span className="font-semibold text-moss">✓ frete grátis garantido!</span>
+                    )}
+                  </p>
+                  <div className="mt-2 h-2.5 border border-ink bg-paper">
+                    <div
+                      className="h-full bg-moss transition-all duration-500 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <ul className="flex-1 divide-y-2 divide-dashed divide-bark/30 overflow-y-auto px-5">
+                  <AnimatePresence initial={false}>
+                    {items.map((it) => (
+                      <motion.li
+                        key={it.key}
+                        layout
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: 60, transition: { duration: 0.22 } }}
+                        className="flex gap-3.5 py-4"
+                      >
+                        <span className="img-zoom block h-20 w-16 shrink-0 overflow-hidden border-2 border-ink bg-sand">
+                          <img src={it.img} alt={it.name} className="h-full w-full object-cover" />
+                        </span>
+                        <span className="flex flex-1 flex-col">
+                          <span className="flex items-start justify-between gap-2">
+                            <span className="font-display text-[16px] font-bold leading-tight">{it.name}</span>
+                            <button
+                              onClick={() => remove(it.key)}
+                              className="text-bark transition-colors hover:text-clay"
+                              aria-label={`Remover ${it.name}`}
+                            >
+                              <CloseIcon className="h-4 w-4" />
+                            </button>
+                          </span>
+                          <span className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-bark">
+                            {it.meta}
+                          </span>
+                          <span className="mt-auto flex items-center justify-between pt-2">
+                            <span className="flex items-center border-2 border-ink">
+                              <button
+                                onClick={() => dec(it.key)}
+                                className="flex h-7 w-7 items-center justify-center transition-colors hover:bg-sand"
+                                aria-label="Diminuir quantidade"
+                              >
+                                <MinusIcon className="h-3.5 w-3.5" />
+                              </button>
+                              <span className="w-8 text-center font-mono text-[13px] font-semibold">{it.qty}</span>
+                              <button
+                                onClick={() => inc(it.key)}
+                                className="flex h-7 w-7 items-center justify-center transition-colors hover:bg-sand"
+                                aria-label="Aumentar quantidade"
+                              >
+                                <PlusIcon className="h-3.5 w-3.5" />
+                              </button>
+                            </span>
+                            <span className="font-display text-lg font-extrabold">
+                              {formatBRL(it.price * it.qty)}
+                            </span>
+                          </span>
+                        </span>
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                </ul>
+
+                {/* rodapé */}
+                <div className="border-t-2 border-ink bg-cream px-5 py-5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-bark">
+                      subtotal
+                    </span>
+                    <span key={total} className="animate-bump font-display text-3xl font-extrabold tracking-tight">
+                      {formatBRL(total)}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-bark/70">
+                    frete calculado no whatsapp · embalado em papel de seda
+                  </p>
+                  <button
+                    onClick={checkout}
+                    disabled={phase === "processing"}
+                    className="btn-knot mt-4 flex w-full items-center justify-center gap-2 border-2 border-ink bg-clay px-6 py-4 font-mono text-sm uppercase tracking-wider text-cream hover:text-clay disabled:opacity-70"
+                    style={{ "--fill": "var(--color-cream)" } as React.CSSProperties}
+                  >
+                    {phase === "processing" ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-cream border-t-transparent" />
+                        passando o fio…
+                      </>
+                    ) : (
+                      <>finalizar encomenda</>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

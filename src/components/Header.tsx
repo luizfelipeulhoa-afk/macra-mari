@@ -1,177 +1,142 @@
 import { useEffect, useState } from "react";
-import { selectCartCount, useStore } from "../store/useStore";
-import { scrollToId } from "../lib/scroll";
-import { CATEGORIES } from "../data/products";
-import { BagIcon, KnotMark, MenuIcon, PauseIcon, PlayIcon, XIcon } from "./Icons";
+import { useStore, cartCount } from "../store/useStore";
+import { KnotMark, BagIcon, CloseIcon } from "./Icons";
 
-const NAV = [
-  { id: "colecoes", label: "Coleções" },
-  { id: "loja", label: "Loja" },
-  { id: "atelier", label: "Atelier" },
-  { id: "sustentabilidade", label: "Sustentabilidade" },
+const navLinks = [
+  { href: "#pecas", label: "Peças" },
+  { href: "#colecoes", label: "Coleções" },
+  { href: "#sob-medida", label: "Sob medida" },
+  { href: "#atelier", label: "Atelier" },
 ];
 
+function openState(): { open: boolean; label: string } {
+  const now = new Date();
+  const day = now.getDay(); // 0 dom … 6 sáb
+  const h = now.getHours() + now.getMinutes() / 60;
+  if (day >= 2 && day <= 5 && h >= 10 && h < 18)
+    return { open: true, label: "atelier aberto · até 18h" };
+  if (day === 6 && h >= 10 && h < 14)
+    return { open: true, label: "atelier aberto · até 14h" };
+  return { open: false, label: "fechado agora · respondo no próximo turno" };
+}
+
 export default function Header() {
+  const items = useStore((s) => s.items);
+  const setDrawer = useStore((s) => s.setDrawer);
+  const count = cartCount(items);
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const count = useStore(selectCartCount);
-  const motionOn = useStore((s) => s.motionOn);
-  const setMotionOn = useStore((s) => s.setMotionOn);
-  const setCartOpen = useStore((s) => s.setCartOpen);
+  const [menu, setMenu] = useState(false);
+  const status = openState();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 36);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
-
-  const go = (id: string) => {
-    setMenuOpen(false);
-    scrollToId(id);
-  };
-
   return (
-    <>
-      <p className="bg-bark-950 py-2 text-center text-[11px] font-semibold tracking-[0.18em] text-cream-100 uppercase">
-        Frete grátis acima de R$ 249 · cada peça é tecida à mão em Tiradentes — MG
-      </p>
-
-      <header
-        className={`sticky top-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "bg-sand-100/95 py-2 shadow-[0_2px_28px_rgba(78,55,31,0.12)] backdrop-blur-md"
-            : "bg-white/65 py-4 backdrop-blur-sm"
-        }`}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 md:px-8">
-          <button
-            type="button"
-            onClick={() => go("inicio")}
-            className="group flex min-h-[48px] items-center gap-2.5"
-            aria-label="Macra Mari — voltar ao início"
-          >
-            <KnotMark className="h-8 w-8 text-olive-600 transition-transform duration-500 group-hover:rotate-90" />
-            <span className="text-left leading-none">
-              <span className="font-display block text-[22px] font-medium tracking-tight text-bark-900">
-                Macra <em className="text-olive-700 italic">Mari</em>
-              </span>
-              <span className="mt-1 hidden text-[9px] font-bold tracking-[0.34em] text-walnut-500 uppercase sm:block">
-                macramê autoral
-              </span>
+    <header
+      className={`sticky top-0 z-50 border-b-2 border-ink bg-paper transition-shadow duration-300 ${
+        scrolled ? "shadow-[0_4px_0_rgba(44,30,19,0.12)]" : ""
+      }`}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        {/* marca */}
+        <a href="#inicio" className="group flex items-center gap-2.5">
+          <KnotMark className="h-9 w-9 text-clay transition-transform duration-500 group-hover:rotate-180" />
+          <span className="leading-none">
+            <span className="block font-display text-xl font-extrabold tracking-tight">
+              Macra&nbsp;Mari
             </span>
+            <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-bark">
+              atelier de macramê
+            </span>
+          </span>
+        </a>
+
+        {/* nav desktop */}
+        <nav className="hidden items-center gap-7 lg:flex">
+          {navLinks.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="group relative font-mono text-[13px] uppercase tracking-[0.14em] text-ink transition-colors hover:text-clay"
+            >
+              {l.label}
+              <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-clay transition-all duration-300 group-hover:w-full" />
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          {/* status */}
+          <span className="hidden items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-bark md:flex">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                status.open ? "bg-moss animate-pulse-dot" : "bg-clay"
+              }`}
+            />
+            {status.label}
+          </span>
+
+          {/* sacola */}
+          <button
+            onClick={() => setDrawer(true)}
+            className="btn-knot relative flex items-center gap-2 border-2 border-ink bg-cream px-3.5 py-2 font-mono text-[13px] uppercase tracking-wider hover:text-cream"
+            style={{ "--fill": "var(--color-clay)" } as React.CSSProperties}
+            aria-label="Abrir sacola de compras"
+          >
+            <BagIcon className="h-5 w-5" />
+            <span className="hidden sm:inline">Sacola</span>
+            {count > 0 && (
+              <span
+                key={count}
+                className="animate-bump absolute -right-2.5 -top-2.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-clay px-1 font-mono text-[12px] font-semibold text-cream shadow-[2px_2px_0_rgba(44,30,19,0.3)]"
+              >
+                {count}
+              </span>
+            )}
           </button>
 
-          <nav aria-label="Navegação principal" className="hidden items-center gap-1 lg:flex">
-            {NAV.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => go(item.id)}
-                className="min-h-[48px] px-4 text-[13px] font-bold tracking-[0.14em] text-walnut-600 uppercase transition-colors hover:text-olive-700"
-              >
-                <span className="border-b-2 border-transparent pb-1 transition-colors duration-300 hover:border-olive-600">
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setMotionOn(!motionOn)}
-              aria-pressed={!motionOn}
-              aria-label={motionOn ? "Pausar animações do site" : "Retomar animações do site"}
-              title={motionOn ? "Pausar animações" : "Retomar animações"}
-              className="flex h-12 w-12 items-center justify-center rounded-full text-walnut-600 transition-colors hover:bg-sand-200/70 hover:text-olive-700"
-            >
-              {motionOn ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
-            </button>
-
-            <button
-              type="button"
-              id="cart-button"
-              onClick={() => setCartOpen(true)}
-              aria-label={`Abrir carrinho, ${count} ${count === 1 ? "item" : "itens"}`}
-              className="relative flex h-12 w-12 items-center justify-center rounded-full text-walnut-600 transition-colors hover:bg-sand-200/70 hover:text-olive-700"
-            >
-              <BagIcon className="h-6 w-6" />
-              {count > 0 && (
-                <span
-                  key={count}
-                  className="animate-badge-pop absolute top-0.5 right-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-bark-900 px-1 text-[11px] font-bold text-cream-50"
-                >
-                  {count}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-expanded={menuOpen}
-              aria-controls="menu-mobile"
-              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-              className="flex h-12 w-12 items-center justify-center rounded-full text-walnut-600 transition-colors hover:bg-sand-200/70 hover:text-olive-700 lg:hidden"
-            >
-              {menuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-            </button>
-          </div>
+          {/* menu mobile */}
+          <button
+            onClick={() => setMenu(!menu)}
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-cream lg:hidden"
+            aria-label="Abrir menu"
+          >
+            {menu ? (
+              <CloseIcon className="h-5 w-5" />
+            ) : (
+              <>
+                <span className="h-[2px] w-5 bg-ink" />
+                <span className="h-[2px] w-5 bg-ink" />
+                <span className="h-[2px] w-3.5 self-start ml-2.5 bg-ink" />
+              </>
+            )}
+          </button>
         </div>
+      </div>
 
-        {/* menu mobile */}
-        <div
-          id="menu-mobile"
-          className={`overflow-hidden border-walnut-600/10 transition-all duration-500 lg:hidden ${
-            menuOpen ? "max-h-[560px] border-t" : "max-h-0"
-          } bg-cream-100/98 backdrop-blur-md`}
-        >
-          <nav aria-label="Navegação móvel" className="px-6 py-6">
-            <ul className="space-y-1">
-              {NAV.map((item, i) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => go(item.id)}
-                    className="flex min-h-[52px] w-full items-baseline gap-4 text-left"
-                  >
-                    <span className="text-[11px] font-bold tracking-[0.2em] text-clay-500">0{i + 1}</span>
-                    <span className="font-display text-3xl font-light text-bark-900 transition-colors hover:text-olive-700">
-                      {item.label}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 border-t border-walnut-600/10 pt-5 text-xs font-semibold tracking-[0.14em] text-walnut-500 uppercase">
-              Coleções
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => {
-                    useStore.getState().setFilter(c.id);
-                    go("loja");
-                  }}
-                  className="h-11 rounded-full border border-walnut-600/25 px-5 text-sm font-semibold text-walnut-600 transition-colors hover:border-olive-600 hover:text-olive-700"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </div>
-      </header>
-    </>
+      {/* menu mobile aberto */}
+      {menu && (
+        <nav className="border-t-2 border-ink bg-cream px-6 py-4 lg:hidden">
+          {navLinks.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setMenu(false)}
+              className="flex items-center justify-between border-b border-dashed border-bark/30 py-3 font-display text-2xl font-bold hover:text-clay"
+            >
+              {l.label}
+              <span className="font-mono text-xs text-bark">→</span>
+            </a>
+          ))}
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-bark">
+            {status.label}
+          </p>
+        </nav>
+      )}
+    </header>
   );
 }
