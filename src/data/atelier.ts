@@ -36,7 +36,20 @@ const FOTOS = {
   cortinaVento: "18pNqzetxJsvgzqC_JeF5iT_eSQUlf9N8",
   quadroDunas: "1aLZ_LUZF3rTNvdympStVlMjSqVuzM1ya",
   mandalaLua: "16EFAO6y4TPMXVpbO_uUOA3HsqfDFTPf-",
+  /* ——— recém-chegadas do varal ——— */
+  quadroTranca: "119E54FAfZylhb6oeJya-kowblmvN9YCD",
+  mandalaSertao: "1hL_0_CC5qpM3-GGCyKcJ9_AaHw2WPYfC",
+  vasoTrio: "1x5igZI_l6rRcZpa7Ea20_EKRsY9Sjkyl",
+  caminhoNo: "1ZE2f9Vb4Etp_rE-8TAr72c_vZPLd2pX9",
 };
+
+/* as quatro peças que acabaram de sair do tear */
+export const newPieces = [
+  { id: FOTOS.quadroTranca, label: "Quadro Trança" },
+  { id: FOTOS.mandalaSertao, label: "Mandala Sertão" },
+  { id: FOTOS.vasoTrio, label: "Porta-vaso Trio" },
+  { id: FOTOS.caminhoNo, label: "Caminho de Mesa Nó" },
+];
 
 /* reserva visual caso o Drive esteja indisponível (arte da série anterior) */
 export const DRIVE_FALLBACKS: Record<string, string> = {
@@ -140,6 +153,50 @@ export const products: Product[] = [
     img: driveThumb(FOTOS.mandalaLua),
     material: "Algodão 2,5 mm · bastidor + meia-lua de cobre",
     size: "Ø 45 cm",
+    dye: "cru",
+  },
+  {
+    id: "quadro-tranca",
+    name: "Quadro Trança",
+    category: "Quadros",
+    price: 340,
+    img: driveThumb(FOTOS.quadroTranca),
+    material: "Algodão 4 mm · trança de 3 cabos · vara de ipê",
+    size: "50 × 80 cm",
+    badge: "nova",
+    dye: "cru",
+  },
+  {
+    id: "mandala-sertao",
+    name: "Mandala Sertão",
+    category: "Mandalas",
+    price: 290,
+    img: driveThumb(FOTOS.mandalaSertao),
+    material: "Algodão 3 mm · tingida com açafrão e urucum",
+    size: "Ø 60 cm",
+    badge: "nova",
+    dye: "mostarda",
+  },
+  {
+    id: "vaso-trio",
+    name: "Porta-vaso Trio",
+    category: "Porta-vasos",
+    price: 160,
+    img: driveThumb(FOTOS.vasoTrio),
+    material: "Algodão 3 mm · 3 alturas escalonadas",
+    size: "60 · 80 · 100 cm",
+    badge: "nova",
+    dye: "verde-musgo",
+  },
+  {
+    id: "caminho-no",
+    name: "Caminho de Mesa Nó",
+    category: "Casa",
+    price: 130,
+    img: driveThumb(FOTOS.caminhoNo),
+    material: "Algodão 2 mm · franjas nas pontas",
+    size: "40 × 150 cm",
+    badge: "nova",
     dye: "cru",
   },
 ];

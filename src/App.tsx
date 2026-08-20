@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import IntroScene from "./components/IntroScene";
 import Hero from "./components/Hero";
 import Shop from "./components/Shop";
+import FreshPieces from "./components/FreshPieces";
 import Collections from "./components/Collections";
 import Manifesto from "./components/Manifesto";
 import Custom from "./components/Custom";
@@ -127,6 +128,7 @@ export default function App() {
 
       <main>
         <Hero />
+        <FreshPieces />
         <Shop />
         <Collections />
         <Manifesto />

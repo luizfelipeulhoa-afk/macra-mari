@@ -254,6 +254,23 @@ body {
   transform: scale(1.07) rotate(1deg);
 }
 
+/* respiração Ken Burns — a foto "vive" com um zoom lento e contínuo */
+@keyframes kenburns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate(1.2%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+.breathe img {
+  animation: kenburns 14s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* ————— camada narrativa (scroll cinematográfico) ————— */
 
 .hline {

@@ -5,6 +5,8 @@ import { products, marqueeWords, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion, useFineMotion } from "../lib/motion";
 import SmartImg from "./SmartImg";
+import AmbientThreads from "./AmbientThreads";
+import ScrambleText from "./ScrambleText";
 import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
 
 /* Three.js entra como chunk separado: só baixa quando a peça 3D vai renderizar */
@@ -181,6 +183,7 @@ export default function Hero() {
 
   return (
     <section id="inicio" ref={scopeRef} className="relative overflow-hidden">
+      <AmbientThreads />
       <div className="weave relative mx-auto max-w-7xl px-4 pb-8 pt-24 sm:px-6 md:pt-28">
         <div className="grid items-center gap-12 lg:grid-cols-12">
           {/* texto — linhas mascaradas que sobem como fios */}
@@ -188,7 +191,7 @@ export default function Hero() {
             <div className="hero-fade">
               <p className="mb-5 inline-flex items-center gap-2 border-2 border-ink bg-cream px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-ink">
                 <span className="h-2 w-2 rotate-45 bg-clay" />
-                ateliê de macramê · goiânia · por Mariana Ulhoa
+                <ScrambleText text="ateliê de macramê · goiânia · por Mariana Ulhoa" delay={600} />
               </p>
             </div>
 

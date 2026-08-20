@@ -68,7 +68,7 @@ export default function Atelier() {
             </Reveal>
 
             <Reveal delay={180} rot={-2} rotFinal={-1}>
-              <figure className="wipe img-zoom relative mt-8 overflow-hidden border-2 border-ink shadow-[8px_10px_0_rgba(44,30,19,0.14)]">
+              <figure className="breathe wipe img-zoom relative mt-8 overflow-hidden border-2 border-ink shadow-[8px_10px_0_rgba(44,30,19,0.14)]">
                 <img
                   src={atelierImg}
                   alt="Mãos tecendo nós de macramê no atelier"

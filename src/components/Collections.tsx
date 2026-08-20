@@ -114,7 +114,7 @@ export default function Collections() {
                 <div className="grid md:grid-cols-2">
                   {/* imagem */}
                   <span
-                    className={`wipe img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
+                    className={`breathe wipe img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
                       i % 2 === 1 ? "md:order-2 md:border-l-2" : "md:border-r-2"
                     }`}
                   >
