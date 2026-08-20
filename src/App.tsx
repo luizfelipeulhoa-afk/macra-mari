@@ -14,6 +14,9 @@ import Atelier from "./components/Atelier";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
 import Cursor from "./components/Cursor";
+import WeaveLoader from "./components/WeaveLoader";
+import ThreadProgress from "./components/ThreadProgress";
+import MarqueeBand from "./components/MarqueeBand";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
 const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
@@ -84,10 +87,28 @@ export default function App() {
     });
   }, []);
 
+  /* fotos se revelam como cortina ao entrar na viewport */
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".wipe").forEach((el) => {
+        gsap.to(el, {
+          clipPath: "inset(0 0 0% 0)",
+          duration: 1.1,
+          ease: "power3.inOut",
+          scrollTrigger: { trigger: el, start: "top 86%", once: true },
+        });
+      });
+    });
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div className="min-h-screen">
+      <WeaveLoader />
       <div className="noise-overlay" aria-hidden="true" />
       <Cursor />
+      <ThreadProgress />
       <Suspense fallback={null}>
         <ThreadCurtain />
       </Suspense>
@@ -99,6 +120,7 @@ export default function App() {
         <Shop />
         <Collections />
         <Manifesto />
+        <MarqueeBand />
         <Custom />
         <Atelier />
       </main>

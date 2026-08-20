@@ -6,6 +6,7 @@ import { useFineMotion } from "../lib/motion";
 const Hanger3D = lazy(() => import("../three/Hanger3D"));
 import { useStore, toast } from "../store/useStore";
 import Reveal from "./Reveal";
+import MaskTitle from "./MaskTitle";
 import {
   BagIcon,
   CheckIcon,
@@ -85,11 +86,13 @@ export default function Custom() {
           <p className="mb-3 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.24em] text-moss">
             <RulerIcon className="h-4 w-4" /> encomenda · do seu jeito, do seu tamanho
           </p>
-          <h2 className="max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight">
-            Não achou no varal?
-            <br />
-            <span className="text-clay">A gente tece pra você.</span>
-          </h2>
+          <MaskTitle
+            lines={[
+              { text: "Não achou no varal?" },
+              { text: "A gente tece pra você.", className: "text-clay" },
+            ]}
+            className="max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight"
+          />
         </Reveal>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-5">

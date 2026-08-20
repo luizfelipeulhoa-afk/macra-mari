@@ -1,5 +1,6 @@
 import { testimonials, atelierImg } from "../data/atelier";
 import Reveal from "./Reveal";
+import MaskTitle from "./MaskTitle";
 import {
   HandIcon,
   LeafIcon,
@@ -50,11 +51,13 @@ export default function Atelier() {
               <p className="mb-3 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.24em] text-clay">
                 <HandIcon className="h-4 w-4" /> por dentro do atelier
               </p>
-              <h2 className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight">
-                Devagar é
-                <br />
-                <span className="outline-text">o nosso ritmo</span>
-              </h2>
+              <MaskTitle
+                lines={[
+                  { text: "Devagar é" },
+                  { text: "o nosso ritmo", className: "outline-text" },
+                ]}
+                className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight"
+              />
               <p className="mt-5 max-w-md text-[15px] leading-relaxed text-bark">
                 O atelier fica numa casa de 1948 no centro de Florianópolis, com
                 o varal na varanda e o tacho de tingimento no quintal. Tudo o
@@ -64,7 +67,7 @@ export default function Atelier() {
             </Reveal>
 
             <Reveal delay={180} rot={-2} rotFinal={-1}>
-              <figure className="img-zoom relative mt-8 overflow-hidden border-2 border-ink shadow-[8px_10px_0_rgba(44,30,19,0.14)]">
+              <figure className="wipe img-zoom relative mt-8 overflow-hidden border-2 border-ink shadow-[8px_10px_0_rgba(44,30,19,0.14)]">
                 <img
                   src={atelierImg}
                   alt="Mãos tecendo nós de macramê no atelier"

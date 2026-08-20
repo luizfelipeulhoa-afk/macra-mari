@@ -6,6 +6,7 @@ import { useStore } from "../store/useStore";
 import { prefersReducedMotion, scrollToId } from "../lib/motion";
 import Reveal from "./Reveal";
 import SmartImg from "./SmartImg";
+import MaskTitle from "./MaskTitle";
 import { ArrowIcon, ThreadIcon } from "./Icons";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -84,11 +85,13 @@ export default function Collections() {
               <p className="mb-3 flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.24em] text-ocre">
                 <ThreadIcon className="h-4 w-4" /> tingimento natural · séries limitadas
               </p>
-              <h2 className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight">
-                Coleções que nascem
-                <br />
-                <span className="outline-text-cream">do tacho de tinta</span>
-              </h2>
+              <MaskTitle
+                lines={[
+                  { text: "Coleções que nascem" },
+                  { text: "do tacho de tinta", className: "outline-text-cream" },
+                ]}
+                className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight"
+              />
             </Reveal>
           </div>
           <Reveal delay={150}>
@@ -111,7 +114,7 @@ export default function Collections() {
                 <div className="grid md:grid-cols-2">
                   {/* imagem */}
                   <span
-                    className={`img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
+                    className={`wipe img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
                       i % 2 === 1 ? "md:order-2 md:border-l-2" : "md:border-r-2"
                     }`}
                   >

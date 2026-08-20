@@ -71,7 +71,7 @@ function HangCard({
         toast(`“${p.name}” foi pra sua sacola`);
         setDrawer(true);
       }}
-      className={`group absolute ${slow ? "hang-slow" : "hang"} ${className ?? ""}`}
+      className={`hang-card group absolute ${slow ? "hang-slow" : "hang"} ${className ?? ""}`}
       style={{ rotate: `${tilt}deg` }}
       aria-label={`Adicionar ${name} à sacola`}
     >
@@ -124,12 +124,13 @@ export default function Hero() {
         stagger: 0.08,
         delay: 0.55,
       });
-      gsap.from(".hang-wrap", {
+      /* as peças despencam na corda e balançam até assentar */
+      gsap.from(".hang-card", {
+        y: -140,
         opacity: 0,
-        y: 44,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: 0.1,
+        duration: 1,
+        ease: "back.out(1.6)",
+        stagger: 0.13,
         delay: 0.8,
       });
       gsap.to(".hero-mandala", {
@@ -153,6 +154,26 @@ export default function Hero() {
           end: "bottom top",
           scrub: true,
         },
+      });
+
+      /* os números do ofício se tecem ao entrar na tela */
+      gsap.utils.toArray<HTMLElement>(".stat-num").forEach((el) => {
+        const target = Number(el.dataset.target ?? 0);
+        const prefix = el.dataset.prefix ?? "";
+        const suffix = el.dataset.suffix ?? "";
+        const fmt = (v: number) =>
+          `${prefix}${Math.round(v).toLocaleString("pt-BR")}${suffix}`;
+        el.textContent = fmt(0);
+        const obj = { v: 0 };
+        gsap.to(obj, {
+          v: target,
+          duration: 1.6,
+          ease: "power2.out",
+          scrollTrigger: { trigger: el, start: "top 92%", once: true },
+          onUpdate: () => {
+            el.textContent = fmt(obj.v);
+          },
+        });
       });
     }, scopeRef);
     return () => ctx.revert();
@@ -320,14 +341,23 @@ export default function Hero() {
         {/* estatísticas do ofício */}
         <div className="hero-fade mt-6 grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4">
           {[
-            { n: "≈ 3.400", l: "nós num quadro grande" },
-            { n: "120 m", l: "de fio por peça" },
-            { n: "14 anos", l: "de tear e café" },
-            { n: "100%", l: "algodão orgânico" },
+            { t: 3400, pre: "≈ ", suf: "", l: "nós num quadro grande" },
+            { t: 120, pre: "", suf: " m", l: "de fio por peça" },
+            { t: 14, pre: "", suf: " anos", l: "de tear e café" },
+            { t: 100, pre: "", suf: "%", l: "algodão orgânico" },
           ].map((s) => (
             <div key={s.l} className="group bg-paper px-5 py-5 transition-colors duration-300 hover:bg-cream">
               <p className="font-display text-3xl font-extrabold tracking-tight text-clay transition-colors group-hover:text-clay-deep md:text-4xl">
-                {s.n}
+                <span
+                  className="stat-num"
+                  data-target={s.t}
+                  data-prefix={s.pre}
+                  data-suffix={s.suf}
+                >
+                  {s.pre}
+                  {s.t.toLocaleString("pt-BR")}
+                  {s.suf}
+                </span>
               </p>
               <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-bark">{s.l}</p>
             </div>

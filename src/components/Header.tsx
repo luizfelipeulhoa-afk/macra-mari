@@ -163,6 +163,7 @@ export default function Header() {
           <div className="flex items-center gap-2.5">
             <button
               data-magnetic
+              data-cursor="sacola"
               onClick={() => setDrawer(true)}
               className={`relative flex h-11 items-center gap-2 border-2 px-3.5 transition-all duration-200 ${
                 overIntro
@@ -188,6 +189,7 @@ export default function Header() {
 
             <button
               data-magnetic
+              data-cursor="menu"
               onClick={openMenu}
               className={`flex h-11 w-11 flex-col items-center justify-center gap-1.5 border-2 transition-colors ${
                 overIntro

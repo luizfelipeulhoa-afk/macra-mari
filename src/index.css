@@ -365,9 +365,82 @@ body {
   display: block;
 }
 
+/* ————— tear de abertura (preloader) ————— */
+
+.wl-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: var(--color-ink);
+  color: var(--color-cream);
+}
+
+.wl-warp {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(251, 246, 234, 0.13);
+}
+
+.wl-weft {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.wl-shuttle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 3px;
+  width: 15vw;
+  min-width: 90px;
+  background: var(--color-ocre);
+  box-shadow:
+    0 0 18px rgba(216, 155, 61, 0.9),
+    0 0 44px rgba(216, 155, 61, 0.4);
+}
+
+/* ————— títulos com máscara de linha ————— */
+
+.mask-title .tline-inner {
+  display: block;
+  transform: translateY(115%);
+}
+
+/* ————— revelação tipo cortina (fotos) ————— */
+
+.wipe {
+  clip-path: inset(0 0 100% 0);
+}
+
+/* ————— letreiro reverso ————— */
+
+.marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee 36s linear infinite reverse;
+}
+
+/* ————— fio de progresso da página ————— */
+
+.thread-progress-fill {
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .mask-title .tline-inner {
+    transform: none;
+  }
+  .wipe {
+    clip-path: none;
   }
   *,
   *::before,

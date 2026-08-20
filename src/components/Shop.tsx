@@ -5,6 +5,7 @@ import { useStore, toast } from "../store/useStore";
 import { useFineMotion } from "../lib/motion";
 import Reveal from "./Reveal";
 import SmartImg from "./SmartImg";
+import MaskTitle from "./MaskTitle";
 import { BagIcon, CheckIcon } from "./Icons";
 
 const cats: (Category | "Todas")[] = [
@@ -162,9 +163,13 @@ export default function Shop() {
               <p className="mb-3 font-mono text-[12px] uppercase tracking-[0.24em] text-clay">
                 ✳ direto do varal do atelier
               </p>
-              <h2 className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight">
-                As peças <span className="outline-text">disponíveis</span>
-              </h2>
+              <MaskTitle
+                lines={[
+                  { text: "As peças" },
+                  { text: "disponíveis", className: "outline-text" },
+                ]}
+                className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight"
+              />
             </div>
             <p className="max-w-xs text-[14px] leading-relaxed text-bark">
               Tirou do varal, levou. Quando uma peça sai, outra entra no tear —
