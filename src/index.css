@@ -1,1 +1,193 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Karla", "Gill Sans", "Trebuchet MS", sans-serif;
+
+  --color-cream-50: #faf6ec;
+  --color-cream-100: #f4eddd;
+  --color-cream-200: #ece1c9;
+
+  --color-sand-100: #efe5cf;
+  --color-sand-200: #e6d8ba;
+  --color-sand-300: #d8c39a;
+  --color-sand-400: #c6ab7c;
+
+  --color-walnut-400: #a1794f;
+  --color-walnut-500: #8a6540;
+  --color-walnut-600: #775636;
+  --color-walnut-700: #624629;
+  --color-walnut-800: #4e371f;
+
+  --color-bark-800: #42301f;
+  --color-bark-900: #332517;
+  --color-bark-950: #271c10;
+
+  --color-olive-300: #b0b183;
+  --color-olive-400: #96986a;
+  --color-olive-500: #7d7f52;
+  --color-olive-600: #66683f;
+  --color-olive-700: #515331;
+  --color-olive-800: #3f4126;
+
+  --color-clay-300: #d3b18d;
+  --color-clay-400: #c09a72;
+  --color-clay-500: #a97e55;
+  --color-clay-600: #8f6743;
+}
+
+@layer base {
+  html {
+    scroll-behavior: auto;
+    scrollbar-color: var(--color-sand-400) var(--color-cream-100);
+  }
+
+  body {
+    @apply bg-cream-50 font-body text-walnut-700 antialiased;
+    font-optical-sizing: auto;
+  }
+
+  ::selection {
+    background: var(--color-olive-600);
+    color: var(--color-cream-50);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-olive-600);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-cream-100);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-sand-400);
+    border-radius: 8px;
+    border: 3px solid var(--color-cream-100);
+  }
+}
+
+/* Lenis recommended base */
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@layer utilities {
+  .texture-weave {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23624629' stroke-opacity='0.05'><path d='M0 14h56M0 42h56'/><path d='M14 0v56M42 0v56'/></g><g fill='%23624629' fill-opacity='0.045'><circle cx='14' cy='14' r='1.4'/><circle cx='42' cy='42' r='1.4'/></g></svg>");
+  }
+
+  .texture-weave-dark {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23faf6ec' stroke-opacity='0.045'><path d='M0 14h56M0 42h56'/><path d='M14 0v56M42 0v56'/></g><g fill='%23faf6ec' fill-opacity='0.05'><circle cx='14' cy='14' r='1.4'/><circle cx='42' cy='42' r='1.4'/></g></svg>");
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.5);
+  }
+  55% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes cue-drop {
+  0% {
+    transform: translateY(-110%);
+  }
+  55%,
+  100% {
+    transform: translateY(120%);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+.animate-toast-in {
+  animation: toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-badge-pop {
+  animation: badge-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-cue {
+  animation: cue-drop 2.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.animate-spin-slower {
+  animation: spin-slow 26s linear infinite;
+}
+.animate-bob {
+  animation: bob 5.5s ease-in-out infinite;
+}
+
+/* Pausa global de animações — preferência do usuário ou do sistema */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
