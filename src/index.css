@@ -173,6 +173,29 @@ body {
   animation: drawline 2.2s 0.4s cubic-bezier(0.6, 0, 0.2, 1) forwards;
 }
 
+/* máscara de linha p/ caracteres e reveals tipográficos */
+.mline,
+.tline {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+.mchar,
+.itag,
+.iword-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* cartões empilhados (coleções) — o próximo desliza sobre o anterior */
+.stack-item {
+  position: sticky;
+  top: 104px;
+}
+.stack-card {
+  will-change: transform, filter;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(30px) rotate(var(--rot, 0deg));

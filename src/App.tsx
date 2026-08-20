@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import Header from "./components/Header";
+import IntroScene from "./components/IntroScene";
 import Hero from "./components/Hero";
 import Shop from "./components/Shop";
 import Collections from "./components/Collections";

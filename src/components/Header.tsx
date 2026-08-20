@@ -38,17 +38,29 @@ export default function Header() {
   const count = cartCount(items);
 
   const [scrolled, setScrolled] = useState(false);
+  const [overIntro, setOverIntro] = useState(true);
   const [active, setActive] = useState("inicio");
   const [menuOpen, setMenuOpen] = useState(false);
   const [bump, setBump] = useState(false);
   const prevCount = useRef(count);
 
-  /* header reage ao scroll: encolhe e ganha corpo */
+  /* header reage ao scroll: encolhe, ganha corpo e sabe quando
+     ainda está sobre o intro escuro (para trocar a cor do texto) */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => {
+      const y = window.scrollY;
+      const hero = document.getElementById("inicio");
+      const heroTop = hero ? hero.offsetTop : 0;
+      setScrolled(y > 30);
+      setOverIntro(y < heroTop - 60);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   /* scroll-spy: destaca o capítulo visível */
@@ -100,16 +112,18 @@ export default function Header() {
     <>
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b-2 transition-all duration-300 ${
-          scrolled
-            ? "border-ink bg-cream/95 py-2 shadow-[0_3px_0_rgba(44,30,19,0.12)]"
-            : "border-transparent bg-transparent py-4"
+          overIntro
+            ? "border-transparent bg-transparent py-4 text-cream"
+            : scrolled
+              ? "border-ink bg-cream/95 py-2 text-ink shadow-[0_3px_0_rgba(44,30,19,0.12)]"
+              : "border-transparent bg-transparent py-4 text-ink"
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <a href="#inicio" className="group flex items-center gap-2.5">
-            <KnotMark className="h-8 w-8 text-clay transition-transform duration-500 group-hover:rotate-180" />
+            <KnotMark className={`h-8 w-8 transition-transform duration-500 group-hover:rotate-180 ${overIntro ? "text-ocre" : "text-clay"}`} />
             <span className="font-display text-[22px] font-extrabold leading-none tracking-tight">
-              Macra<span className="text-clay">Mari</span>
+              Macra<span className={overIntro ? "text-ocre" : "text-clay"}>Mari</span>
             </span>
           </a>
 
@@ -119,7 +133,13 @@ export default function Header() {
                 key={l.id}
                 href={l.href}
                 className={`group relative font-mono text-[12px] uppercase tracking-[0.16em] transition-colors ${
-                  active === l.id ? "text-clay" : "text-ink hover:text-clay"
+                  active === l.id
+                    ? overIntro
+                      ? "text-ocre"
+                      : "text-clay"
+                    : overIntro
+                      ? "text-cream hover:text-ocre"
+                      : "text-ink hover:text-clay"
                 }`}
               >
                 <span
@@ -137,7 +157,11 @@ export default function Header() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setDrawer(true)}
-              className="relative flex h-11 items-center gap-2 border-2 border-ink bg-cream px-3.5 transition-all duration-200 hover:bg-ink hover:text-cream"
+              className={`relative flex h-11 items-center gap-2 border-2 px-3.5 transition-all duration-200 ${
+                overIntro
+                  ? "border-cream bg-transparent hover:bg-cream hover:text-ink"
+                  : "border-ink bg-cream hover:bg-ink hover:text-cream"
+              }`}
               aria-label={`Abrir sacola (${count} itens)`}
             >
               <BagIcon className="h-5 w-5" />
@@ -157,7 +181,11 @@ export default function Header() {
 
             <button
               onClick={() => setMenuOpen(true)}
-              className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-cream transition-colors hover:bg-ink hover:text-cream"
+              className={`flex h-11 w-11 flex-col items-center justify-center gap-1.5 border-2 transition-colors ${
+                overIntro
+                  ? "border-cream bg-transparent hover:bg-cream hover:text-ink"
+                  : "border-ink bg-cream hover:bg-ink hover:text-cream"
+              }`}
               aria-label="Abrir menu"
               aria-expanded={menuOpen}
             >
