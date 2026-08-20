@@ -1,52 +1,37 @@
+import { lazy, Suspense, useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { products, marqueeWords, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
-import Reveal from "./Reveal";
+import { prefersReducedMotion, useFineMotion } from "../lib/motion";
 import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
 
-/* mandala decorativa que gira lentamente ao fundo */
-function Mandala({ className }: { className?: string }) {
-  const petals = Array.from({ length: 12 });
+/* Three.js entra como chunk separado: só baixa quando a peça 3D vai renderizar */
+const Mandala3D = lazy(() => import("../three/Mandala3D"));
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* fallback 2D da mandala (mobile / movimento reduzido) */
+function MandalaSVG({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 400 400" className={className} aria-hidden="true">
-      <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 10" />
-      <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 7" />
-      <circle cx="200" cy="200" r="40" fill="none" stroke="currentColor" strokeWidth="2" />
-      {petals.map((_, i) => (
+      <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 10" />
+      <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" strokeWidth="2" />
+      <circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="2 7" />
+      <circle cx="200" cy="200" r="40" fill="none" stroke="currentColor" strokeWidth="2.5" />
+      {Array.from({ length: 12 }).map((_, i) => (
         <path
           key={i}
           d="M200 50 C 216 92, 216 122, 200 150 C 184 122, 184 92, 200 50 Z"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="2"
           transform={`rotate(${i * 30} 200 200)`}
         />
       ))}
-      {petals.map((_, i) => (
-        <circle
-          key={`d${i}`}
-          cx="200"
-          cy="66"
-          r="4"
-          fill="currentColor"
-          transform={`rotate(${i * 30 + 15} 200 200)`}
-        />
+      {Array.from({ length: 12 }).map((_, i) => (
+        <circle key={`d${i}`} cx="200" cy="66" r="4" fill="currentColor" transform={`rotate(${i * 30 + 15} 200 200)`} />
       ))}
-    </svg>
-  );
-}
-
-/* diagrama de nó quadrado — desenhado quando entra na tela */
-function KnotDiagram({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 220 150" className={className} aria-hidden="true">
-      <path className="draw-path" d="M20 40 C 70 10, 120 70, 200 42" fill="none" stroke="var(--color-clay)" strokeWidth="5" strokeLinecap="round" />
-      <path className="draw-path" d="M20 105 C 90 130, 140 60, 200 100" fill="none" stroke="var(--color-moss)" strokeWidth="5" strokeLinecap="round" />
-      <path className="draw-path" d="M85 20 C 80 70, 130 80, 125 132" fill="none" stroke="var(--color-ink)" strokeWidth="5" strokeLinecap="round" strokeDasharray="1 12" />
-      <circle cx="108" cy="73" r="24" fill="none" stroke="var(--color-ocre)" strokeWidth="3" strokeDasharray="6 6" />
-      <text x="150" y="142" fontFamily="IBM Plex Mono, monospace" fontSize="11" fill="var(--color-bark)">
-        nó quadrado — o começo de tudo
-      </text>
     </svg>
   );
 }
@@ -89,10 +74,14 @@ function HangCard({
       style={{ rotate: `${tilt}deg` }}
       aria-label={`Adicionar ${name} à sacola`}
     >
-      {/* prendedor de varal */}
       <svg viewBox="0 0 24 30" className="mx-auto -mb-1 h-7 w-6 text-bark" aria-hidden="true">
         <path d="M12 2v14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-        <path d="M6 14h12l-1.6 13a1.8 1.8 0 0 1-3.5.2L12 18l-.9 9.2a1.8 1.8 0 0 1-3.5-.2L6 14Z" fill="var(--color-ocre)" stroke="var(--color-ink)" strokeWidth="1.4" />
+        <path
+          d="M6 14h12l-1.6 13a1.8 1.8 0 0 1-3.5.2L12 18l-.9 9.2a1.8 1.8 0 0 1-3.5-.2L6 14Z"
+          fill="var(--color-ocre)"
+          stroke="var(--color-ink)"
+          strokeWidth="1.4"
+        />
       </svg>
       <span className="block w-28 border-2 border-ink bg-cream p-2 pb-3 shadow-[4px_6px_0_rgba(44,30,19,0.14)] transition-transform duration-300 group-hover:scale-105 sm:w-40 md:w-44">
         <span className="img-zoom block aspect-[4/5] overflow-hidden border border-ink/15 bg-sand">
@@ -112,41 +101,84 @@ function HangCard({
 
 export default function Hero() {
   const featured = [products[0], products[2], products[1], products[3]];
+  const fineMotion = useFineMotion();
+  const scopeRef = useRef<HTMLElement | null>(null);
+
+  /* timeline de entrada + parallax de saída: o scroll já começa narrando */
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".hline-inner", {
+        yPercent: 118,
+        duration: 1.05,
+        ease: "power4.out",
+        stagger: 0.09,
+        delay: 0.15,
+      });
+      gsap.from(".hero-fade", {
+        opacity: 0,
+        y: 26,
+        duration: 0.85,
+        ease: "power3.out",
+        stagger: 0.08,
+        delay: 0.55,
+      });
+      gsap.from(".hang-wrap", {
+        opacity: 0,
+        y: 44,
+        duration: 0.8,
+        ease: "power3.out",
+        stagger: 0.1,
+        delay: 0.8,
+      });
+      gsap.to(".hero-mandala", {
+        yPercent: 14,
+        rotate: 3,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#inicio",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+      gsap.to(".hero-copy", {
+        yPercent: -8,
+        opacity: 0.2,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#inicio",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }, scopeRef);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section id="inicio" className="relative overflow-hidden">
-      {/* mandala girando ao fundo */}
-      <div className="pointer-events-none absolute -right-40 -top-40 hidden text-ink/[0.09] md:block">
-        <Mandala className="h-[560px] w-[560px] animate-spin-slow" />
-      </div>
-      <div className="pointer-events-none absolute -left-24 top-[62%] hidden text-clay/[0.12] lg:block">
-        <Mandala className="h-72 w-72 animate-spin-slow" />
-      </div>
-
-      <div className="weave relative mx-auto max-w-7xl px-4 pb-8 pt-12 sm:px-6 md:pt-16">
-        <div className="grid items-start gap-10 lg:grid-cols-12">
-          {/* texto principal */}
-          <div className="lg:col-span-7">
-            <Reveal>
+    <section id="inicio" ref={scopeRef} className="relative overflow-hidden">
+      <div className="weave relative mx-auto max-w-7xl px-4 pb-8 pt-24 sm:px-6 md:pt-28">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          {/* texto — linhas mascaradas que sobem como fios */}
+          <div className="hero-copy lg:col-span-7">
+            <div className="hero-fade">
               <p className="mb-5 inline-flex items-center gap-2 border-2 border-ink bg-cream px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-ink">
                 <span className="h-2 w-2 rotate-45 bg-clay" />
                 atelier de macramê · florianópolis · desde 2011
               </p>
-            </Reveal>
+            </div>
 
             <h1 className="font-display font-extrabold leading-[0.92] tracking-tight">
-              <Reveal delay={80}>
-                <span className="block text-[clamp(3rem,8.5vw,6.8rem)]">
-                  Cada nó,
-                </span>
-              </Reveal>
-              <Reveal delay={180}>
-                <span className="outline-text block text-[clamp(3rem,8.5vw,6.8rem)]">
-                  uma história
-                </span>
-              </Reveal>
-              <Reveal delay={280}>
-                <span className="block text-[clamp(3rem,8.5vw,6.8rem)]">
+              <span className="hline text-[clamp(2.9rem,8.5vw,6.8rem)]">
+                <span className="hline-inner">Cada nó,</span>
+              </span>
+              <span className="hline text-[clamp(2.9rem,8.5vw,6.8rem)]">
+                <span className="hline-inner outline-text">uma história</span>
+              </span>
+              <span className="hline text-[clamp(2.9rem,8.5vw,6.8rem)]">
+                <span className="hline-inner">
                   tecida à{" "}
                   <span className="relative inline-block text-clay">
                     mão.
@@ -155,38 +187,36 @@ export default function Hero() {
                     </svg>
                   </span>
                 </span>
-              </Reveal>
+              </span>
             </h1>
 
-            <Reveal delay={380}>
+            <div className="hero-fade">
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-bark">
                 Quadros, mandalas, porta-vasos e bolsas feitos devagar — fio de
                 algodão orgânico, madeira de reaproveitamento e milhares de nós
                 quadrados, um de cada vez.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={470}>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <a
-                  href="#pecas"
-                  className="btn-knot inline-flex items-center gap-2 border-2 border-ink bg-ink px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-cream hover:text-ink"
-                  style={{ "--fill": "var(--color-ocre)" } as React.CSSProperties}
-                >
-                  Ver o varal
-                  <ArrowDownIcon className="h-4 w-4" />
-                </a>
-                <a
-                  href="#sob-medida"
-                  className="btn-knot inline-flex items-center gap-2 stitch bg-transparent px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-ink hover:text-cream"
-                  style={{ "--fill": "var(--color-moss)" } as React.CSSProperties}
-                >
-                  Peça sob medida
-                </a>
-              </div>
-            </Reveal>
+            <div className="hero-fade mt-8 flex flex-wrap items-center gap-4">
+              <a
+                href="#pecas"
+                className="btn-knot inline-flex items-center gap-2 border-2 border-ink bg-ink px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-cream hover:text-ink"
+                style={{ "--fill": "var(--color-ocre)" } as React.CSSProperties}
+              >
+                Ver o varal
+                <ArrowDownIcon className="h-4 w-4" />
+              </a>
+              <a
+                href="#sob-medida"
+                className="btn-knot inline-flex items-center gap-2 stitch bg-transparent px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-ink hover:text-cream"
+                style={{ "--fill": "var(--color-moss)" } as React.CSSProperties}
+              >
+                Peça sob medida
+              </a>
+            </div>
 
-            <Reveal delay={560}>
+            <div className="hero-fade">
               <p className="mt-7 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-bark">
                 <span className="flex text-ocre">
                   {[...Array(5)].map((_, i) => (
@@ -195,79 +225,111 @@ export default function Hero() {
                 </span>
                 4,9 de avaliação · 1.240+ peças enviadas pelo Brasil
               </p>
-            </Reveal>
+            </div>
           </div>
 
-          {/* diagrama de nó */}
-          <Reveal delay={300} className="hidden lg:col-span-5 lg:block" rot={3} rotFinal={0}>
-            <div className="relative ml-auto mt-6 max-w-md border-2 border-ink bg-cream p-6 shadow-[8px_10px_0_rgba(44,30,19,0.12)]" style={{ rotate: "2deg" }}>
-              <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-bark">
-                caderno da Mari — pág. 01
-              </p>
-              <KnotDiagram className="w-full" />
-              <p className="mt-4 border-t border-dashed border-bark/40 pt-4 text-sm leading-relaxed text-bark">
-                “Antes da primeira peça, foram 217 nós de treino. O macramê não
-                aceita pressa — e é exatamente por isso que ele acalma.”
-              </p>
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-clay">
-                — Mariana, fundadora
+          {/* a peça-em-3D: Mandala Solar reproduzida em Three.js */}
+          <div className="hero-mandala lg:col-span-5">
+            <div
+              className="relative border-2 border-ink bg-cream/70 p-3 shadow-[10px_12px_0_rgba(44,30,19,0.14)]"
+              style={{ rotate: "1.6deg" }}
+            >
+              <div className="flex items-center justify-between border-b-2 border-dashed border-bark/40 px-2 pb-2 pt-1">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-bark">
+                  exposição viva · mandala solar
+                </span>
+                <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-moss">
+                  <span className="h-2 w-2 animate-pulse-dot rounded-full bg-moss" />
+                  {fineMotion ? "3d ativo" : "modo 2d"}
+                </span>
+              </div>
+
+              {fineMotion ? (
+                <Suspense
+                  fallback={
+                    <div className="grid aspect-[4/5] w-full place-items-center text-clay">
+                      <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
+                    </div>
+                  }
+                >
+                  <Mandala3D className="aspect-[4/5] w-full" />
+                </Suspense>
+              ) : (
+                <div className="grid aspect-[4/5] w-full place-items-center text-clay">
+                  <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
+                </div>
+              )}
+
+              {/* etiquetas flutuantes */}
+              <span className="absolute -left-4 top-[30%] hidden animate-bob border-2 border-ink bg-ocre px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block">
+                nó nº 3.412
+              </span>
+              <span
+                className="absolute -right-3 bottom-[26%] hidden animate-bob border-2 border-ink bg-moss px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-cream shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block"
+                style={{ animationDelay: "1.2s" }}
+              >
+                fio: algodão 3 mm
+              </span>
+
+              <p className="border-t-2 border-dashed border-bark/40 px-2 pb-1 pt-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
+                {fineMotion
+                  ? "mova o cursor · role para girar a peça"
+                  : "mandala solar · série terral nº 01"}
               </p>
             </div>
-          </Reveal>
+          </div>
         </div>
 
         {/* varal de peças */}
-        <div className="relative mt-10 h-[300px] sm:h-[330px] md:mt-14 md:h-[380px]">
+        <div className="relative mt-12 h-[300px] sm:h-[330px] md:mt-16 md:h-[380px]">
           <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="absolute left-0 top-0 h-14 w-full text-ink" aria-hidden="true">
             <path d="M0 14 C 300 54, 900 54, 1200 12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
             <circle cx="10" cy="14" r="5" fill="var(--color-clay)" stroke="currentColor" strokeWidth="2" />
             <circle cx="1190" cy="12" r="5" fill="var(--color-clay)" stroke="currentColor" strokeWidth="2" />
           </svg>
 
-          <HangCard
-            {...{ img: featured[0].img, name: featured[0].name, price: featured[0].price, id: featured[0].id }}
-            className="left-[2%] top-[7%] sm:left-[4%] md:top-[9%]"
-            tilt={-4}
-          />
-          <HangCard
-            {...{ img: featured[1].img, name: featured[1].name, price: featured[1].price, id: featured[1].id }}
-            className="left-[26%] top-[16%] sm:left-[27%] md:top-[19%]"
-            tilt={2}
-            slow
-          />
-          <HangCard
-            {...{ img: featured[2].img, name: featured[2].name, price: featured[2].price, id: featured[2].id }}
-            className="left-[50%] top-[17%] sm:left-[52%] md:top-[20%]"
-            tilt={-2}
-          />
-          <HangCard
-            {...{ img: featured[3].img, name: featured[3].name, price: featured[3].price, id: featured[3].id }}
-            className="left-[74%] top-[9%] sm:left-[75%] md:top-[11%]"
-            tilt={4}
-            slow
-          />
+          <div className="hang-wrap absolute inset-0">
+            <HangCard
+              {...{ img: featured[0].img, name: featured[0].name, price: featured[0].price, id: featured[0].id }}
+              className="left-[2%] top-[7%] sm:left-[4%] md:top-[9%]"
+              tilt={-4}
+            />
+            <HangCard
+              {...{ img: featured[1].img, name: featured[1].name, price: featured[1].price, id: featured[1].id }}
+              className="left-[26%] top-[16%] sm:left-[27%] md:top-[19%]"
+              tilt={2}
+              slow
+            />
+            <HangCard
+              {...{ img: featured[2].img, name: featured[2].name, price: featured[2].price, id: featured[2].id }}
+              className="left-[50%] top-[17%] sm:left-[52%] md:top-[20%]"
+              tilt={-2}
+            />
+            <HangCard
+              {...{ img: featured[3].img, name: featured[3].name, price: featured[3].price, id: featured[3].id }}
+              className="left-[74%] top-[9%] sm:left-[75%] md:top-[11%]"
+              tilt={4}
+              slow
+            />
+          </div>
         </div>
 
         {/* estatísticas do ofício */}
-        <Reveal delay={150}>
-          <div className="mt-6 grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4">
-            {[
-              { n: "≈ 3.400", l: "nós num quadro grande" },
-              { n: "120 m", l: "de fio por peça" },
-              { n: "14 anos", l: "de tear e café" },
-              { n: "100%", l: "algodão orgânico" },
-            ].map((s) => (
-              <div key={s.l} className="group bg-paper px-5 py-5 transition-colors duration-300 hover:bg-cream">
-                <p className="font-display text-3xl font-extrabold tracking-tight text-clay transition-colors group-hover:text-clay-deep md:text-4xl">
-                  {s.n}
-                </p>
-                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-bark">
-                  {s.l}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+        <div className="hero-fade mt-6 grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4">
+          {[
+            { n: "≈ 3.400", l: "nós num quadro grande" },
+            { n: "120 m", l: "de fio por peça" },
+            { n: "14 anos", l: "de tear e café" },
+            { n: "100%", l: "algodão orgânico" },
+          ].map((s) => (
+            <div key={s.l} className="group bg-paper px-5 py-5 transition-colors duration-300 hover:bg-cream">
+              <p className="font-display text-3xl font-extrabold tracking-tight text-clay transition-colors group-hover:text-clay-deep md:text-4xl">
+                {s.n}
+              </p>
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-bark">{s.l}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* letreiro */}

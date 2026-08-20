@@ -231,6 +231,77 @@ body {
   transform: scale(1.07) rotate(1deg);
 }
 
+/* ————— camada narrativa (scroll cinematográfico) ————— */
+
+.hline {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
+}
+.hline-inner {
+  display: block;
+  will-change: transform;
+}
+
+.tilt-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.15);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-inner {
+  transform: translateZ(30px);
+  transform-style: preserve-3d;
+}
+
+.cursor-dot {
+  position: fixed;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-clay);
+  z-index: 97;
+  pointer-events: none;
+}
+.cursor-ring {
+  position: fixed;
+  left: -19px;
+  top: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(44, 30, 19, 0.45);
+  z-index: 96;
+  pointer-events: none;
+  transition:
+    width 0.28s ease,
+    height 0.28s ease,
+    left 0.28s ease,
+    top 0.28s ease,
+    border-color 0.28s ease,
+    background-color 0.28s ease;
+}
+.cursor-ring.cursor-hot {
+  width: 58px;
+  height: 58px;
+  left: -29px;
+  top: -29px;
+  border-color: var(--color-clay);
+  background: rgba(194, 81, 43, 0.09);
+}
+@media (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+}
+
+.hero-mandala canvas {
+  display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

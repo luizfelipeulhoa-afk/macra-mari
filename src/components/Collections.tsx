@@ -1,5 +1,6 @@
 import { collections, type Collection } from "../data/atelier";
 import { useStore } from "../store/useStore";
+import { scrollToId } from "../lib/motion";
 import Reveal from "./Reveal";
 import { ArrowIcon, ThreadIcon } from "./Icons";
 
@@ -20,7 +21,7 @@ export default function Collections() {
 
   const goShop = (c: Collection) => {
     setFilter(c.category);
-    document.getElementById("pecas")?.scrollIntoView({ behavior: "smooth" });
+    scrollToId("pecas");
   };
 
   return (

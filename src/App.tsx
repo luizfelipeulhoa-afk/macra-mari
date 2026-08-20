@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Shop from "./components/Shop";
 import Collections from "./components/Collections";
+import Manifesto from "./components/Manifesto";
 import Custom from "./components/Custom";
 import Atelier from "./components/Atelier";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
+import Cursor from "./components/Cursor";
 import { onToast } from "./store/useStore";
+import { isCoarsePointer, prefersReducedMotion, scrollToId } from "./lib/motion";
 import { KnotMark } from "./components/Icons";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ToastMsg {
   id: number;
@@ -19,6 +27,47 @@ interface ToastMsg {
 export default function App() {
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
 
+  /* rolagem cinematográfica (Lenis) — desktop sem movimento reduzido */
+  useEffect(() => {
+    if (prefersReducedMotion() || isCoarsePointer()) return;
+    const lenis = new Lenis({ lerp: 0.1 });
+    window.__lenis = lenis;
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(raf);
+      lenis.destroy();
+      window.__lenis = undefined;
+    };
+  }, []);
+
+  /* âncoras navegam pela rolagem suave */
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>(
+        'a[href^="#"]'
+      );
+      if (!a) return;
+      const href = a.getAttribute("href");
+      if (href && href.length > 1) {
+        e.preventDefault();
+        scrollToId(href.slice(1));
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  /* recalcula pinagens após fontes/imagens carregarem */
+  useEffect(() => {
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refresh);
+    return () => window.removeEventListener("load", refresh);
+  }, []);
+
+  /* toasts */
   useEffect(() => {
     let seq = 0;
     return onToast((msg) => {
@@ -34,6 +83,7 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <div className="noise-overlay" aria-hidden="true" />
+      <Cursor />
 
       <Header />
 
@@ -41,6 +91,7 @@ export default function App() {
         <Hero />
         <Shop />
         <Collections />
+        <Manifesto />
         <Custom />
         <Atelier />
       </main>

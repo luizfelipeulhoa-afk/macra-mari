@@ -1,142 +1,279 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useStore, cartCount } from "../store/useStore";
-import { KnotMark, BagIcon, CloseIcon } from "./Icons";
+import {
+  BagIcon,
+  CloseIcon,
+  InstagramIcon,
+  KnotMark,
+  MailIcon,
+  WhatsIcon,
+} from "./Icons";
 
-const navLinks = [
-  { href: "#pecas", label: "Peças" },
-  { href: "#colecoes", label: "Coleções" },
-  { href: "#sob-medida", label: "Sob medida" },
-  { href: "#atelier", label: "Atelier" },
+const navLinks: { label: string; href: string; id: string }[] = [
+  { label: "O varal", href: "#pecas", id: "pecas" },
+  { label: "Coleções", href: "#colecoes", id: "colecoes" },
+  { label: "Sob medida", href: "#sob-medida", id: "sob-medida" },
+  { label: "Atelier", href: "#atelier", id: "atelier" },
+  { label: "Contato", href: "#contato", id: "contato" },
 ];
 
-function openState(): { open: boolean; label: string } {
-  const now = new Date();
-  const day = now.getDay(); // 0 dom … 6 sáb
-  const h = now.getHours() + now.getMinutes() / 60;
-  if (day >= 2 && day <= 5 && h >= 10 && h < 18)
-    return { open: true, label: "atelier aberto · até 18h" };
-  if (day === 6 && h >= 10 && h < 14)
-    return { open: true, label: "atelier aberto · até 14h" };
-  return { open: false, label: "fechado agora · respondo no próximo turno" };
-}
+const overlayVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.18 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 46, rotate: -2 },
+  show: {
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    transition: { duration: 0.5, ease: [0.2, 0.7, 0.2, 1] as const },
+  },
+};
 
 export default function Header() {
   const items = useStore((s) => s.items);
   const setDrawer = useStore((s) => s.setDrawer);
   const count = cartCount(items);
-  const [scrolled, setScrolled] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const status = openState();
 
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState("inicio");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [bump, setBump] = useState(false);
+  const prevCount = useRef(count);
+
+  /* header reage ao scroll: encolhe e ganha corpo */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 30);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* scroll-spy: destaca o capítulo visível */
+  useEffect(() => {
+    const ids = ["inicio", ...navLinks.map((l) => l.id)];
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) setActive(en.target.id);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  /* badge da sacola "pula" quando ganha peça */
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setBump(true);
+      const t = window.setTimeout(() => setBump(false), 450);
+      prevCount.current = count;
+      return () => window.clearTimeout(t);
+    }
+    prevCount.current = count;
+  }, [count]);
+
+  /* Esc fecha o menu */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   return (
-    <header
-      className={`sticky top-0 z-50 border-b-2 border-ink bg-paper transition-shadow duration-300 ${
-        scrolled ? "shadow-[0_4px_0_rgba(44,30,19,0.12)]" : ""
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        {/* marca */}
-        <a href="#inicio" className="group flex items-center gap-2.5">
-          <KnotMark className="h-9 w-9 text-clay transition-transform duration-500 group-hover:rotate-180" />
-          <span className="leading-none">
-            <span className="block font-display text-xl font-extrabold tracking-tight">
-              Macra&nbsp;Mari
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 border-b-2 transition-all duration-300 ${
+          scrolled
+            ? "border-ink bg-cream/95 py-2 shadow-[0_3px_0_rgba(44,30,19,0.12)]"
+            : "border-transparent bg-transparent py-4"
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <a href="#inicio" className="group flex items-center gap-2.5">
+            <KnotMark className="h-8 w-8 text-clay transition-transform duration-500 group-hover:rotate-180" />
+            <span className="font-display text-[22px] font-extrabold leading-none tracking-tight">
+              Macra<span className="text-clay">Mari</span>
             </span>
-            <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-bark">
-              atelier de macramê
-            </span>
-          </span>
-        </a>
+          </a>
 
-        {/* nav desktop */}
-        <nav className="hidden items-center gap-7 lg:flex">
-          {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="group relative font-mono text-[13px] uppercase tracking-[0.14em] text-ink transition-colors hover:text-clay"
-            >
-              {l.label}
-              <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-clay transition-all duration-300 group-hover:w-full" />
-            </a>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          {/* status */}
-          <span className="hidden items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-bark md:flex">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                status.open ? "bg-moss animate-pulse-dot" : "bg-clay"
-              }`}
-            />
-            {status.label}
-          </span>
-
-          {/* sacola */}
-          <button
-            onClick={() => setDrawer(true)}
-            className="btn-knot relative flex items-center gap-2 border-2 border-ink bg-cream px-3.5 py-2 font-mono text-[13px] uppercase tracking-wider hover:text-cream"
-            style={{ "--fill": "var(--color-clay)" } as React.CSSProperties}
-            aria-label="Abrir sacola de compras"
-          >
-            <BagIcon className="h-5 w-5" />
-            <span className="hidden sm:inline">Sacola</span>
-            {count > 0 && (
-              <span
-                key={count}
-                className="animate-bump absolute -right-2.5 -top-2.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-clay px-1 font-mono text-[12px] font-semibold text-cream shadow-[2px_2px_0_rgba(44,30,19,0.3)]"
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Navegação principal">
+            {navLinks.map((l) => (
+              <a
+                key={l.id}
+                href={l.href}
+                className={`group relative font-mono text-[12px] uppercase tracking-[0.16em] transition-colors ${
+                  active === l.id ? "text-clay" : "text-ink hover:text-clay"
+                }`}
               >
-                {count}
-              </span>
-            )}
-          </button>
+                <span
+                  className={`absolute -left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rotate-45 bg-clay transition-all duration-300 ${
+                    active === l.id ? "scale-100 opacity-100" : "scale-0 opacity-0"
+                  }`}
+                />
+                <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1.5px] bg-left-bottom bg-no-repeat pb-1 transition-[background-size] duration-300 group-hover:bg-[length:100%_1.5px]">
+                  {l.label}
+                </span>
+              </a>
+            ))}
+          </nav>
 
-          {/* menu mobile */}
-          <button
-            onClick={() => setMenu(!menu)}
-            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-cream lg:hidden"
-            aria-label="Abrir menu"
-          >
-            {menu ? (
-              <CloseIcon className="h-5 w-5" />
-            ) : (
-              <>
-                <span className="h-[2px] w-5 bg-ink" />
-                <span className="h-[2px] w-5 bg-ink" />
-                <span className="h-[2px] w-3.5 self-start ml-2.5 bg-ink" />
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* menu mobile aberto */}
-      {menu && (
-        <nav className="border-t-2 border-ink bg-cream px-6 py-4 lg:hidden">
-          {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setMenu(false)}
-              className="flex items-center justify-between border-b border-dashed border-bark/30 py-3 font-display text-2xl font-bold hover:text-clay"
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setDrawer(true)}
+              className="relative flex h-11 items-center gap-2 border-2 border-ink bg-cream px-3.5 transition-all duration-200 hover:bg-ink hover:text-cream"
+              aria-label={`Abrir sacola (${count} itens)`}
             >
-              {l.label}
-              <span className="font-mono text-xs text-bark">→</span>
-            </a>
-          ))}
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-bark">
-            {status.label}
-          </p>
-        </nav>
-      )}
-    </header>
+              <BagIcon className="h-5 w-5" />
+              <span className="hidden font-mono text-[12px] uppercase tracking-wider sm:inline">
+                Sacola
+              </span>
+              {count > 0 && (
+                <span
+                  className={`absolute -right-2.5 -top-2.5 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-ink bg-clay px-1 font-mono text-[11px] font-bold text-cream ${
+                    bump ? "animate-bump" : ""
+                  }`}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 border-2 border-ink bg-cream transition-colors hover:bg-ink hover:text-cream"
+              aria-label="Abrir menu"
+              aria-expanded={menuOpen}
+            >
+              <span className="h-0.5 w-5 bg-current" />
+              <span className="h-0.5 w-3.5 self-center bg-current" style={{ marginLeft: "-6px" }} />
+              <span className="h-0.5 w-5 bg-current" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* menu de tela cheia — a navegação vira parte da experiência */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="menu"
+            className="weave fixed inset-0 z-[65] flex flex-col bg-moss-deep text-cream"
+            initial={{ clipPath: "inset(0 0 100% 0)" }}
+            animate={{ clipPath: "inset(0 0 0% 0)" }}
+            exit={{ clipPath: "inset(0 0 100% 0)" }}
+            transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
+          >
+            <svg
+              viewBox="0 0 400 400"
+              className="pointer-events-none absolute -bottom-40 -right-40 h-[62vmin] w-[62vmin] animate-spin-slow text-cream/10"
+              aria-hidden="true"
+            >
+              <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 10" />
+              <circle cx="200" cy="200" r="140" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              {Array.from({ length: 12 }).map((_, i) => (
+                <path
+                  key={i}
+                  d="M200 60 C 214 96, 214 124, 200 150 C 186 124, 186 96, 200 60 Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  transform={`rotate(${i * 30} 200 200)`}
+                />
+              ))}
+            </svg>
+
+            <div className="flex items-center justify-between border-b-2 border-cream/20 px-5 py-4 sm:px-8">
+              <span className="flex items-center gap-2.5">
+                <KnotMark className="h-8 w-8 text-ocre" />
+                <span className="font-display text-[22px] font-extrabold tracking-tight">
+                  Macra<span className="text-ocre">Mari</span>
+                </span>
+              </span>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="flex h-11 w-11 items-center justify-center border-2 border-cream/40 transition-colors hover:border-ocre hover:text-ocre"
+                aria-label="Fechar menu"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            <motion.nav
+              className="flex flex-1 flex-col justify-center gap-1 px-6 sm:px-14"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="show"
+              aria-label="Menu"
+            >
+              {navLinks.map((l, i) => (
+                <motion.a
+                  key={l.id}
+                  href={l.href}
+                  onClick={() => setMenuOpen(false)}
+                  variants={itemVariants}
+                  className="group flex items-baseline gap-4 border-b border-dashed border-cream/15 py-3.5 transition-transform duration-300 hover:translate-x-3 sm:py-5"
+                >
+                  <span className="font-mono text-[12px] text-ocre">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="font-display text-[clamp(2rem,7vw,4rem)] font-extrabold leading-none tracking-tight transition-colors group-hover:text-ocre">
+                    {l.label}
+                  </span>
+                  <span
+                    className={`ml-auto h-3 w-3 rotate-45 border-2 border-ocre transition-all duration-300 ${
+                      active === l.id ? "bg-ocre" : "bg-transparent opacity-0 group-hover:opacity-100"
+                    }`}
+                  />
+                </motion.a>
+              ))}
+            </motion.nav>
+
+            <motion.div
+              className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-cream/20 px-5 py-5 sm:px-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.4 }}
+            >
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/60">
+                <span className="mr-2 inline-block h-2 w-2 animate-pulse-dot rounded-full bg-ocre align-middle" />
+                atelier aberto · ter–sex 10h–18h · florianópolis
+              </p>
+              <div className="flex items-center gap-3">
+                {[
+                  { icon: WhatsIcon, label: "WhatsApp" },
+                  { icon: InstagramIcon, label: "Instagram" },
+                  { icon: MailIcon, label: "E-mail" },
+                ].map((s) => (
+                  <span
+                    key={s.label}
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center border-2 border-cream/40 transition-colors hover:border-ocre hover:text-ocre"
+                    title={s.label}
+                  >
+                    <s.icon className="h-5 w-5" />
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
