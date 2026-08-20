@@ -27,22 +27,24 @@ export default function MotionToggle() {
           ? "Ligar as animações do atelier"
           : "Desligar as animações (movimento reduzido)"
       }
-      className={`fixed bottom-4 right-4 z-[66] flex items-center gap-2 border-2 px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] shadow-[3px_4px_0_rgba(0,0,0,0.25)] transition-transform duration-200 hover:-translate-y-0.5 ${
+      className={`fixed left-0 top-1/2 z-[66] flex -translate-x-[calc(100%-22px)] -translate-y-1/2 cursor-pointer items-center gap-2.5 border-2 border-l-0 py-3.5 pl-1.5 pr-2.5 font-mono text-[11px] uppercase tracking-[0.18em] shadow-[3px_4px_0_rgba(0,0,0,0.25)] transition-transform duration-300 hover:translate-x-0 focus-visible:translate-x-0 ${
         reduced
           ? "border-cream bg-clay text-cream"
           : "border-ink bg-cream text-ink hover:bg-sand"
       }`}
     >
+      <span className="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+        {reduced
+          ? sysReduced
+            ? "ativar movimento"
+            : "movimento: desligado"
+          : "movimento"}
+      </span>
       <span
-        className={`h-2 w-2 rounded-full ${
+        className={`h-2 w-2 shrink-0 rounded-full ${
           reduced ? "bg-cream" : "animate-pulse-dot bg-moss"
         }`}
       />
-      {reduced
-        ? sysReduced
-          ? "ativar movimento"
-          : "movimento: desligado"
-        : "movimento: ligado"}
     </button>
   );
 }
