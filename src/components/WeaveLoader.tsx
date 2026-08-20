@@ -29,12 +29,19 @@ export default function WeaveLoader() {
   const countRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
+    /* movimento reduzido: abertura curta e estática, entra sozinha */
     if (prefersReducedMotion()) {
-      setDone(true);
-      return;
+      const t = window.setTimeout(() => setDone(true), 2200);
+      return () => window.clearTimeout(t);
     }
 
     document.body.style.overflow = "hidden";
+
+    /* à prova de falhas: a página sempre abre, aconteça o que for */
+    const failsafe = window.setTimeout(() => {
+      document.body.style.overflow = "";
+      setDone(true);
+    }, 7000);
 
     const ctx = gsap.context(() => {
       const warp = gsap.utils.toArray<HTMLElement>(".wl-warp");
@@ -98,14 +105,10 @@ export default function WeaveLoader() {
             pos
           );
         }
-        tl.from(
+        tl.fromTo(
           w,
-          {
-            scaleX: 0,
-            transformOrigin: i % 2 ? "100% 50%" : "0% 50%",
-            duration: step,
-            ease: "none",
-          },
+          { scaleX: 0 },
+          { scaleX: 1, duration: step, ease: "none" },
           pos
         );
       });
@@ -141,6 +144,7 @@ export default function WeaveLoader() {
     });
 
     return () => {
+      window.clearTimeout(failsafe);
       document.body.style.overflow = "";
       ctx.revert();
     };
@@ -169,6 +173,8 @@ export default function WeaveLoader() {
               top: `${((i + 1) / (WEFT_COUNT + 1)) * 100}%`,
               background: WEFT_COLORS[i % WEFT_COLORS.length],
               opacity: 0.75,
+              transform: "scaleX(0)",
+              transformOrigin: i % 2 ? "100% 50%" : "0% 50%",
             }}
           />
         ))}

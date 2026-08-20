@@ -432,28 +432,30 @@ body {
   transform-origin: top;
 }
 
+/* movimento reduzido — respeitado, salvo quando o visitante
+   força o movimento pelo controle "movimento" (html.motion-on) */
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html:not(.motion-on) {
     scroll-behavior: auto;
   }
-  .mask-title .tline-inner {
+  html:not(.motion-on) .mask-title .tline-inner {
     transform: none;
   }
-  .wipe {
+  html:not(.motion-on) .wipe {
     clip-path: none;
   }
-  *,
-  *::before,
-  *::after {
+  html:not(.motion-on) *,
+  html:not(.motion-on) *::before,
+  html:not(.motion-on) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.15s !important;
   }
-  .reveal {
+  html:not(.motion-on) .reveal {
     opacity: 1;
     transform: none;
   }
-  .draw-path {
+  html:not(.motion-on) .draw-path {
     stroke-dashoffset: 0;
   }
 }

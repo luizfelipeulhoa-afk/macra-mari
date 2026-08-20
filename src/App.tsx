@@ -17,6 +17,7 @@ import Cursor from "./components/Cursor";
 import WeaveLoader from "./components/WeaveLoader";
 import ThreadProgress from "./components/ThreadProgress";
 import MarqueeBand from "./components/MarqueeBand";
+import MotionToggle from "./components/MotionToggle";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
 const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
@@ -90,17 +91,24 @@ export default function App() {
   /* fotos se revelam como cortina ao entrar na viewport */
   useEffect(() => {
     if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>(".wipe").forEach((el) => {
-        gsap.to(el, {
-          clipPath: "inset(0 0 0% 0)",
-          duration: 1.1,
-          ease: "power3.inOut",
-          scrollTrigger: { trigger: el, start: "top 86%", once: true },
+    let ctx: gsap.Context | undefined;
+    try {
+      ctx = gsap.context(() => {
+        gsap.utils.toArray<HTMLElement>(".wipe").forEach((el) => {
+          gsap.to(el, {
+            clipPath: "inset(0 0 0% 0)",
+            duration: 1.1,
+            ease: "power3.inOut",
+            scrollTrigger: { trigger: el, start: "top 86%", once: true },
+          });
         });
       });
-    });
-    return () => ctx.revert();
+    } catch {
+      document
+        .querySelectorAll<HTMLElement>(".wipe")
+        .forEach((el) => (el.style.clipPath = "none"));
+    }
+    return () => ctx?.revert();
   }, []);
 
   return (
@@ -127,6 +135,7 @@ export default function App() {
 
       <Footer />
       <CartDrawer />
+      <MotionToggle />
 
       {/* toasts */}
       <div className="pointer-events-none fixed bottom-5 left-5 z-[80] flex flex-col gap-2.5">

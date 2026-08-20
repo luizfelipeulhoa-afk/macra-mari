@@ -24,6 +24,14 @@
         color: #2c1e13;
       }
     </style>
+    <script>
+      /* aplica a preferência de movimento antes da primeira pintura */
+      try {
+        if (window.localStorage.getItem("mm-motion") === "on") {
+          document.documentElement.classList.add("motion-on");
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

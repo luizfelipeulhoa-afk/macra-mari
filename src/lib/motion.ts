@@ -11,11 +11,32 @@ declare global {
   }
 }
 
-export function prefersReducedMotion(): boolean {
+const MOTION_KEY = "mm-motion";
+
+function readOverride(): "on" | "off" | null {
+  try {
+    const v = window.localStorage.getItem(MOTION_KEY);
+    return v === "on" || v === "off" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function systemPrefersReducedMotion(): boolean {
   return (
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
+}
+
+/* Deve reduzir movimento? O visitante pode sobrepor o sistema
+   pelo controle "movimento" (canto inferior direito). */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  const override = readOverride();
+  if (override === "on") return false;
+  if (override === "off") return true;
+  return systemPrefersReducedMotion();
 }
 
 export function isCoarsePointer(): boolean {
@@ -32,6 +53,29 @@ export function useFineMotion(): boolean {
     setOk(!prefersReducedMotion() && !isCoarsePointer());
   }, []);
   return ok;
+}
+
+export function applyMotionClass() {
+  try {
+    document.documentElement.classList.toggle(
+      "motion-on",
+      readOverride() === "on"
+    );
+  } catch {
+    /* noop */
+  }
+}
+
+/* alterna a preferência e recarrega para o tear abrir de novo */
+export function cycleMotion(): "on" | "off" {
+  const next = prefersReducedMotion() ? "on" : "off";
+  try {
+    window.localStorage.setItem(MOTION_KEY, next);
+  } catch {
+    /* noop */
+  }
+  applyMotionClass();
+  return next;
 }
 
 export function scrollToId(id: string) {

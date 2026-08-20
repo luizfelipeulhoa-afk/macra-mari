@@ -208,6 +208,7 @@ export default function Footer() {
             © 2026 Macra Mari — tecida com paciência em Floripa
           </span>
           <span>algodão orgânico · tingimento natural · zero pressa</span>
+          <span className="text-ocre">v2.3 · tecelagem nº 3.412</span>
         </div>
       </div>
     </footer>

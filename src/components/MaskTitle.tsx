@@ -28,17 +28,24 @@ export default function MaskTitle({
     const el = ref.current;
     if (!el || prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
-      gsap.to(el.querySelectorAll(".tline-inner"), {
-        yPercent: 0,
-        duration: 1,
-        ease: "power4.out",
-        stagger,
-        scrollTrigger: { trigger: el, start: "top 86%", once: true },
-      });
-    }, el);
+    let ctx: gsap.Context | undefined;
+    try {
+      ctx = gsap.context(() => {
+        gsap.to(el.querySelectorAll(".tline-inner"), {
+          yPercent: 0,
+          duration: 1,
+          ease: "power4.out",
+          stagger,
+          scrollTrigger: { trigger: el, start: "top 86%", once: true },
+        });
+      }, el);
+    } catch {
+      el.querySelectorAll<HTMLElement>(".tline-inner").forEach(
+        (n) => (n.style.transform = "none")
+      );
+    }
 
-    return () => ctx.revert();
+    return () => ctx?.revert();
   }, [stagger]);
 
   return (
