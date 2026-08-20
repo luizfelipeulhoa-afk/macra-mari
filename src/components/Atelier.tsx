@@ -44,9 +44,10 @@ export default function Atelier() {
       if (motionOn) {
         gsap.fromTo(
           "[data-atelier-main]",
-          { yPercent: -5 },
+          { yPercent: -5, scale: 1.1 },
           {
             yPercent: 5,
+            scale: 1.1,
             ease: "none",
             scrollTrigger: { trigger: rootRef.current, start: "top bottom", end: "bottom top", scrub: 1 },
           }
@@ -84,16 +85,18 @@ export default function Atelier() {
           {/* colagem de imagens */}
           <div className="relative lg:col-span-6">
             <div data-reveal-a className="overflow-hidden rounded-lg shadow-[0_30px_70px_-28px_rgba(78,55,31,0.5)]">
-              <img
-                data-atelier-main
-                src={IMG.atelier}
-                alt="Mãos de artesã tecendo nós de macramê sobre mesa de madeira, com cordões de algodão cru ao redor"
-                width={1280}
-                height={960}
-                loading="lazy"
-                decoding="async"
-                className="aspect-[4/3] w-full scale-110 object-cover"
-              />
+              <div className="animate-kenburns">
+                <img
+                  data-atelier-main
+                  src={IMG.atelier}
+                  alt="Mãos de artesã tecendo nós de macramê sobre mesa de madeira, com cordões de algodão cru ao redor"
+                  width={1280}
+                  height={960}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/3] w-full scale-110 object-cover"
+                />
+              </div>
             </div>
             <div data-reveal-a className="absolute -bottom-12 -right-4 hidden w-[46%] rotate-3 overflow-hidden rounded-lg border-8 border-cream-50 shadow-2xl sm:block">
               <img

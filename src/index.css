@@ -143,6 +143,17 @@ html.lenis {
     transform: rotate(360deg);
   }
 }
+@keyframes kenburns {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1.4%, -1.8%, 0);
+  }
+}
+.animate-kenburns {
+  animation: kenburns 16s ease-in-out infinite alternate;
+}
 @keyframes bob {
   0%,
   100% {
