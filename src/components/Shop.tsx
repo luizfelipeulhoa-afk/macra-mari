@@ -4,6 +4,7 @@ import { products, formatBRL, type Category, type Product } from "../data/atelie
 import { useStore, toast } from "../store/useStore";
 import { useFineMotion } from "../lib/motion";
 import Reveal from "./Reveal";
+import SmartImg from "./SmartImg";
 import { BagIcon, CheckIcon } from "./Icons";
 
 const cats: (Category | "Todas")[] = [
@@ -80,7 +81,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
       <Tilt className="h-full">
         <div className="tilt-inner group relative flex h-full flex-col border-2 border-ink bg-cream shadow-[5px_7px_0_rgba(44,30,19,0.12)]">
           <div className="img-zoom relative aspect-[4/5] overflow-hidden border-b-2 border-ink bg-sand">
-            <img
+            <SmartImg
               src={p.img}
               alt={p.name}
               loading="lazy"

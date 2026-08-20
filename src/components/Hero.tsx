@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { products, marqueeWords, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion, useFineMotion } from "../lib/motion";
+import SmartImg from "./SmartImg";
 import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
 
 /* Three.js entra como chunk separado: só baixa quando a peça 3D vai renderizar */
@@ -85,7 +86,7 @@ function HangCard({
       </svg>
       <span className="block w-28 border-2 border-ink bg-cream p-2 pb-3 shadow-[4px_6px_0_rgba(44,30,19,0.14)] transition-transform duration-300 group-hover:scale-105 sm:w-40 md:w-44">
         <span className="img-zoom block aspect-[4/5] overflow-hidden border border-ink/15 bg-sand">
-          <img src={img} alt={name} loading="eager" className="h-full w-full object-cover" />
+          <SmartImg src={img} alt={name} loading="eager" className="h-full w-full object-cover" />
         </span>
         <span className="mt-2 flex items-end justify-between gap-2">
           <span className="text-left font-display text-sm font-bold leading-tight">{name}</span>

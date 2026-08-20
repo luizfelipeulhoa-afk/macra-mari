@@ -2,6 +2,7 @@ import { collections, type Collection } from "../data/atelier";
 import { useStore } from "../store/useStore";
 import { scrollToId } from "../lib/motion";
 import Reveal from "./Reveal";
+import SmartImg from "./SmartImg";
 import { ArrowIcon, ThreadIcon } from "./Icons";
 
 const toneBg: Record<Collection["tone"], string> = {
@@ -69,7 +70,7 @@ export default function Collections() {
                 style={{ rotate: `${i % 2 === 0 ? -1 : 1.2}deg` }}
               >
                 <span className="img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink">
-                  <img src={c.img} alt={`Coleção ${c.name}`} loading="lazy" className="h-full w-full object-cover" />
+                  <SmartImg src={c.img} alt={`Coleção ${c.name}`} loading="lazy" className="h-full w-full object-cover" />
                   <span className="absolute left-3 top-3 border-2 border-ink bg-cream px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ink">
                     série nº {String(i + 1).padStart(2, "0")}
                   </span>

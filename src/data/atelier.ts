@@ -5,29 +5,6 @@ export type Category =
   | "Bolsas"
   | "Casa";
 
-const IMG = {
-  mare: "https://image.qwenlm.ai/generated-images/1e73c8f1-028f-4093-8a8b-6052357385e8/_result.png",
-  mandalaSolar:
-    "https://image.qwenlm.ai/generated-images/d95b2adb-1d43-4612-812e-795b3e6a86a1/_result.png",
-  vasoSuspenso:
-    "https://image.qwenlm.ai/generated-images/3d8f4ee1-adf7-4190-b70a-b3ccdc88b2bc/_result.png",
-  bolsaFeira:
-    "https://image.qwenlm.ai/generated-images/1eaaceb8-a0c6-4510-9e13-b43985130252/_result.png",
-  portaCopos:
-    "https://image.qwenlm.ai/generated-images/2a1fdd2a-8a35-4e41-945e-b48d140910c7/_result.png",
-  cortinaVento:
-    "https://image.qwenlm.ai/generated-images/8f502694-9063-4bbd-b046-e0ea4016d2ee/_result.png",
-  quadroDunas:
-    "https://image.qwenlm.ai/generated-images/9ac945b6-995b-4421-8553-00cdbd0d9519/_result.png",
-  mandalaLua:
-    "https://image.qwenlm.ai/generated-images/3ab25080-2c85-435f-ac68-234194b8e0d2/_result.png",
-  vasoTerral:
-    "https://image.qwenlm.ai/generated-images/01701503-0901-4a3e-b3aa-f592d84c1db5/_result.png",
-};
-
-export const atelierImg =
-  "https://image.qwenlm.ai/generated-images/954e6a94-d0ba-4d52-848f-9ae7d19bd091/_result.png";
-
 export interface Product {
   id: string;
   name: string;
@@ -40,13 +17,54 @@ export interface Product {
   dye: string;
 }
 
+/* ————————————————————————————————————————————————
+   FOTOS REAIS DAS PEÇAS (Google Drive do atelier)
+   Servidas pelo endpoint de thumbnail do Drive, que
+   redimensiona no servidor — nada de baixar 4 MB.
+   Para trocar a foto de uma peça, basta mover o id
+   do arquivo entre os produtos abaixo.
+   ———————————————————————————————————————————————— */
+export const driveThumb = (id: string, w = 1600) =>
+  `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
+
+const FOTOS = {
+  mare: "1m_f-JIurokHemAB2f2hLerIgMIGLhZw2",
+  mandalaSolar: "19KtN284IweoNAsYF176CnlyhqiqXUJxI",
+  vasoSuspenso: "1MyAD0lSUmQRuQNpHL490Ap8yh6PsAyC-",
+  bolsaFeira: "1QJ1DYCmK3A0oyIrkSj1Oh3OJdtf95WEZ",
+  portaCopos: "1jqabTRzpy-4qEROX52E8UuXjNPhVBq5a",
+  cortinaVento: "18pNqzetxJsvgzqC_JeF5iT_eSQUlf9N8",
+  quadroDunas: "1aLZ_LUZF3rTNvdympStVlMjSqVuzM1ya",
+  mandalaLua: "16EFAO6y4TPMXVpbO_uUOA3HsqfDFTPf-",
+};
+
+/* reserva visual caso o Drive esteja indisponível (arte da série anterior) */
+export const DRIVE_FALLBACKS: Record<string, string> = {
+  [FOTOS.mare]:
+    "https://image.qwenlm.ai/generated-images/1e73c8f1-028f-4093-8a8b-6052357385e8/_result.png",
+  [FOTOS.mandalaSolar]:
+    "https://image.qwenlm.ai/generated-images/d95b2adb-1d43-4612-812e-795b3e6a86a1/_result.png",
+  [FOTOS.vasoSuspenso]:
+    "https://image.qwenlm.ai/generated-images/3d8f4ee1-adf7-4190-b70a-b3ccdc88b2bc/_result.png",
+  [FOTOS.bolsaFeira]:
+    "https://image.qwenlm.ai/generated-images/1eaaceb8-a0c6-4510-9e13-b43985130252/_result.png",
+  [FOTOS.portaCopos]:
+    "https://image.qwenlm.ai/generated-images/2a1fdd2a-8a35-4e41-945e-b48d140910c7/_result.png",
+  [FOTOS.cortinaVento]:
+    "https://image.qwenlm.ai/generated-images/8f502694-9063-4bbd-b046-e0ea4016d2ee/_result.png",
+  [FOTOS.quadroDunas]:
+    "https://image.qwenlm.ai/generated-images/9ac945b6-995b-4421-8553-00cdbd0d9519/_result.png",
+  [FOTOS.mandalaLua]:
+    "https://image.qwenlm.ai/generated-images/3ab25080-2c85-435f-ac68-234194b8e0d2/_result.png",
+};
+
 export const products: Product[] = [
   {
     id: "mare",
     name: "Quadro Maré",
     category: "Quadros",
     price: 320,
-    img: IMG.mare,
+    img: driveThumb(FOTOS.mare),
     material: "Algodão orgânico 4 mm · vara de madeira de demolição",
     size: "60 × 90 cm",
     badge: "mais tecida",
@@ -57,7 +75,7 @@ export const products: Product[] = [
     name: "Mandala Solar",
     category: "Mandalas",
     price: 260,
-    img: IMG.mandalaSolar,
+    img: driveThumb(FOTOS.mandalaSolar),
     material: "Algodão 3 mm · bastidor de jatobá",
     size: "Ø 70 cm",
     badge: "nova",
@@ -68,7 +86,7 @@ export const products: Product[] = [
     name: "Porta-vaso Suspenso",
     category: "Porta-vasos",
     price: 95,
-    img: IMG.vasoSuspenso,
+    img: driveThumb(FOTOS.vasoSuspenso),
     material: "Algodão 3 mm · argola de latão",
     size: "80 cm · vaso 15 cm",
     dye: "cru",
@@ -78,7 +96,7 @@ export const products: Product[] = [
     name: "Bolsa Feira",
     category: "Bolsas",
     price: 140,
-    img: IMG.bolsaFeira,
+    img: driveThumb(FOTOS.bolsaFeira),
     material: "Algodão reciclado 5 mm · alça trançada",
     size: "38 × 42 cm",
     badge: "última peça",
@@ -89,7 +107,7 @@ export const products: Product[] = [
     name: "Kit Porta-copos Nó",
     category: "Casa",
     price: 70,
-    img: IMG.portaCopos,
+    img: driveThumb(FOTOS.portaCopos),
     material: "Algodão 2 mm · kit com 4 unidades",
     size: "Ø 11 cm cada",
     dye: "verde-musgo",
@@ -99,7 +117,7 @@ export const products: Product[] = [
     name: "Cortina Vento",
     category: "Quadros",
     price: 480,
-    img: IMG.cortinaVento,
+    img: driveThumb(FOTOS.cortinaVento),
     material: "Algodão 4 mm · 38 fileiras de nós",
     size: "150 × 200 cm",
     dye: "cru",
@@ -109,7 +127,7 @@ export const products: Product[] = [
     name: "Quadro Dunas",
     category: "Quadros",
     price: 210,
-    img: IMG.quadroDunas,
+    img: driveThumb(FOTOS.quadroDunas),
     material: "Algodão 3 mm · arco de eucalipto tratado",
     size: "40 × 60 cm",
     dye: "terracota",
@@ -119,21 +137,10 @@ export const products: Product[] = [
     name: "Mandala Lua",
     category: "Mandalas",
     price: 150,
-    img: IMG.mandalaLua,
+    img: driveThumb(FOTOS.mandalaLua),
     material: "Algodão 2,5 mm · bastidor + meia-lua de cobre",
     size: "Ø 45 cm",
     dye: "cru",
-  },
-  {
-    id: "vaso-terral",
-    name: "Porta-vaso Duplo Terral",
-    category: "Porta-vasos",
-    price: 120,
-    img: IMG.vasoTerral,
-    material: "Algodão 4 mm · dois vasos de cerâmica inclusos",
-    size: "70 + 95 cm",
-    badge: "nova",
-    dye: "terracota",
   },
 ];
 
@@ -152,7 +159,7 @@ export const collections: Collection[] = [
     id: "terral",
     name: "Terral",
     desc: "Fios tingidos com urucum e casca de cebola. O quente da terra pra dentro de casa.",
-    img: IMG.mandalaSolar,
+    img: products[1].img,
     category: "Mandalas",
     tone: "clay",
     pieces: 7,
@@ -161,7 +168,7 @@ export const collections: Collection[] = [
     id: "mare",
     name: "Maré",
     desc: "Cru sobre cru, texturas que sobem e descem como respiração de praia.",
-    img: IMG.mare,
+    img: products[0].img,
     category: "Quadros",
     tone: "moss",
     pieces: 9,
@@ -170,7 +177,7 @@ export const collections: Collection[] = [
     id: "sertao",
     name: "Sertão",
     desc: "Mostarda, ocre e sol. Peças robustas, fios grossos, franjas ao vento.",
-    img: IMG.bolsaFeira,
+    img: products[3].img,
     category: "Bolsas",
     tone: "ocre",
     pieces: 5,
@@ -223,6 +230,10 @@ export const marqueeWords = [
   "tingimento natural",
   "cada nó conta uma história",
 ];
+
+/* bancada do atelier — registro do ofício */
+export const atelierImg =
+  "https://image.qwenlm.ai/generated-images/01701503-0901-4a3e-b3aa-f592d84c1db5/_result.png";
 
 export const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", {

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { formatBRL } from "../data/atelier";
 import { useStore, cartTotal, cartCount } from "../store/useStore";
+import SmartImg from "./SmartImg";
 import {
   BagIcon,
   CheckIcon,
@@ -183,7 +184,7 @@ export default function CartDrawer() {
                         className="flex gap-3.5 py-4"
                       >
                         <span className="img-zoom block h-20 w-16 shrink-0 overflow-hidden border-2 border-ink bg-sand">
-                          <img src={it.img} alt={it.name} className="h-full w-full object-cover" />
+                          <SmartImg src={it.img} alt={it.name} className="h-full w-full object-cover" />
                         </span>
                         <span className="flex flex-1 flex-col">
                           <span className="flex items-start justify-between gap-2">
