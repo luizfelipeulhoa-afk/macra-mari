@@ -136,7 +136,7 @@ export default function IntroScene() {
         <IntroMandala className="pointer-events-none absolute left-1/2 top-1/2 h-[88vmin] w-[88vmin] -translate-x-1/2 -translate-y-1/2 text-cream/[0.13]" />
         <div className="relative z-10 px-6 text-center">
           <p className="mb-4 inline-block border-2 border-cream/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.26em] text-cream/80">
-            atelier de macramê · florianópolis · desde 2011
+            ateliê de macramê · goiânia · por Mariana Ulhoa
           </p>
           <h1 className="font-display text-[clamp(3rem,14vw,9rem)] font-extrabold leading-[0.9] tracking-tight">
             Macra<span className="text-ocre">Mari</span>
@@ -186,7 +186,7 @@ export default function IntroScene() {
       <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
         <div className="text-center">
           <p className="tline font-mono text-[12px] uppercase tracking-[0.3em] text-ocre">
-            <span className="iword-inner">atelier de macramê — florianópolis</span>
+            <span className="iword-inner">ateliê de macramê — goiânia, go</span>
           </p>
           <p className="iword mt-3 overflow-hidden font-display text-[clamp(2.6rem,9vw,6.5rem)] font-extrabold leading-[0.95] tracking-tight">
             <span className="iword-inner">
@@ -205,7 +205,7 @@ export default function IntroScene() {
         algodão orgânico · tingimento natural
       </p>
       <p className="iside absolute right-5 top-1/2 hidden -translate-y-1/2 font-mono text-[10px] uppercase tracking-[0.42em] text-cream/45 [writing-mode:vertical-rl] md:block">
-        desde 2011 · peças numeradas à mão
+        3 anos de tear · peças numeradas à mão
       </p>
 
       {/* contador de nós */}

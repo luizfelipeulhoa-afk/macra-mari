@@ -164,7 +164,7 @@ export default function Footer() {
                 <PinIcon className="mt-1 h-5 w-5 shrink-0 text-clay" />
                 Rua do Varal, 48
                 <br />
-                Centro · Florianópolis — SC
+                Setor Bueno · Goiânia — GO
               </p>
               <div className="mt-6 flex gap-3">
                 <a
@@ -205,7 +205,7 @@ export default function Footer() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-cream/10 pt-6 font-mono text-[11px] uppercase tracking-wider text-cream/40">
           <span className="flex items-center gap-2">
             <KnotMark className="h-4 w-4 text-clay" />
-            © 2026 Macra Mari — tecida com paciência em Floripa
+            © 2026 Macra Mari — tecida com paciência em Goiânia por Mariana Ulhoa
           </span>
           <span>algodão orgânico · tingimento natural · zero pressa</span>
           <span className="text-ocre">v2.3 · tecelagem nº 3.412</span>

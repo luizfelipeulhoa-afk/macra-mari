@@ -291,7 +291,7 @@ export default function Header() {
             >
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/60">
                 <span className="mr-2 inline-block h-2 w-2 animate-pulse-dot rounded-full bg-ocre align-middle" />
-                atelier aberto · ter–sex 10h–18h · florianópolis
+                ateliê aberto · ter–sex 10h–18h · goiânia
               </p>
               <div className="flex items-center gap-3">
                 {[

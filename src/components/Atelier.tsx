@@ -21,7 +21,7 @@ const steps = [
     n: "02",
     title: "A urdidura",
     icon: ThreadIcon,
-    text: "Fios medidos um a um e presos no tear de madeira que foi do avô da Mari. A tensão certa é o segredo que nenhuma máquina copia.",
+    text: "Fios medidos um a um e presos no tear de madeira da família. A tensão certa é o segredo que nenhuma máquina copia.",
     tone: "text-clay",
   },
   {
@@ -59,9 +59,10 @@ export default function Atelier() {
                 className="font-display text-[clamp(2.2rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-tight"
               />
               <p className="mt-5 max-w-md text-[15px] leading-relaxed text-bark">
-                O atelier fica numa casa de 1948 no centro de Florianópolis, com
-                o varal na varanda e o tacho de tingimento no quintal. Tudo o
-                que sai daqui passou por quatro mãos — as da Mari e as suas,
+                Há 3 anos, a Mariana Ulhoa trocou o escritório por uma casa com
+                quintal no Setor Bueno, em Goiânia — varal na varanda, tacho de
+                tingimento no fogão e mais de 100 clientes que viraram amigos.
+                Tudo o que sai daqui passou pelas mãos dela — e pelas suas,
                 quando pendura.
               </p>
             </Reveal>

@@ -18,6 +18,8 @@ import WeaveLoader from "./components/WeaveLoader";
 import ThreadProgress from "./components/ThreadProgress";
 import MarqueeBand from "./components/MarqueeBand";
 import MotionToggle from "./components/MotionToggle";
+import MacrameBuild from "./components/MacrameBuild";
+import KnotDivider from "./components/KnotDivider";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
 const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
@@ -128,8 +130,11 @@ export default function App() {
         <Shop />
         <Collections />
         <Manifesto />
+        <MacrameBuild />
         <MarqueeBand />
+        <KnotDivider label="nó nº 1.204" />
         <Custom />
+        <KnotDivider label="nova carreira" />
         <Atelier />
       </main>
 

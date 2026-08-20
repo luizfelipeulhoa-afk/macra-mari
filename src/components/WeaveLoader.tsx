@@ -186,7 +186,7 @@ export default function WeaveLoader() {
         <div className="relative grid h-full place-items-center px-6">
           <div className="text-center">
             <p className="wl-meta mb-4 inline-block border border-cream/30 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-cream/70">
-              atelier macramari · florianópolis
+              macramari · goiânia · mariana ulhoa
             </p>
             <p className="font-display text-[clamp(3rem,11vw,8.5rem)] font-extrabold leading-none tracking-tight text-cream">
               {"MacraMari".split("").map((ch, i) => (

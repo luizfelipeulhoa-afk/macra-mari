@@ -188,7 +188,7 @@ export default function Hero() {
             <div className="hero-fade">
               <p className="mb-5 inline-flex items-center gap-2 border-2 border-ink bg-cream px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.22em] text-ink">
                 <span className="h-2 w-2 rotate-45 bg-clay" />
-                atelier de macramê · florianópolis · desde 2011
+                ateliê de macramê · goiânia · por Mariana Ulhoa
               </p>
             </div>
 
@@ -247,7 +247,7 @@ export default function Hero() {
                     <StarIcon key={i} className="h-4 w-4" />
                   ))}
                 </span>
-                4,9 de avaliação · 1.240+ peças enviadas pelo Brasil
+                4,9 de avaliação · 100+ clientes pelo Brasil
               </p>
             </div>
           </div>
@@ -343,8 +343,8 @@ export default function Hero() {
           {[
             { t: 3400, pre: "≈ ", suf: "", l: "nós num quadro grande" },
             { t: 120, pre: "", suf: " m", l: "de fio por peça" },
-            { t: 14, pre: "", suf: " anos", l: "de tear e café" },
-            { t: 100, pre: "", suf: "%", l: "algodão orgânico" },
+            { t: 3, pre: "", suf: " anos", l: "de ateliê e café" },
+            { t: 100, pre: "", suf: "+", l: "clientes felizes" },
           ].map((s) => (
             <div key={s.l} className="group bg-paper px-5 py-5 transition-colors duration-300 hover:bg-cream">
               <p className="font-display text-3xl font-extrabold tracking-tight text-clay transition-colors group-hover:text-clay-deep md:text-4xl">
