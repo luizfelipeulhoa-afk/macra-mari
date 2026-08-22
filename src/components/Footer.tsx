@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { CONTACT } from "../data/atelier";
 import Reveal from "./Reveal";
 import {
   ArrowIcon,
@@ -162,13 +163,29 @@ export default function Footer() {
               </p>
               <p className="flex items-start gap-2.5 text-[15px] leading-relaxed text-cream/85">
                 <PinIcon className="mt-1 h-5 w-5 shrink-0 text-clay" />
-                Rua do Varal, 48
+                Setor Bueno
                 <br />
-                Setor Bueno · Goiânia — GO
+                Goiânia — GO
               </p>
+              <a
+                href={`https://wa.me/${CONTACT.whatsapp}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 flex items-center gap-2 font-mono text-[13px] text-cream/85 transition-colors hover:text-moss"
+              >
+                <WhatsIcon className="h-4 w-4 text-moss" />
+                {CONTACT.whatsappLabel}
+              </a>
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className="mt-1.5 flex items-center gap-2 font-mono text-[13px] text-cream/85 transition-colors hover:text-ocre"
+              >
+                <MailIcon className="h-4 w-4 text-ocre" />
+                {CONTACT.email}
+              </a>
               <div className="mt-6 flex gap-3">
                 <a
-                  href="https://instagram.com"
+                  href={CONTACT.instagram}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Instagram do atelier"
@@ -177,7 +194,7 @@ export default function Footer() {
                   <InstagramIcon className="h-5 w-5" />
                 </a>
                 <a
-                  href="https://wa.me/5548999990048"
+                  href={`https://wa.me/${CONTACT.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="WhatsApp do atelier"
@@ -187,7 +204,7 @@ export default function Footer() {
                 </a>
               </div>
               <p className="mt-5 font-mono text-[11px] uppercase leading-relaxed tracking-wider text-cream/45">
-                pedidos pelo whatsapp · retirada na porta · envio via correios p/ todo o Brasil
+                {CONTACT.instagramLabel} · pedidos pelo whatsapp · envio p/ todo o Brasil
               </p>
             </Reveal>
           </div>

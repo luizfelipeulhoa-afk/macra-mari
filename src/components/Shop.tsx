@@ -10,10 +10,9 @@ import { BagIcon, CheckIcon } from "./Icons";
 
 const cats: (Category | "Todas")[] = [
   "Todas",
-  "Quadros",
-  "Mandalas",
-  "Porta-vasos",
   "Bolsas",
+  "Painéis",
+  "Suportes",
   "Casa",
 ];
 

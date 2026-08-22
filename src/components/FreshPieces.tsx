@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { newPieces, driveThumb } from "../data/atelier";
+import { products, formatBRL } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
 import SmartImg from "./SmartImg";
 import MaskTitle from "./MaskTitle";
@@ -18,18 +18,19 @@ export default function FreshPieces() {
   const addItem = useStore((s) => s.addItem);
   const setDrawer = useStore((s) => s.setDrawer);
 
-  const prices = [340, 290, 160, 130];
+  /* as 4 peças mais novas do catálogo real */
+  const fresh = products.slice(-4);
 
   const grab = (i: number) => {
-    const p = newPieces[i];
+    const p = fresh[i];
     addItem({
-      key: `nova-${p.id}`,
-      name: p.label,
-      price: prices[i],
-      img: driveThumb(p.id),
-      meta: "Recém-saída do tear",
+      key: p.id,
+      name: p.name,
+      price: p.price,
+      img: p.img,
+      meta: `${p.category} · ${p.size}`,
     });
-    toast(`“${p.label}” foi pra sua sacola`);
+    toast(`“${p.name}” foi pra sua sacola`);
     setDrawer(true);
   };
 
@@ -131,12 +132,12 @@ export default function FreshPieces() {
         </svg>
 
         <div ref={trackRef} className="fp-track flex w-max gap-10 px-[8vw] pb-6 pt-10">
-          {newPieces.map((p, i) => (
+          {fresh.map((p, i) => (
             <button
               key={p.id}
               onClick={() => grab(i)}
               className="fp-hang group relative block w-[240px] shrink-0 text-left sm:w-[300px]"
-              aria-label={`Adicionar ${p.label} à sacola`}
+              aria-label={`Adicionar ${p.name} à sacola`}
             >
               {/* prendedor */}
               <span className="relative z-20 -mb-2 block h-7 w-5">
@@ -147,8 +148,8 @@ export default function FreshPieces() {
               <span className="fp-card breathe img-zoom group relative block overflow-hidden border-2 border-cream/90 bg-cream shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
                 <span className="block aspect-[4/5] overflow-hidden">
                   <SmartImg
-                    src={driveThumb(p.id)}
-                    alt={p.label}
+                    src={p.img}
+                    alt={p.name}
                     loading="lazy"
                     className="h-full w-full object-cover"
                   />
@@ -162,9 +163,9 @@ export default function FreshPieces() {
                 {/* legenda que sobe no hover */}
                 <span className="absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-ink bg-ink/95 px-4 py-3 transition-transform duration-300 ease-out group-hover:translate-y-0">
                   <span className="flex items-center justify-between gap-3">
-                    <span className="font-display text-lg font-bold text-cream">{p.label}</span>
+                    <span className="font-display text-lg font-bold text-cream">{p.name}</span>
                     <span className="font-mono text-sm font-semibold text-ocre">
-                      R$ {prices[i]}
+                      {formatBRL(p.price)}
                     </span>
                   </span>
                   <span className="mt-1 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-cream/70">

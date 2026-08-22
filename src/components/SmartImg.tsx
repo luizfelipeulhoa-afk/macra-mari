@@ -1,5 +1,5 @@
 import { useMemo, useState, type SyntheticEvent } from "react";
-import { DRIVE_FALLBACKS } from "../data/atelier";
+import { wixImg, BRAND } from "../data/atelier";
 
 interface SmartImgProps {
   src: string;
@@ -8,10 +8,10 @@ interface SmartImgProps {
   loading?: "lazy" | "eager";
 }
 
-/* Cadeia de resiliência para fotos hospedadas no Drive:
-   1) thumbnail redimensionado do Drive
-   2) CDN pública do Google (mesmo arquivo)
-   3) arte de reserva da série anterior — a página nunca quebra */
+/* Cadeia de resiliência de imagem:
+   1) fonte original (CDN Wix com AVIF/redimensionamento)
+   2) mesma foto em PNG direto da CDN (sem transformação)
+   3) foto de capa do ateliê — a página nunca fica quebrada */
 export default function SmartImg({
   src,
   alt,
@@ -20,13 +20,13 @@ export default function SmartImg({
 }: SmartImgProps) {
   const chain = useMemo(() => {
     const out = [src];
-    const m = src.match(/[?&]id=([\w-]+)/);
+    const m = src.match(/\/media\/([^/]+)~mv2\.(jpe?g|png)/);
     if (m) {
-      const id = m[1];
-      out.push(`https://lh3.googleusercontent.com/d/${id}`);
-      const fb = DRIVE_FALLBACKS[src] ?? DRIVE_FALLBACKS[`id:${id}`];
-      if (fb) out.push(fb);
+      out.push(
+        `https://static.wixstatic.com/media/${m[1]}~mv2.${m[2]}`
+      );
     }
+    out.push(wixImg(BRAND.cover, 900, 1125));
     return out;
   }, [src]);
 
@@ -48,7 +48,6 @@ export default function SmartImg({
       className={className}
       loading={loading}
       onError={onError}
-      referrerPolicy="no-referrer"
     />
   );
 }
