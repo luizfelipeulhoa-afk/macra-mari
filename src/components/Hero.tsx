@@ -217,9 +217,9 @@ export default function Hero() {
 
             <div className="hero-fade">
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-bark">
-                Quadros, mandalas, porta-vasos e bolsas feitos devagar — fio de
-                algodão orgânico, madeira de reaproveitamento e milhares de nós
-                quadrados, um de cada vez.
+                Bolsas, painéis, suportes e peças de casa feitas devagar — fio de
+                algodão, barbante, lurex e náutico, amarrados nó por nó, um de
+                cada vez, pelas mãos da Mariana.
               </p>
             </div>
 

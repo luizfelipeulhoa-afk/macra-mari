@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore, cartCount, curtain } from "../store/useStore";
+import Logo from "./Logo";
 import {
   BagIcon,
   CloseIcon,
@@ -126,12 +127,7 @@ export default function Header() {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          <a href="#inicio" className="group flex items-center gap-2.5">
-            <KnotMark className={`h-8 w-8 transition-transform duration-500 group-hover:rotate-180 ${overIntro ? "text-ocre" : "text-clay"}`} />
-            <span className="font-display text-[22px] font-extrabold leading-none tracking-tight">
-              Macra<span className={overIntro ? "text-ocre" : "text-clay"}>Mari</span>
-            </span>
-          </a>
+          <Logo dark={overIntro} />
 
           <nav className="hidden items-center gap-7 lg:flex" aria-label="Navegação principal">
             {navLinks.map((l) => (
