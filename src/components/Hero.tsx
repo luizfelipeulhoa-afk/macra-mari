@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { products, marqueeWords, formatBRL } from "../data/atelier";
+import { products, marqueeWords, formatBRL, BRAND } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion, useFineMotion } from "../lib/motion";
 import SmartImg from "./SmartImg";
@@ -9,8 +9,9 @@ import AmbientThreads from "./AmbientThreads";
 import ScrambleText from "./ScrambleText";
 import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
 
-/* Three.js entra como chunk separado: só baixa quando a peça 3D vai renderizar */
-const Mandala3D = lazy(() => import("../three/Mandala3D"));
+/* Three.js entra como chunk separado: só baixa quando o palco 3D vai renderizar */
+const Stage3D = lazy(() => import("../three/Stage3D"));
+import type { StagePiece, StageStatus } from "../three/Stage3D";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,6 +107,13 @@ export default function Hero() {
   const featured = [products[0], products[2], products[1], products[3]];
   const fineMotion = useFineMotion();
   const scopeRef = useRef<HTMLElement | null>(null);
+  const [piece, setPiece] = useState<StagePiece>("wall");
+  const [stage, setStage] = useState<StageStatus>("loading");
+
+  const pieces: { k: StagePiece; label: string; img: string }[] = [
+    { k: "wall", label: "wall hanging", img: BRAND.catPaineis },
+    { k: "bag", label: "bolsa azul", img: BRAND.catBolsas },
+  ];
 
   /* timeline de entrada + parallax de saída: o scroll já começa narrando */
   useEffect(() => {
@@ -255,7 +263,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* a peça-em-3D: Mandala Solar reproduzida em Three.js */}
+          {/* palco 3D: wall hanging + blue bag em exposição, giro 360° no scroll */}
           <div className="hero-mandala lg:col-span-5">
             <div
               className="relative border-2 border-ink bg-cream/70 p-3 shadow-[10px_12px_0_rgba(44,30,19,0.14)]"
@@ -263,11 +271,25 @@ export default function Hero() {
             >
               <div className="flex items-center justify-between border-b-2 border-dashed border-bark/40 px-2 pb-2 pt-1">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-bark">
-                  exposição viva · mandala solar
+                  exposição viva · peças em 3d
                 </span>
-                <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-moss">
-                  <span className="h-2 w-2 animate-pulse-dot rounded-full bg-moss" />
-                  {fineMotion ? "3d ativo" : "modo 2d"}
+                <span
+                  className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider ${
+                    stage === "ready" ? "text-moss" : stage === "error" ? "text-clay" : "text-ocre"
+                  }`}
+                >
+                  <span
+                    className={`h-2 w-2 animate-pulse-dot rounded-full ${
+                      stage === "ready" ? "bg-moss" : stage === "error" ? "bg-clay" : "bg-ocre"
+                    }`}
+                  />
+                  {fineMotion
+                    ? stage === "ready"
+                      ? "3d ativo · arraste p/ girar"
+                      : stage === "error"
+                        ? "modo reserva"
+                        : "tecendo o modelo…"
+                    : "modo 2d"}
                 </span>
               </div>
 
@@ -279,7 +301,11 @@ export default function Hero() {
                     </div>
                   }
                 >
-                  <Mandala3D className="aspect-[4/5] w-full" />
+                  <Stage3D
+                    active={piece}
+                    onStatus={setStage}
+                    className="aspect-[4/5] w-full"
+                  />
                 </Suspense>
               ) : (
                 <div className="grid aspect-[4/5] w-full place-items-center text-clay">
@@ -287,20 +313,52 @@ export default function Hero() {
                 </div>
               )}
 
+              {/* seletor de peças */}
+              <div className="mt-2.5 grid grid-cols-2 gap-2">
+                {pieces.map((p) => (
+                  <button
+                    key={p.k}
+                    onClick={() => setPiece(p.k)}
+                    aria-pressed={piece === p.k}
+                    className={`group flex items-center gap-2.5 border-2 px-2.5 py-2 text-left transition-all duration-200 ${
+                      piece === p.k
+                        ? "border-ink bg-ink text-cream shadow-[3px_4px_0_rgba(44,30,19,0.2)]"
+                        : "border-ink bg-cream text-ink hover:bg-sand"
+                    }`}
+                  >
+                    <span className="block h-9 w-9 shrink-0 overflow-hidden border border-ink/30">
+                      <SmartImg src={p.img} alt="" className="h-full w-full object-cover" />
+                    </span>
+                    <span>
+                      <span className="block font-display text-[13px] font-bold leading-tight">
+                        {p.label}
+                      </span>
+                      <span
+                        className={`font-mono text-[9px] uppercase tracking-widest ${
+                          piece === p.k ? "text-ocre" : "text-bark"
+                        }`}
+                      >
+                        {piece === p.k ? "● em destaque" : "ver no palco"}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
               {/* etiquetas flutuantes */}
-              <span className="absolute -left-4 top-[30%] hidden animate-bob border-2 border-ink bg-ocre px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block">
-                nó nº 3.412
+              <span className="absolute -left-4 top-[26%] hidden animate-bob border-2 border-ink bg-ocre px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block">
+                360° no scroll
               </span>
               <span
-                className="absolute -right-3 bottom-[26%] hidden animate-bob border-2 border-ink bg-moss px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-cream shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block"
+                className="absolute -right-3 bottom-[30%] hidden animate-bob border-2 border-ink bg-moss px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-cream shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block"
                 style={{ animationDelay: "1.2s" }}
               >
-                fio: algodão 3 mm
+                arraste p/ girar
               </span>
 
-              <p className="border-t-2 border-dashed border-bark/40 px-2 pb-1 pt-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
+              <p className="mt-2.5 border-t-2 border-dashed border-bark/40 px-2 pb-1 pt-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
                 {fineMotion
-                  ? "mova o cursor · role para girar a peça"
+                  ? "role para girar 360° · arraste com o cursor · escolha a peça"
                   : "mandala solar · série terral nº 01"}
               </p>
             </div>

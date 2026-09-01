@@ -208,3 +208,13 @@ export const formatBRL = (v: number) =>
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
+
+/* ————————————————————————————————————————————————
+   MODELOS 3D REAIS DAS PEÇAS (Google Drive do ateliê)
+   wallZip  — macrame wall hanging (zip: glb/gltf/obj)
+   blueBag  — blue knitted bag (.glb)
+   ———————————————————————————————————————————————— */
+export const MODELS = {
+  wallZip: "1_f2Ks2-9Gu3V2BKTDbtCHrbOpae02t0D",
+  blueBag: "1zBaxJqYkHwgacQZb2tI7DZfruNBq7p5H",
+};
