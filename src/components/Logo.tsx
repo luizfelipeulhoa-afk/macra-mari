@@ -1,8 +1,7 @@
-import { BRAND } from "../data/atelier";
 import { scrollToId } from "../lib/motion";
 
-/* Marca do ateliê: a foto real de capa do site antigo virou o emblema
-   circular, envolto por um anel de nó, ao lado do wordmark. */
+/* Marca do ateliê: emblema circular de nó desenhado em SVG,
+   sem nenhuma foto — ao lado do wordmark. */
 export default function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <a
@@ -32,15 +31,12 @@ export default function Logo({ dark = false }: { dark?: boolean }) {
             strokeLinecap="round"
           />
         </svg>
-        {/* emblema com a foto real */}
-        <span className="absolute inset-[5px] block overflow-hidden rounded-full border border-ink/20">
-          <img
-            src={BRAND.coverImg}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="eager"
-          />
-        </span>
+        {/* centro do nó */}
+        <span
+          className={`absolute inset-[13px] block rounded-full ${
+            dark ? "bg-ocre" : "bg-clay"
+          }`}
+        />
       </span>
       <span
         className={`font-display text-[21px] font-extrabold leading-none tracking-tight ${
