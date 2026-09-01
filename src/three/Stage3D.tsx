@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { loadGlb, loadZipModel, normalize } from "./loadModel";
+import { buildKnitBag, buildWallHanging } from "./proceduralPieces";
 import { MODELS } from "../data/atelier";
-import Mandala3D from "./Mandala3D";
 
 export type StagePiece = "wall" | "bag";
 export type StageStatus = "loading" | "ready" | "error";
@@ -18,11 +18,14 @@ interface Stage3DProps {
    e a blue knitted bag no pedestal. O scroll gira as
    peças em 360°, o cursor as inclina e o arraste as
    faz rodar com inércia — um showroom de verdade.
+
+   As peças procedurais garantem que o palco nunca fique
+   vazio; os modelos reais do Drive são carregados em
+   segundo plano e substituem as procedurais quando prontos.
    ———————————————————————————————————————————————— */
 export default function Stage3D({ active, className = "", onStatus }: Stage3DProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const activeRef = useRef<StagePiece>(active);
-  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     activeRef.current = active;
@@ -47,7 +50,6 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
     renderer.domElement.style.cursor = "grab";
     renderer.domElement.style.touchAction = "pan-y";
 
-    /* luz quente de ateliê */
     scene.add(new THREE.HemisphereLight(0xfff2dd, 0x3a2a1a, 1.25));
     const key = new THREE.DirectionalLight(0xffe3c0, 2.6);
     key.position.set(3.5, 4.5, 6);
@@ -59,9 +61,8 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
     rim.position.set(-3, 2, -4);
     scene.add(rim);
 
+    /* vara de pendurar e pedestal (sempre visíveis) */
     const matWood = new THREE.MeshStandardMaterial({ color: 0x8a5a33, roughness: 0.62 });
-
-    /* vara de pendurar */
     const dowel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 4.6, 14), matWood);
     dowel.rotation.z = Math.PI / 2;
     dowel.position.y = 2.55;
@@ -71,17 +72,29 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
       cap.position.set(s * 2.32, 2.55, 0);
       scene.add(cap);
     });
-
-    /* pedestal da bolsa */
     const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 1.14, 0.16, 28), matWood);
     pedestal.position.set(0, -2.5, 0);
     scene.add(pedestal);
 
-    const wallGroup = new THREE.Group();
-    const bagGroup = new THREE.Group();
-    scene.add(wallGroup, bagGroup);
+    /* peças procedurais — base garantida */
+    const wallHolder = new THREE.Group();
+    const bagHolder = new THREE.Group();
+    wallHolder.add(buildWallHanging());
+    bagHolder.add(buildKnitBag());
+    scene.add(wallHolder, bagHolder);
 
-    const loaded: Record<StagePiece, boolean> = { wall: false, bag: false };
+    /* upgrade silencioso com os modelos reais do Drive */
+    const upgrade = (holder: THREE.Group, real: THREE.Object3D, targetH: number) => {
+      if (disposed) return;
+      holder.clear();
+      holder.add(normalize(real, targetH));
+    };
+    loadZipModel(MODELS.wallZip)
+      .then((m) => upgrade(wallHolder, m, 3.0))
+      .catch(() => undefined);
+    loadGlb(MODELS.blueBag)
+      .then((m) => upgrade(bagHolder, m, 2.0))
+      .catch(() => undefined);
 
     /* posições/alvo conforme a peça em destaque */
     const targets: Record<StagePiece, Record<StagePiece, { p: THREE.Vector3; s: number }>> = {
@@ -99,41 +112,10 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
       bag: { p: new THREE.Vector3(2.05, -1.62, 0.15), s: 0.001 },
     };
 
-    /* carregamento das duas peças */
-    const report = () => {
-      if (loaded.wall || loaded.bag) onStatus?.("ready");
-    };
-
-    loadZipModel(MODELS.wallZip)
-      .then((m) => {
-        if (disposed) return;
-        wallGroup.add(normalize(m, 3.4));
-        loaded.wall = true;
-        report();
-      })
-      .catch(() => undefined);
-
-    loadGlb(MODELS.blueBag)
-      .then((m) => {
-        if (disposed) return;
-        bagGroup.add(normalize(m, 2.0));
-        loaded.bag = true;
-        report();
-      })
-      .catch(() => undefined);
-
-    /* se as duas falharem, o palco avisa e mostra a mandala reserva */
-    const failTimer = window.setTimeout(() => {
-      if (!loaded.wall && !loaded.bag && !disposed) {
-        onStatus?.("error");
-        setFailed(true);
-      }
-    }, 12000);
-
     /* interação: cursor inclina, arraste gira com inércia */
     const mouse = { x: 0, y: 0 };
     const target = { x: 0, y: 0 };
-    let drag = { wall: 0, bag: 0 };
+    const drag = { wall: 0, bag: 0 };
     let vel = 0;
     let dragging = false;
     let lastX = 0;
@@ -185,11 +167,10 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
     const ro = new ResizeObserver(resize);
     ro.observe(mount);
 
-    /* render só quando visível */
+    const clock = new THREE.Clock();
     let raf = 0;
     let running = false;
     let visible = true;
-    const clock = new THREE.Clock();
 
     const tick = () => {
       const t = clock.getElapsedTime();
@@ -209,16 +190,16 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
         cur[k].s += (tgt.s - cur[k].s) * 0.08;
       });
 
-      wallGroup.position.copy(cur.wall.p);
-      wallGroup.scale.setScalar(Math.max(cur.wall.s, 0.001));
-      wallGroup.rotation.y = scroll + drag.wall + mouse.x * 0.35;
-      wallGroup.rotation.z = Math.sin(t * 0.9) * 0.045;
-      wallGroup.rotation.x = -mouse.y * 0.12;
+      wallHolder.position.copy(cur.wall.p);
+      wallHolder.scale.setScalar(Math.max(cur.wall.s, 0.001));
+      wallHolder.rotation.y = scroll + drag.wall + mouse.x * 0.35;
+      wallHolder.rotation.z = Math.sin(t * 0.9) * 0.045;
+      wallHolder.rotation.x = -mouse.y * 0.12;
 
-      bagGroup.position.copy(cur.bag.p);
-      bagGroup.scale.setScalar(Math.max(cur.bag.s, 0.001));
-      bagGroup.rotation.y = t * 0.35 + scroll * 0.7 + drag.bag + mouse.x * 0.4;
-      bagGroup.rotation.x = -mouse.y * 0.1;
+      bagHolder.position.copy(cur.bag.p);
+      bagHolder.scale.setScalar(Math.max(cur.bag.s, 0.001));
+      bagHolder.rotation.y = t * 0.35 + scroll * 0.7 + drag.bag + mouse.x * 0.4;
+      bagHolder.rotation.x = -mouse.y * 0.1;
 
       camera.position.x = mouse.x * 0.3;
       camera.lookAt(0, 0, 0);
@@ -237,67 +218,53 @@ export default function Stage3D({ active, className = "", onStatus }: Stage3DPro
       cancelAnimationFrame(raf);
     };
 
-    if (reduced) {
-      renderer.render(scene, camera);
-    } else {
-      const io = new IntersectionObserver(
-        ([e]) => {
-          visible = e.isIntersecting;
-          if (visible && !document.hidden) start();
-          else stop();
-        },
-        { threshold: 0 }
-      );
-      io.observe(mount);
-      const onVis = () => {
-        if (document.hidden) stop();
-        else if (visible) start();
-      };
-      document.addEventListener("visibilitychange", onVis);
-      start();
-
-      return () => {
-        disposed = true;
-        window.clearTimeout(failTimer);
-        stop();
-        io.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        window.removeEventListener("pointermove", onMove);
-        window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("scroll", onScroll);
-        renderer.domElement.removeEventListener("pointerdown", onDown);
-        ro.disconnect();
-        scene.traverse((o) => {
-          const m = o as THREE.Mesh;
-          if (m.isMesh) m.geometry.dispose();
-        });
-        [matWood].forEach((m) => m.dispose());
-        renderer.dispose();
-        if (renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
-      };
-    }
-
-    return () => {
+    const cleanup = () => {
       disposed = true;
-      window.clearTimeout(failTimer);
+      stop();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("scroll", onScroll);
+      renderer.domElement.removeEventListener("pointerdown", onDown);
       ro.disconnect();
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         if (m.isMesh) m.geometry.dispose();
       });
-      [matWood].forEach((m) => m.dispose());
+      matWood.dispose();
       renderer.dispose();
       if (renderer.domElement.parentElement === mount) mount.removeChild(renderer.domElement);
     };
-  }, [onStatus]);
 
-  /* reserva: se o Drive não entregar os modelos, a mandala assume o palco */
-  if (failed) {
-    return <Mandala3D className={className} />;
-  }
+    if (reduced) {
+      renderer.render(scene, camera);
+      onStatus?.("ready");
+      return cleanup;
+    }
+
+    /* render só quando visível e com a aba ativa */
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (visible && !document.hidden) start();
+        else stop();
+      },
+      { threshold: 0 }
+    );
+    io.observe(mount);
+    const onVis = () => {
+      if (document.hidden) stop();
+      else if (visible) start();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    start();
+    onStatus?.("ready");
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+      cleanup();
+    };
+  }, [onStatus]);
 
   return <div ref={mountRef} className={className} aria-hidden="true" />;
 }

@@ -275,20 +275,18 @@ export default function Hero() {
                 </span>
                 <span
                   className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider ${
-                    stage === "ready" ? "text-moss" : stage === "error" ? "text-clay" : "text-ocre"
+                    stage === "ready" ? "text-moss" : "text-ocre"
                   }`}
                 >
                   <span
                     className={`h-2 w-2 animate-pulse-dot rounded-full ${
-                      stage === "ready" ? "bg-moss" : stage === "error" ? "bg-clay" : "bg-ocre"
+                      stage === "ready" ? "bg-moss" : "bg-ocre"
                     }`}
                   />
                   {fineMotion
                     ? stage === "ready"
                       ? "3d ativo · arraste p/ girar"
-                      : stage === "error"
-                        ? "modo reserva"
-                        : "tecendo o modelo…"
+                      : "tecendo o palco…"
                     : "modo 2d"}
                 </span>
               </div>
