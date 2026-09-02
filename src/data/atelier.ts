@@ -21,6 +21,12 @@ export interface Product {
 export const driveThumb = (id: string, w = 1200) =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
 
+/* identidade visual — capas reais usadas no seletor de peças do hero */
+export const BRAND = {
+  catPaineis: driveThumb("1m_f-JIurokHemAB2f2hLerIgMIGLhZw2"),
+  catBolsas: driveThumb("1QJ1DYCmK3A0oyIrkSj1Oh3OJdtf95WEZ"),
+};
+
 const FOTOS = {
   painelLotus: "1m_f-JIurokHemAB2f2hLerIgMIGLhZw2",
   meiaLua: "19KtN284IweoNAsYF176CnlyhqiqXUJxI",

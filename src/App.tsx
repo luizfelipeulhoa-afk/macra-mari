@@ -21,6 +21,7 @@ import MarqueeBand from "./components/MarqueeBand";
 import MotionToggle from "./components/MotionToggle";
 import MacrameBuild from "./components/MacrameBuild";
 import KnotDivider from "./components/KnotDivider";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
 const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
