@@ -11,7 +11,19 @@ const endpoints = (id: string) => [
   `https://lh3.googleusercontent.com/d/${id}`,
 ];
 
+/* cache por id: o mesmo modelo nunca é baixado duas vezes */
+const dlCache = new Map<string, Promise<ArrayBuffer>>();
+
 async function fetchDrive(id: string): Promise<ArrayBuffer> {
+  const hit = dlCache.get(id);
+  if (hit) return hit;
+  const p = doFetch(id);
+  dlCache.set(id, p);
+  p.catch(() => dlCache.delete(id));
+  return p;
+}
+
+async function doFetch(id: string): Promise<ArrayBuffer> {
   let lastErr: unknown = new Error("todos os endpoints falharam");
   for (const url of endpoints(id)) {
     try {
