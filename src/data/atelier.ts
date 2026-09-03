@@ -24,6 +24,8 @@ export const driveThumb = (id: string, w = 1200) =>
 /* identidade visual — capas reais usadas no seletor de peças do hero */
 export const BRAND = {
   catPaineis: driveThumb("1m_f-JIurokHemAB2f2hLerIgMIGLhZw2"),
+  /* versão grande: plano de fundo do intro (tela cheia) */
+  catPaineisXL: driveThumb("1m_f-JIurokHemAB2f2hLerIgMIGLhZw2", 2000),
   catBolsas: driveThumb("1QJ1DYCmK3A0oyIrkSj1Oh3OJdtf95WEZ"),
 };
 
