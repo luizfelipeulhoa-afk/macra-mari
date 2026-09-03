@@ -2,13 +2,15 @@ import { useEffect, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { loadGlb, normalize } from "./loadModel";
-import { MODELS, BRAND } from "../data/atelier";
+import { MODELS } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
 
 interface IntroCanvasProps {
   sectionRef: RefObject<HTMLElement>;
   windowRef: RefObject<HTMLDivElement>;
   len: number;
+  onReady?: () => void;
+  onFail?: () => void;
 }
 
 const smooth = (a: number, b: number, x: number) => {
@@ -17,12 +19,18 @@ const smooth = (a: number, b: number, x: number) => {
 };
 
 /* ————————————————————————————————————————————————
-   Canvas da transição de entrada: o wall hanging
-   começa gigante, como plano de fundo do app, e o
-   scroll o conduz para dentro da moldura até virar
-   a peça em exposição (tamanho da janela do quadro).
+   Camada 3D da transição de entrada: renderiza o GLB
+   real do Drive sobre a foto de fundo. Quando o modelo
+   chega, ele assume a coreografia — gigante no fundo,
+   conduzido pelo scroll até caber na janela da moldura.
    ———————————————————————————————————————————————— */
-export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasProps) {
+export default function IntroCanvas({
+  sectionRef,
+  windowRef,
+  len,
+  onReady,
+  onFail,
+}: IntroCanvasProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -31,37 +39,48 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
     if (!mount || !section) return;
     const reduced = prefersReducedMotion();
 
-    const scene = new THREE.Scene();
+    let scene: THREE.Scene;
+    let camera: THREE.PerspectiveCamera;
+    let renderer: THREE.WebGLRenderer;
+    try {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(36, 1, 0.1, 60);
+      camera.position.set(0, 0, 8);
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      /* sem WebGL: a foto de fundo já garante o intro */
+      onFail?.();
+      return;
+    }
+
     const FOV = 36;
     const CAM_Z = 8;
-    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
-    camera.position.set(0, 0, CAM_Z);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = 1.12;
     mount.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.35));
-    const key = new THREE.DirectionalLight(0xffe3c0, 2.7);
+    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.45));
+    const key = new THREE.DirectionalLight(0xffe3c0, 2.9);
     key.position.set(3.5, 4.5, 6);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc489, 1.1);
+    const rim = new THREE.DirectionalLight(0xffc489, 1.2);
     rim.position.set(-3, 1.5, -4);
     scene.add(rim);
 
     const holder = new THREE.Group();
     scene.add(holder);
 
-    /* geometria de medidas (recalculada no resize) */
     const m = {
       startScale: 6,
       endScale: 2,
       endY: 0,
       worldPerPx: 0.01,
     };
+
+    let modelOn = false;
+
     const resize = () => {
       const w = mount.clientWidth;
       const h = mount.clientHeight;
@@ -71,47 +90,43 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
       camera.updateProjectionMatrix();
 
       const vpWorldH = 2 * Math.tan((FOV * Math.PI) / 360) * CAM_Z;
+      const vpWorldW = vpWorldH * (w / h);
       m.worldPerPx = vpWorldH / h;
-      m.startScale = vpWorldH * 1.32; /* fundo: ocupa 132% da tela */
+      /* cobre a tela inteira mesmo em monitores largos */
+      m.startScale = Math.max(vpWorldH, vpWorldW) * 1.3;
 
       const win = windowRef.current;
       if (win) {
         const r = win.getBoundingClientRect();
         if (r.width > 10) {
-          /* 88% da janela: margem p/ o balanço não vazar da moldura */
-          m.endScale = r.height * m.worldPerPx * 0.88;
+          m.endScale = r.height * m.worldPerPx * 0.9;
           m.endY = (h / 2 - (r.top + r.height / 2)) * m.worldPerPx;
         }
       }
-      if (reduced) renderAt(1);
+      if (reduced && modelOn) renderAt(1);
     };
 
-    /* ——— a peça real ———
-       Enquanto o modelo 3D (Drive) baixa, mostra-se a FOTO real da
-       peça num plano 2D — nunca um 3D inventado. Quando o GLB chega,
-       ele assume o palco exatamente como saiu do arquivo original. */
-    let current: THREE.Object3D | null = null;
-    const setPiece = (obj: THREE.Object3D) => {
-      if (current) holder.remove(current);
-      current = obj;
-      holder.add(obj);
-      resize();
-      if (reduced) renderAt(1);
+    const renderAt = (prog: number) => {
+      if (!modelOn) return;
+      const e = smooth(0.28, 0.78, prog);
+      const s = m.startScale + (m.endScale - m.startScale) * e;
+      holder.scale.setScalar(Math.max(s, 0.001));
+      holder.position.y = m.endY * e;
+      holder.rotation.y = (1 - e) * 0.4 + Math.sin(prog * Math.PI) * 0.1;
+      holder.rotation.x = (1 - e) * 0.05;
+      renderer.render(scene, camera);
     };
 
-    /* reserva imediata: foto real num plano (proporção 3:4) */
-    const photoTex = new THREE.TextureLoader().load(BRAND.catPaineis);
-    photoTex.colorSpace = THREE.SRGBColorSpace;
-    const photo = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.75, 1),
-      new THREE.MeshBasicMaterial({ map: photoTex, transparent: true })
-    );
-    setPiece(photo);
-
-    /* modelo 3D real — substitui a foto quando chega */
+    /* o modelo real, exatamente como saiu do arquivo */
     loadGlb(MODELS.wallV2)
-      .then((model) => setPiece(normalize(model, 1)))
-      .catch(() => undefined);
+      .then((model) => {
+        holder.add(normalize(model, 1));
+        modelOn = true;
+        resize();
+        if (reduced) renderAt(1);
+        onReady?.();
+      })
+      .catch(() => onFail?.());
 
     /* progresso do scroll na seção pinada */
     let target = reduced ? 1 : 0;
@@ -127,17 +142,6 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
           },
         });
 
-    const renderAt = (prog: number) => {
-      const e = smooth(0.28, 0.78, prog);
-      const s = m.startScale + (m.endScale - m.startScale) * e;
-      holder.scale.setScalar(Math.max(s, 0.001));
-      holder.position.y = m.endY * e;
-      /* começa angulada como cenário, termina de frente na moldura */
-      holder.rotation.y = (1 - e) * 0.85 + Math.sin(prog * Math.PI) * 0.12;
-      holder.rotation.x = (1 - e) * 0.06;
-      renderer.render(scene, camera);
-    };
-
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(mount);
@@ -152,7 +156,7 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
       const t = clock.getElapsedTime();
       p += (target - p) * 0.09;
       renderAt(p);
-      holder.rotation.y += Math.sin(t * 0.5) * 0.0015;
+      if (modelOn) holder.rotation.y += Math.sin(t * 0.5) * 0.0015;
       raf = requestAnimationFrame(tick);
     };
     const start = () => {
@@ -166,45 +170,11 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
       cancelAnimationFrame(raf);
     };
 
-    if (reduced) {
-      renderAt(1);
-    } else {
-      const io = new IntersectionObserver(
-        ([e]) => {
-          visible = e.isIntersecting;
-          if (visible && !document.hidden) start();
-          else stop();
-        },
-        { threshold: 0 }
-      );
-      io.observe(mount);
-      const onVis = () => {
-        if (document.hidden) stop();
-        else if (visible) start();
-      };
-      document.addEventListener("visibilitychange", onVis);
-      start();
-
-      return () => {
-        stop();
-        st?.kill();
-        io.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        window.removeEventListener("resize", resize);
-        ro.disconnect();
-        scene.traverse((o) => {
-          const mesh = o as THREE.Mesh;
-          if (mesh.isMesh) mesh.geometry.dispose();
-        });
-        renderer.dispose();
-        if (renderer.domElement.parentElement === mount)
-          mount.removeChild(renderer.domElement);
-      };
-    }
-
-    return () => {
-      window.removeEventListener("resize", resize);
+    const dispose = () => {
+      stop();
+      st?.kill();
       ro.disconnect();
+      window.removeEventListener("resize", resize);
       scene.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (mesh.isMesh) mesh.geometry.dispose();
@@ -213,7 +183,33 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
       if (renderer.domElement.parentElement === mount)
         mount.removeChild(renderer.domElement);
     };
-  }, [sectionRef, windowRef, len]);
+
+    if (reduced) {
+      return dispose;
+    }
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (visible && !document.hidden) start();
+        else stop();
+      },
+      { threshold: 0 }
+    );
+    io.observe(mount);
+    const onVis = () => {
+      if (document.hidden) stop();
+      else if (visible) start();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    start();
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+      dispose();
+    };
+  }, [sectionRef, windowRef, len, onReady, onFail]);
 
   return <div ref={mountRef} className="absolute inset-0" aria-hidden="true" />;
 }
