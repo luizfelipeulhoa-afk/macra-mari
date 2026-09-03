@@ -263,10 +263,30 @@ export const marqueeWords = [
   "goiânia · desde 2023",
 ];
 
-/* modelos 3D reais (Drive) */
+/* ————————————————————————————————————————————————
+   MODELO 3D — ORDEM DE TENTATIVA:
+   1) local (mesma origem, NUNCA falha): salve o arquivo como
+      public/models/wall-hanging.glb no projeto e faça o build.
+   2) Drive (rede externa, pode ser barrada por CORS).
+   ———————————————————————————————————————————————— */
 export const MODELS = {
+  wallLocal: "/models/wall-hanging.glb",
   /* macrame wall hanging 3d model (2).glb — pasta MMari */
-  wallV2: "1n-HtLb9c-h-LsKueqLeuHGt6W2JpOeUl",
+  wallDrive: "1n-HtLb9c-h-LsKueqLeuHGt6W2JpOeUl",
+};
+
+/* ————————————————————————————————————————————————
+   ARTES 2D DA PEÇA DE ENTRADA (foto de estúdio + PNG sem fundo).
+   ORDEM: local (public/images/, nunca falha) → Drive (reserva).
+   O PNG, quando carrega, protagoniza a transição — a peça
+   "flutua" recortada sobre o fundo de estúdio.
+   ———————————————————————————————————————————————— */
+export const PIECE_ART = {
+  pngLocal: "/images/peca.png",
+  studioLocal: "/images/peca-estudio.jpg",
+  /* Design sem nome.png / Gemini_Generated_Image... — pasta MMari */
+  pngDrive: driveThumb("1JvHMi9KjbZD-5mmzgm9dECIT24_lISFt", 1400),
+  studioDrive: driveThumb("1YvSlquMezh3HTpeaeEUjflntis1z9GNI", 1600),
 };
 
 export const CONTACT = {

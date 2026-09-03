@@ -1,0 +1,28 @@
+ARQUIVOS DA PEÇA DE ENTRADA — Macra Mari
+=========================================
+
+O Google Drive da pasta "MMari" NÃO está público (os arquivos exigem
+permissão), então o navegador bloqueia o download. A solução definitiva
+é servir os arquivos do próprio site (mesma origem = nunca falha).
+
+Baixe estes 3 arquivos da pasta MMari e salve-os EXATAMENTE assim:
+
+  1) macrame wall hanging 3d model (2).glb
+        →  public/models/wall-hanging.glb
+
+  2) Design sem nome.png          (o PNG sem fundo)
+        →  public/images/peca.png
+
+  3) Gemini_Generated_Image...jfif (a foto de estúdio)
+        →  public/images/peca-estudio.jpg
+
+Depois rode:  npm run build
+
+Resultado:
+  · O MODELO 3D real abre a página em tela cheia e, com o scroll,
+    entra na moldura até virar a peça à venda (nítido, pixel ratio 2).
+  · O PNG sem fundo e a foto de estúdio reforçam a transição.
+  · Se algum arquivo faltar, o site usa a foto do catálogo como
+    reserva — nunca quebra.
+
+Sem esses arquivos locais, o 3D NÃO aparece (o Drive bloqueia).

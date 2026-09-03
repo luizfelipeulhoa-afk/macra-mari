@@ -1,7 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { loadGlb, normalize } from "./loadModel";
+import { loadGlbSmart, normalize } from "./loadModel";
 import { MODELS } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
 
@@ -55,19 +55,23 @@ export default function IntroCanvas({
 
     const FOV = 36;
     const CAM_Z = 8;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    /* nitidez máxima: pixel ratio cheio (até 2) + antialias */
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.18;
     mount.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.45));
-    const key = new THREE.DirectionalLight(0xffe3c0, 2.9);
+    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.6));
+    const key = new THREE.DirectionalLight(0xffe3c0, 3.2);
     key.position.set(3.5, 4.5, 6);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc489, 1.2);
+    const rim = new THREE.DirectionalLight(0xffc489, 1.5);
     rim.position.set(-3, 1.5, -4);
     scene.add(rim);
+    const front = new THREE.DirectionalLight(0xfff6e8, 1.1);
+    front.position.set(0, 1, 8);
+    scene.add(front);
 
     const holder = new THREE.Group();
     scene.add(holder);
@@ -117,8 +121,9 @@ export default function IntroCanvas({
       renderer.render(scene, camera);
     };
 
-    /* o modelo real, exatamente como saiu do arquivo */
-    loadGlb(MODELS.wallV2)
+    /* o modelo real, exatamente como saiu do arquivo
+       (local primeiro, Drive como reserva) */
+    loadGlbSmart(MODELS.wallLocal, MODELS.wallDrive)
       .then((model) => {
         holder.add(normalize(model, 1));
         modelOn = true;

@@ -266,7 +266,8 @@ body {
     transform: scale(1) translate(0, 0);
   }
 }
-.breathe img {
+.breathe img,
+img.breathe {
   animation: kenburns 14s ease-in-out infinite;
   will-change: transform;
 }
