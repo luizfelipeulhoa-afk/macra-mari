@@ -1,9 +1,8 @@
 import { useEffect, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { loadZipModel, normalize } from "./loadModel";
-import { buildWallHanging } from "./proceduralPieces";
-import { MODELS } from "../data/atelier";
+import { loadGlb, normalize } from "./loadModel";
+import { MODELS, BRAND } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
 
 interface IntroCanvasProps {
@@ -87,16 +86,31 @@ export default function IntroCanvas({ sectionRef, windowRef, len }: IntroCanvasP
       if (reduced) renderAt(1);
     };
 
-    /* o modelo (Drive) com reserva procedural imediata */
-    holder.add(normalize(buildWallHanging(), 1));
-    const fallback = holder.children[0];
-    loadZipModel(MODELS.wallZip)
-      .then((model) => {
-        holder.remove(fallback);
-        holder.add(normalize(model, 1));
-        resize();
-        if (reduced) renderAt(1);
-      })
+    /* ——— a peça real ———
+       Enquanto o modelo 3D (Drive) baixa, mostra-se a FOTO real da
+       peça num plano 2D — nunca um 3D inventado. Quando o GLB chega,
+       ele assume o palco exatamente como saiu do arquivo original. */
+    let current: THREE.Object3D | null = null;
+    const setPiece = (obj: THREE.Object3D) => {
+      if (current) holder.remove(current);
+      current = obj;
+      holder.add(obj);
+      resize();
+      if (reduced) renderAt(1);
+    };
+
+    /* reserva imediata: foto real num plano (proporção 3:4) */
+    const photoTex = new THREE.TextureLoader().load(BRAND.catPaineis);
+    photoTex.colorSpace = THREE.SRGBColorSpace;
+    const photo = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.75, 1),
+      new THREE.MeshBasicMaterial({ map: photoTex, transparent: true })
+    );
+    setPiece(photo);
+
+    /* modelo 3D real — substitui a foto quando chega */
+    loadGlb(MODELS.wallV2)
+      .then((model) => setPiece(normalize(model, 1)))
       .catch(() => undefined);
 
     /* progresso do scroll na seção pinada */

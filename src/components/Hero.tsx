@@ -1,45 +1,15 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { products, marqueeWords, formatBRL, BRAND } from "../data/atelier";
+import { products, marqueeWords, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
-import { prefersReducedMotion, useFineMotion } from "../lib/motion";
+import { prefersReducedMotion } from "../lib/motion";
 import SmartImg from "./SmartImg";
 import AmbientThreads from "./AmbientThreads";
 import ScrambleText from "./ScrambleText";
-import ErrorBoundary from "./ErrorBoundary";
-import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
-import type { StagePiece, StageStatus } from "../three/Stage3D";
-
-/* Three.js entra como chunk separado: só baixa quando o palco 3D vai renderizar */
-const Stage3D = lazy(() => import("../three/Stage3D"));
+import { ArrowDownIcon, BagIcon, PlusIcon, StarIcon } from "./Icons";
 
 gsap.registerPlugin(ScrollTrigger);
-
-/* fallback 2D da mandala (mobile / movimento reduzido) */
-function MandalaSVG({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 400 400" className={className} aria-hidden="true">
-      <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 10" />
-      <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" strokeWidth="2" />
-      <circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="2 7" />
-      <circle cx="200" cy="200" r="40" fill="none" stroke="currentColor" strokeWidth="2.5" />
-      {Array.from({ length: 12 }).map((_, i) => (
-        <path
-          key={i}
-          d="M200 50 C 216 92, 216 122, 200 150 C 184 122, 184 92, 200 50 Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          transform={`rotate(${i * 30} 200 200)`}
-        />
-      ))}
-      {Array.from({ length: 12 }).map((_, i) => (
-        <circle key={`d${i}`} cx="200" cy="66" r="4" fill="currentColor" transform={`rotate(${i * 30 + 15} 200 200)`} />
-      ))}
-    </svg>
-  );
-}
 
 function HangCard({
   img,
@@ -106,15 +76,24 @@ function HangCard({
 
 export default function Hero() {
   const featured = [products[0], products[2], products[1], products[3]];
-  const fineMotion = useFineMotion();
   const scopeRef = useRef<HTMLElement | null>(null);
-  const [piece, setPiece] = useState<StagePiece>("wall");
-  const [stage, setStage] = useState<StageStatus>("loading");
+  const addItem = useStore((s) => s.addItem);
+  const setDrawer = useStore((s) => s.setDrawer);
 
-  const pieces: { k: StagePiece; label: string; img: string }[] = [
-    { k: "wall", label: "wall hanging", img: BRAND.catPaineis },
-    { k: "bag", label: "bolsa azul", img: BRAND.catBolsas },
-  ];
+  /* peça em destaque no hero — foto real, direto do varal */
+  const destaque = products[0];
+
+  const reservar = () => {
+    addItem({
+      key: destaque.id,
+      name: destaque.name,
+      price: destaque.price,
+      img: destaque.img,
+      meta: `${destaque.category} · ${destaque.size}`,
+    });
+    toast(`“${destaque.name}” foi pra sua sacola`);
+    setDrawer(true);
+  };
 
   /* timeline de entrada + parallax de saída: o scroll já começa narrando */
   useEffect(() => {
@@ -264,109 +243,64 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* palco 3D: wall hanging + blue bag em exposição, giro 360° no scroll */}
+          {/* peça em destaque — foto real, direto do varal da Mari */}
           <div className="hero-mandala lg:col-span-5">
             <div
-              className="relative border-2 border-ink bg-cream/70 p-3 shadow-[10px_12px_0_rgba(44,30,19,0.14)]"
+              className="relative border-2 border-ink bg-cream/80 p-3 shadow-[10px_12px_0_rgba(44,30,19,0.14)]"
               style={{ rotate: "1.6deg" }}
             >
               <div className="flex items-center justify-between border-b-2 border-dashed border-bark/40 px-2 pb-2 pt-1">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-bark">
-                  exposição viva · peças em 3d
+                  peça da semana
                 </span>
-                <span
-                  className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider ${
-                    stage === "ready" ? "text-moss" : "text-ocre"
-                  }`}
-                >
-                  <span
-                    className={`h-2 w-2 animate-pulse-dot rounded-full ${
-                      stage === "ready" ? "bg-moss" : "bg-ocre"
-                    }`}
-                  />
-                  {fineMotion
-                    ? stage === "ready"
-                      ? "3d ativo · arraste p/ girar"
-                      : "tecendo o palco…"
-                    : "modo 2d"}
+                <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-moss">
+                  <span className="h-2 w-2 animate-pulse-dot rounded-full bg-moss" />
+                  pronta p/ envio
                 </span>
               </div>
 
-              {fineMotion ? (
-                <ErrorBoundary
-                  fallback={
-                    <div className="grid aspect-[4/5] w-full place-items-center text-clay">
-                      <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
-                    </div>
-                  }
-                >
-                  <Suspense
-                    fallback={
-                      <div className="grid aspect-[4/5] w-full place-items-center text-clay">
-                        <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
-                      </div>
-                    }
-                  >
-                    <Stage3D
-                      active={piece}
-                      onStatus={setStage}
-                      className="aspect-[4/5] w-full"
-                    />
-                  </Suspense>
-                </ErrorBoundary>
-              ) : (
-                <div className="grid aspect-[4/5] w-full place-items-center text-clay">
-                  <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
+              <div className="breathe img-zoom relative mt-2.5 aspect-[4/5] overflow-hidden border-2 border-ink bg-sand">
+                <SmartImg
+                  src={destaque.img}
+                  alt={destaque.name}
+                  loading="eager"
+                  className="h-full w-full object-cover"
+                />
+                {/* carimbo */}
+                <span className="absolute left-3 top-3 -rotate-6 border-2 border-ink bg-clay px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-cream shadow-[3px_3px_0_rgba(44,30,19,0.25)]">
+                  tecida à mão
+                </span>
+                <span className="absolute bottom-3 right-3 rotate-3 border-2 border-ink bg-cream/95 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-bark">
+                  peça única · nº 04
+                </span>
+              </div>
+
+              <div className="flex items-end justify-between gap-3 px-1 pt-3">
+                <div>
+                  <h3 className="font-display text-2xl font-extrabold leading-none tracking-tight">
+                    {destaque.name}
+                  </h3>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-bark">
+                    {destaque.material}
+                  </p>
                 </div>
-              )}
-
-              {/* seletor de peças */}
-              <div className="mt-2.5 grid grid-cols-2 gap-2">
-                {pieces.map((p) => (
-                  <button
-                    key={p.k}
-                    onClick={() => setPiece(p.k)}
-                    aria-pressed={piece === p.k}
-                    className={`group flex items-center gap-2.5 border-2 px-2.5 py-2 text-left transition-all duration-200 ${
-                      piece === p.k
-                        ? "border-ink bg-ink text-cream shadow-[3px_4px_0_rgba(44,30,19,0.2)]"
-                        : "border-ink bg-cream text-ink hover:bg-sand"
-                    }`}
-                  >
-                    <span className="block h-9 w-9 shrink-0 overflow-hidden border border-ink/30">
-                      <SmartImg src={p.img} alt="" className="h-full w-full object-cover" />
-                    </span>
-                    <span>
-                      <span className="block font-display text-[13px] font-bold leading-tight">
-                        {p.label}
-                      </span>
-                      <span
-                        className={`font-mono text-[9px] uppercase tracking-widest ${
-                          piece === p.k ? "text-ocre" : "text-bark"
-                        }`}
-                      >
-                        {piece === p.k ? "● em destaque" : "ver no palco"}
-                      </span>
-                    </span>
-                  </button>
-                ))}
+                <p className="whitespace-nowrap font-display text-3xl font-extrabold text-clay">
+                  {formatBRL(destaque.price)}
+                </p>
               </div>
 
-              {/* etiquetas flutuantes */}
-              <span className="absolute -left-4 top-[26%] hidden animate-bob border-2 border-ink bg-ocre px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block">
-                360° no scroll
-              </span>
-              <span
-                className="absolute -right-3 bottom-[30%] hidden animate-bob border-2 border-ink bg-moss px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-cream shadow-[3px_4px_0_rgba(44,30,19,0.18)] sm:block"
-                style={{ animationDelay: "1.2s" }}
+              <button
+                onClick={reservar}
+                data-magnetic
+                className="btn-knot mt-3 flex w-full items-center justify-center gap-2 border-2 border-ink bg-ink px-4 py-3 font-mono text-[12px] uppercase tracking-[0.18em] text-cream hover:text-ink"
+                style={{ "--fill": "var(--color-ocre)" } as React.CSSProperties}
               >
-                arraste p/ girar
-              </span>
+                <BagIcon className="h-4 w-4" />
+                reservar esta peça
+              </button>
 
-              <p className="mt-2.5 border-t-2 border-dashed border-bark/40 px-2 pb-1 pt-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
-                {fineMotion
-                  ? "role para girar 360° · arraste com o cursor · escolha a peça"
-                  : "mandala solar · série terral nº 01"}
+              <p className="border-t-2 border-dashed border-bark/40 px-2 pb-1 pt-2.5 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bark">
+                foto real · sai do varal direto pra sua casa
               </p>
             </div>
           </div>

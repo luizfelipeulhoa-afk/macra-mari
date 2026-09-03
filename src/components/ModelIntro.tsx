@@ -1,7 +1,10 @@
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import IntroCanvas from "../three/IntroCanvas";
+
+/* Three.js entra como chunk à parte; o overlay de título/moldura
+   já está na tela enquanto o canvas 3D baixa */
+const IntroCanvas = lazy(() => import("../three/IntroCanvas"));
 import { BRAND, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
@@ -107,7 +110,9 @@ export default function ModelIntro() {
           "radial-gradient(120% 90% at 50% 20%, #332214 0%, #241812 45%, #180f09 100%)",
       }}
     >
-      <IntroCanvas sectionRef={sectionRef} windowRef={windowRef} len={LEN} />
+      <Suspense fallback={null}>
+        <IntroCanvas sectionRef={sectionRef} windowRef={windowRef} len={LEN} />
+      </Suspense>
 
       {/* véu de contraste sobre o modelo de fundo */}
       <div

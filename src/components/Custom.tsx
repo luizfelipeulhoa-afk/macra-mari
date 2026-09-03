@@ -1,9 +1,5 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatBRL, products } from "../data/atelier";
-import { useFineMotion } from "../lib/motion";
-
-/* o porta-vaso 3D só entra quando for renderizar */
-const Hanger3D = lazy(() => import("../three/Hanger3D"));
 import { useStore, toast } from "../store/useStore";
 import Reveal from "./Reveal";
 import MaskTitle from "./MaskTitle";
@@ -63,9 +59,7 @@ export default function Custom() {
 
   const dyeName = dyes.find((d) => d.id === dye)!.label;
   const typeName = types.find((t) => t.id === type)!.label;
-  const fineMotion = useFineMotion();
   const selHex = dyes.find((d) => d.id === dye)?.hex ?? "#e9dcc0";
-  const hangerScale = 0.55 + ((width - 30) / 130) * 0.8;
 
   const order = () => {
     addItem({
@@ -218,33 +212,22 @@ export default function Custom() {
                 resumo da encomenda
               </p>
 
-              {/* prévia 3D ao vivo: cor do fio e tamanho atualizam o modelo */}
-              {fineMotion && (
-                <div className="mt-4 overflow-hidden border-2 border-dashed border-cream/30 bg-cream/[0.05]">
-                  <div className="flex items-center justify-between border-b border-dashed border-cream/25 px-3 py-1.5">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">
-                      prévia da tecelagem
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-ocre">
-                      <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ocre" />
-                      3d ao vivo
-                    </span>
-                  </div>
-                  <Suspense
-                    fallback={
-                      <div className="grid aspect-square place-items-center font-mono text-[10px] uppercase tracking-widest text-cream/40">
-                        tecendo a prévia…
-                      </div>
-                    }
-                  >
-                    <Hanger3D
-                      cordHex={selHex}
-                      scale={hangerScale}
-                      className="aspect-square w-full"
-                    />
-                  </Suspense>
-                </div>
-              )}
+              {/* amostra real do fio escolhido */}
+              <div className="mt-4 flex items-center gap-3 border-2 border-dashed border-cream/30 bg-cream/[0.05] px-3 py-2.5">
+                <span
+                  className="h-9 w-9 shrink-0 rounded-full border-2 border-cream/50 shadow-inner"
+                  style={{ backgroundColor: selHex }}
+                  aria-hidden="true"
+                />
+                <span>
+                  <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-ocre">
+                    fio: {dyeName}
+                  </span>
+                  <span className="block font-mono text-[9px] uppercase tracking-wider text-cream/50">
+                    algodão orgânico · tingido à mão
+                  </span>
+                </span>
+              </div>
 
               <ul className="mt-5 space-y-3 font-mono text-[13px] uppercase tracking-wider">
                 <li className="flex justify-between gap-3 border-b border-dashed border-cream/25 pb-2">

@@ -263,8 +263,8 @@ export const marqueeWords = [
 
 /* modelos 3D reais (Drive) */
 export const MODELS = {
-  blueBag: "1zBaxJqYkHwgacQZb2tI7DZfruNBq7p5H",
-  wallZip: "1_f2Ks2-9Gu3V2BKTDbtCHrbOpae02t0D",
+  /* macrame wall hanging 3d model (2).glb — pasta MMari */
+  wallV2: "1n-HtLb9c-h-LsKueqLeuHGt6W2JpOeUl",
 };
 
 export const CONTACT = {
