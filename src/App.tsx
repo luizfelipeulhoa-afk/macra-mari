@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import Header from "./components/Header";
-import IntroScene from "./components/IntroScene";
+import ModelIntro from "./components/ModelIntro";
 import Hero from "./components/Hero";
 import Shop from "./components/Shop";
 import FreshPieces from "./components/FreshPieces";
@@ -21,6 +21,7 @@ import MarqueeBand from "./components/MarqueeBand";
 import MotionToggle from "./components/MotionToggle";
 import MacrameBuild from "./components/MacrameBuild";
 import KnotDivider from "./components/KnotDivider";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
 const ThreadCurtain = lazy(() => import("./three/ThreadCurtain"));
@@ -127,6 +128,7 @@ export default function App() {
       <Header />
 
       <main>
+        <ModelIntro />
         <Hero />
         <FreshPieces />
         <Shop />

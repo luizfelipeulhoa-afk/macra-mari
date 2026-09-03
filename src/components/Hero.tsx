@@ -7,11 +7,12 @@ import { prefersReducedMotion, useFineMotion } from "../lib/motion";
 import SmartImg from "./SmartImg";
 import AmbientThreads from "./AmbientThreads";
 import ScrambleText from "./ScrambleText";
+import ErrorBoundary from "./ErrorBoundary";
 import { ArrowDownIcon, PlusIcon, StarIcon } from "./Icons";
+import type { StagePiece, StageStatus } from "../three/Stage3D";
 
 /* Three.js entra como chunk separado: só baixa quando o palco 3D vai renderizar */
 const Stage3D = lazy(() => import("../three/Stage3D"));
-import type { StagePiece, StageStatus } from "../three/Stage3D";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -292,19 +293,27 @@ export default function Hero() {
               </div>
 
               {fineMotion ? (
-                <Suspense
+                <ErrorBoundary
                   fallback={
                     <div className="grid aspect-[4/5] w-full place-items-center text-clay">
                       <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
                     </div>
                   }
                 >
-                  <Stage3D
-                    active={piece}
-                    onStatus={setStage}
-                    className="aspect-[4/5] w-full"
-                  />
-                </Suspense>
+                  <Suspense
+                    fallback={
+                      <div className="grid aspect-[4/5] w-full place-items-center text-clay">
+                        <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />
+                      </div>
+                    }
+                  >
+                    <Stage3D
+                      active={piece}
+                      onStatus={setStage}
+                      className="aspect-[4/5] w-full"
+                    />
+                  </Suspense>
+                </ErrorBoundary>
               ) : (
                 <div className="grid aspect-[4/5] w-full place-items-center text-clay">
                   <MandalaSVG className="h-[82%] w-[82%] animate-spin-slow" />

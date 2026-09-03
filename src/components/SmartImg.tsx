@@ -1,5 +1,5 @@
 import { useMemo, useState, type SyntheticEvent } from "react";
-import { wixImg, BRAND } from "../data/atelier";
+import { products, driveThumb } from "../data/atelier";
 
 interface SmartImgProps {
   src: string;
@@ -8,10 +8,10 @@ interface SmartImgProps {
   loading?: "lazy" | "eager";
 }
 
-/* Cadeia de resiliência de imagem:
-   1) fonte original (CDN Wix com AVIF/redimensionamento)
-   2) mesma foto em PNG direto da CDN (sem transformação)
-   3) foto de capa do ateliê — a página nunca fica quebrada */
+/* Cadeia de resiliência (só fotos do Drive):
+   1) thumbnail redimensionado
+   2) CDN pública do Google (mesmo arquivo)
+   3) outra foto do Drive — a página nunca fica quebrada */
 export default function SmartImg({
   src,
   alt,
@@ -20,13 +20,11 @@ export default function SmartImg({
 }: SmartImgProps) {
   const chain = useMemo(() => {
     const out = [src];
-    const m = src.match(/\/media\/([^/]+)~mv2\.(jpe?g|png)/);
+    const m = src.match(/[?&]id=([\w-]+)/);
     if (m) {
-      out.push(
-        `https://static.wixstatic.com/media/${m[1]}~mv2.${m[2]}`
-      );
+      out.push(`https://lh3.googleusercontent.com/d/${m[1]}`);
     }
-    out.push(wixImg(BRAND.cover, 900, 1125));
+    out.push(products[0].img);
     return out;
   }, [src]);
 
@@ -51,3 +49,5 @@ export default function SmartImg({
     />
   );
 }
+
+export { driveThumb };
