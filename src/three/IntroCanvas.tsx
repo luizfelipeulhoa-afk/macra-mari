@@ -33,6 +33,13 @@ export default function IntroCanvas({
 }: IntroCanvasProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
 
+  /* callbacks em refs: a cena NUNCA é recriada quando eles mudam
+     (evita o loop de teardown/rebuild que travava a página) */
+  const onReadyRef = useRef(onReady);
+  const onFailRef = useRef(onFail);
+  onReadyRef.current = onReady;
+  onFailRef.current = onFail;
+
   useEffect(() => {
     const mount = mountRef.current;
     const section = sectionRef.current;
@@ -49,7 +56,7 @@ export default function IntroCanvas({
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     } catch {
       /* sem WebGL: a foto de fundo já garante o intro */
-      onFail?.();
+      onFailRef.current?.();
       return;
     }
 
@@ -75,6 +82,8 @@ export default function IntroCanvas({
 
     const holder = new THREE.Group();
     scene.add(holder);
+
+    let disposed = false;
 
     const m = {
       startScale: 6,
@@ -125,13 +134,16 @@ export default function IntroCanvas({
        (local primeiro, Drive como reserva) */
     loadGlbSmart(MODELS.wallLocal, MODELS.wallDrive)
       .then((model) => {
+        if (disposed) return; /* componente já desmontado */
         holder.add(normalize(model, 1));
         modelOn = true;
         resize();
         if (reduced) renderAt(1);
-        onReady?.();
+        onReadyRef.current?.();
       })
-      .catch(() => onFail?.());
+      .catch(() => {
+        if (!disposed) onFailRef.current?.();
+      });
 
     /* progresso do scroll na seção pinada */
     let target = reduced ? 1 : 0;
@@ -176,6 +188,7 @@ export default function IntroCanvas({
     };
 
     const dispose = () => {
+      disposed = true;
       stop();
       st?.kill();
       ro.disconnect();
@@ -214,7 +227,10 @@ export default function IntroCanvas({
       document.removeEventListener("visibilitychange", onVis);
       dispose();
     };
-  }, [sectionRef, windowRef, len, onReady, onFail]);
+    /* onReady/onFail ficam de fora de propósito (estão em refs):
+       se entrassem aqui, cada setState do pai recriaria a cena inteira */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionRef, windowRef, len]);
 
   return <div ref={mountRef} className="absolute inset-0" aria-hidden="true" />;
 }
