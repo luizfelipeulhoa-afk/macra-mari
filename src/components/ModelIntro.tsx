@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BRAND, PIECE_ART, driveThumb, formatBRL } from "../data/atelier";
+import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
 import { ArrowDownIcon, BagIcon } from "./Icons";
@@ -229,13 +229,14 @@ export default function ModelIntro() {
           "radial-gradient(120% 90% at 50% 20%, #332214 0%, #241812 45%, #180f09 100%)",
       }}
     >
-      {/* sondas: local primeiro, Drive como reserva */}
+      {/* sondas: local primeiro, Drive como reserva
+          (os *Drive já são URLs completas — usar direto) */}
       <ProbeImg
-        srcs={[PIECE_ART.studioLocal, driveThumb(PIECE_ART.studioDrive, 1600)]}
+        srcs={[PIECE_ART.studioLocal, PIECE_ART.studioDrive]}
         onOk={applyStudio}
       />
       <ProbeImg
-        srcs={[PIECE_ART.pngLocal, driveThumb(PIECE_ART.pngDrive, 1600)]}
+        srcs={[PIECE_ART.pngLocal, PIECE_ART.pngDrive]}
         onOk={applyPng}
       />
 
