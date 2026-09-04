@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
+import { BRAND, PIECE_ART, driveThumb, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
 import { ArrowDownIcon, BagIcon } from "./Icons";
@@ -20,66 +20,49 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/* imagem com cadeia de fontes: tenta cada src até uma carregar */
-function FallbackImg({
-  srcs,
-  onLoadOk,
-  onAllFailed,
-  imgRef,
-  className,
-  style,
-  alt,
-  ariaHidden,
-}: {
-  srcs: string[];
-  onLoadOk?: () => void;
-  onAllFailed?: () => void;
-  imgRef?: React.RefObject<HTMLImageElement>;
-  className?: string;
-  style?: React.CSSProperties;
-  alt: string;
-  ariaHidden?: boolean;
-}) {
+/* sonda uma lista de fontes; a primeira que carregar vence */
+function ProbeImg({ srcs, onOk }: { srcs: string[]; onOk: (src: string) => void }) {
   const [i, setI] = useState(0);
+  if (i >= srcs.length) return null;
   return (
     <img
-      ref={imgRef}
       src={srcs[i]}
-      alt={alt}
-      aria-hidden={ariaHidden}
-      className={className}
-      style={style}
-      draggable={false}
-      onLoad={() => onLoadOk?.()}
-      onError={() => {
-        if (i + 1 < srcs.length) setI(i + 1);
-        else onAllFailed?.();
-      }}
+      alt=""
+      aria-hidden="true"
+      className="hidden"
+      onLoad={() => onOk(srcs[i])}
+      onError={() => setI(i + 1)}
     />
   );
 }
 
 /* ————————————————————————————————————————————————
-   Transição de entrada em camadas, à prova de falha:
-   · BASE: a foto real (catálogo, sempre pública) ocupa a tela e o
-     scroll a conduz para dentro da moldura — funciona sempre.
-   · REFORÇO: quando o PNG sem fundo carrega (local ou Drive), ele
-     assume o palco — a peça recortada flutua sobre o estúdio.
-   · 3D: quando o modelo .glb chega, tudo se dissolve e ele estrela.
+   Transição de entrada — UMA camada protagonista:
+   PNG sem fundo (recortado) > foto de estúdio > foto do catálogo.
+   O que estiver visível É o que o scroll conduz para dentro da
+   moldura — nunca há camada escondendo o movimento.
+   Quando o modelo 3D chega, a foto se dissolve e ele assume.
+   No fim, uma onda de papel sobe e entrega a página ao varal —
+   sem corte preto nem branco.
    ———————————————————————————————————————————————— */
 export default function ModelIntro() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const windowRef = useRef<HTMLDivElement | null>(null);
-  const photoRef = useRef<HTMLImageElement | null>(null);
-  const pngRef = useRef<HTMLImageElement | null>(null);
-  const studioRef = useRef<HTMLImageElement | null>(null);
+  const heroRef = useRef<HTMLImageElement | null>(null);
+  const heroModeRef = useRef<"photo" | "png">("photo");
   const modelReady = useRef(false);
+  const progRef = useRef(0);
+  const doneRef = useRef({ studio: false, png: false });
+
   const addItem = useStore((s) => s.addItem);
   const setDrawer = useStore((s) => s.setDrawer);
   const [glbStatus, setGlbStatus] = useState<"loading" | "ready" | "off">("loading");
-  const [pngOn, setPngOn] = useState(false); /* PNG carregou → protagoniza */
+  const [hero, setHero] = useState<{ src: string; mode: "photo" | "png" }>({
+    src: BRAND.catPaineisXL,
+    mode: "photo",
+  });
 
-  /* limite de espera pelo modelo: nunca fica "baixando…" para sempre */
+  /* limite de espera pelo modelo 3D */
   useEffect(() => {
     const t = window.setTimeout(
       () => setGlbStatus((s) => (s === "loading" ? "off" : s)),
@@ -88,38 +71,36 @@ export default function ModelIntro() {
     return () => window.clearTimeout(t);
   }, []);
 
-  /* morfologia tela cheia → janela da moldura (foto e/ou PNG) */
+  /* morfologia: tela cheia → janela da moldura */
   const morphLayers = (p: number) => {
+    progRef.current = p;
+    const el = heroRef.current;
     const win = windowRef.current;
-    if (!win || modelReady.current) return;
+    if (!el || !win || modelReady.current) return;
     const r = win.getBoundingClientRect();
     if (r.width < 10) return;
     const e = smooth(0.28, 0.78, p);
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    /* foto-base: estica/encolhe até virar o quadro (sempre presente) */
-    const ph = photoRef.current;
-    if (ph) {
-      ph.style.transform = `translate(${(r.left * e).toFixed(1)}px, ${(r.top * e).toFixed(
+    if (heroModeRef.current === "png") {
+      /* peça recortada: flutua do centro da tela até a moldura */
+      const baseH = el.offsetHeight || vh;
+      const s = (r.height * 0.92) / baseH;
+      const dx = r.left + r.width / 2 - vw / 2;
+      const dy = r.top + r.height / 2 - vh / 2;
+      el.style.transform = `translate(calc(-50% + ${(dx * e).toFixed(1)}px), calc(-50% + ${(
+        dy * e
+      ).toFixed(1)}px)) scale(${(1 + (s - 1) * e).toFixed(4)}) rotate(${((1 - e) * -4).toFixed(
+        2
+      )}deg)`;
+    } else {
+      /* foto cheia: estica/encolhe até virar o quadro */
+      el.style.transform = `translate(${(r.left * e).toFixed(1)}px, ${(r.top * e).toFixed(
         1
       )}px) scale(${(1 + (r.width / vw - 1) * e).toFixed(4)}, ${(
         1 + (r.height / vh - 1) * e
       ).toFixed(4)})`;
-    }
-
-    /* PNG recortado: encolhe do centro até caber na janela */
-    const pn = pngRef.current;
-    if (pn) {
-      const baseH = pn.offsetHeight || vh;
-      const s = (r.height * 0.92) / baseH;
-      const dx = r.left + r.width / 2 - vw / 2;
-      const dy = r.top + r.height / 2 - vh / 2;
-      pn.style.transform = `translate(calc(-50% + ${(dx * e).toFixed(1)}px), calc(-50% + ${(
-        dy * e
-      ).toFixed(1)}px)) scale(${(1 + (s - 1) * e).toFixed(4)}) rotate(${(
-        (1 - e) * -4
-      ).toFixed(2)}deg)`;
     }
   };
 
@@ -131,12 +112,13 @@ export default function ModelIntro() {
     if (reduced) {
       gsap.set(".mi-title", { autoAlpha: 0 });
       gsap.set(".mi-cue", { autoAlpha: 0 });
+      gsap.set(".mi-exit", { yPercent: 103 });
       morphLayers(1);
       return;
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(".mi-overlay", { opacity: 0.9 });
+      gsap.set(".mi-overlay", { opacity: 0.88 });
       gsap.set(".mi-frame", { autoAlpha: 0, scale: 1.5, transformOrigin: "50% 40%" });
       gsap.set(".mi-info", { autoAlpha: 0, y: 70 });
       gsap.set(".mi-info > *", { autoAlpha: 0, y: 24 });
@@ -144,6 +126,7 @@ export default function ModelIntro() {
       gsap.set(".mi-cue2", { autoAlpha: 0, y: 16 });
       gsap.set(".mi-tline-inner", { yPercent: 120 });
       gsap.set(".mi-kicker", { autoAlpha: 0, y: 14 });
+      gsap.set(".mi-exit", { yPercent: 103 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -156,22 +139,34 @@ export default function ModelIntro() {
         },
       });
 
+      /* 1 — o título sobe por cima da peça gigante */
       tl.to(".mi-kicker", { autoAlpha: 1, y: 0, duration: 0.35 }, 0.05);
       tl.to(".mi-tline-inner", { yPercent: 0, duration: 0.6, stagger: 0.12, ease: "power4.out" }, 0.15);
+
+      /* 2 — o título sai de cena */
       tl.to(".mi-title", { autoAlpha: 0, yPercent: -14, duration: 0.5, ease: "power2.in" }, 1.0);
       tl.to(".mi-cue", { autoAlpha: 0, duration: 0.3 }, 0.95);
-      tl.to(".mi-overlay", { opacity: 0.45, duration: 0.7 }, 1.05);
+      tl.to(".mi-overlay", { opacity: 0.42, duration: 0.7 }, 1.05);
+
+      /* 3 — a moldura entra e o cordão se pendura */
       tl.to(".mi-frame", { autoAlpha: 1, scale: 1, duration: 0.75, ease: "power3.out" }, 1.25);
       tl.fromTo(".mi-cord-path", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.55, ease: "none" }, 1.3);
       tl.fromTo(".mi-cord-knot", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.2, ease: "back.out(3)" }, 1.78);
+
+      /* 4 — a etiqueta de preço salta na lateral */
       tl.to(".mi-tag", { autoAlpha: 1, scale: 1, rotate: -8, duration: 0.4, ease: "back.out(2.2)" }, 2.0);
+
+      /* 5 — a ficha de venda sobe, item a item */
       tl.to(".mi-info", { autoAlpha: 1, y: 0, duration: 0.4 }, 2.05);
       tl.to(".mi-info > *", { autoAlpha: 1, y: 0, duration: 0.3, stagger: 0.07 }, 2.15);
-      tl.to(".mi-cue2", { autoAlpha: 1, y: 0, duration: 0.35 }, 2.75);
-      tl.to(".mi-overlay", { opacity: 0.28, duration: 0.4 }, 2.8);
+
+      /* 6 — convite para o varal + onda de papel entregando a página */
+      tl.to(".mi-overlay", { opacity: 0.18, duration: 0.45 }, 2.7);
+      tl.to(".mi-cue2", { autoAlpha: 1, y: 0, duration: 0.3 }, 2.72);
+      tl.to(".mi-exit", { yPercent: 0, duration: 0.32, ease: "power3.inOut" }, 2.82);
     }, section);
 
-    const onResize = () => morphLayers(1);
+    const onResize = () => morphLayers(progRef.current);
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -181,24 +176,35 @@ export default function ModelIntro() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* reforço 2D carregou: estúdio + PNG surgem, foto-base se dissolve */
-  const onPngReady = () => {
-    if (modelReady.current) return;
-    setPngOn(true);
-    [studioRef.current, pngRef.current].forEach((el) => {
-      if (el) gsap.to(el, { autoAlpha: 1, duration: 0.8, ease: "power2.out" });
-    });
-    const ph = photoRef.current;
-    if (ph) gsap.to(ph, { autoAlpha: 0, duration: 0.8, ease: "power2.out" });
+  /* quando a camada protagonista muda, reposiciona na hora */
+  useEffect(() => {
+    heroModeRef.current = hero.mode;
+    if (prefersReducedMotion()) {
+      morphLayers(1);
+    } else {
+      /* espera a imagem pintar com o novo src */
+      requestAnimationFrame(() => requestAnimationFrame(() => morphLayers(progRef.current)));
+    }
+  }, [hero]);
+
+  const applyStudio = (src: string) => {
+    if (doneRef.current.studio || doneRef.current.png) return;
+    doneRef.current.studio = true;
+    setHero({ src, mode: "photo" });
+  };
+  const applyPng = (src: string) => {
+    if (doneRef.current.png) return;
+    doneRef.current.png = true;
+    heroModeRef.current = "png";
+    setHero({ src, mode: "png" });
   };
 
-  /* modelo 3D chegou: dissolve tudo e deixa o GLB brilhar */
+  /* o modelo 3D chegou: dissolve a foto e deixa o GLB brilhar */
   const onModelReady = () => {
     modelReady.current = true;
     setGlbStatus("ready");
-    [photoRef.current, pngRef.current, studioRef.current].forEach((el) => {
-      if (el) gsap.to(el, { autoAlpha: 0, duration: 0.8, ease: "power2.out" });
-    });
+    const el = heroRef.current;
+    if (el) gsap.to(el, { autoAlpha: 0, duration: 0.8, ease: "power2.out" });
   };
 
   const addToBag = () => {
@@ -223,35 +229,30 @@ export default function ModelIntro() {
           "radial-gradient(120% 90% at 50% 20%, #332214 0%, #241812 45%, #180f09 100%)",
       }}
     >
-      {/* BASE garantida — foto real do catálogo, sempre pública */}
+      {/* sondas: local primeiro, Drive como reserva */}
+      <ProbeImg
+        srcs={[PIECE_ART.studioLocal, driveThumb(PIECE_ART.studioDrive, 1600)]}
+        onOk={applyStudio}
+      />
+      <ProbeImg
+        srcs={[PIECE_ART.pngLocal, driveThumb(PIECE_ART.pngDrive, 1600)]}
+        onOk={applyPng}
+      />
+
+      {/* CAMADA PROTAGONISTA — a única imagem que se move */}
       <img
-        ref={photoRef}
-        src={BRAND.catPaineisXL}
-        alt="Peça de macramê da Macra Mari ocupando a tela inteira"
-        className="absolute inset-0 z-0 h-full w-full origin-top-left object-cover will-change-transform"
+        ref={heroRef}
+        src={hero.src}
+        alt="Peça de macramê da Macra Mari sendo conduzida para a moldura"
         draggable={false}
+        className={
+          hero.mode === "png"
+            ? "absolute left-1/2 top-1/2 z-10 h-[130vh] w-auto max-w-none will-change-transform"
+            : "absolute inset-0 z-10 h-full w-full origin-top-left object-cover will-change-transform"
+        }
       />
 
-      {/* REFORÇO — fundo de estúdio + PNG recortado (entram se carregarem) */}
-      <FallbackImg
-        srcs={[PIECE_ART.studioLocal, PIECE_ART.studioDrive, BRAND.catPaineisXL]}
-        imgRef={studioRef}
-        alt=""
-        ariaHidden
-        onLoadOk={onPngReady}
-        className="breathe absolute inset-0 z-0 h-full w-full object-cover"
-        style={{ opacity: 0 }}
-      />
-      <FallbackImg
-        srcs={[PIECE_ART.pngLocal, PIECE_ART.pngDrive]}
-        imgRef={pngRef}
-        alt="Peça de macramê em tamanho gigante"
-        onLoadOk={onPngReady}
-        className="absolute left-1/2 top-1/2 z-10 h-[130vh] w-auto max-w-none origin-center object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.6)] will-change-transform"
-        style={{ opacity: 0, transform: "translate(-50%, -50%)" }}
-      />
-
-      {/* camada 3D por cima, quando o modelo chega */}
+      {/* camada 3D por cima, quando o Drive/local entrega o GLB */}
       <div className="pointer-events-none absolute inset-0 z-10">
         <Suspense fallback={null}>
           <IntroCanvas
@@ -259,7 +260,7 @@ export default function ModelIntro() {
             windowRef={windowRef}
             len={LEN}
             onReady={onModelReady}
-            onFail={() => setGlbStatus("off")}
+            onFail={() => setGlbStatus((s) => (s === "ready" ? s : "off"))}
           />
         </Suspense>
       </div>
@@ -269,11 +270,11 @@ export default function ModelIntro() {
         className="mi-overlay pointer-events-none absolute inset-0 z-20"
         style={{
           background:
-            "linear-gradient(180deg, rgba(20,12,7,0.5) 0%, rgba(20,12,7,0.68) 55%, rgba(20,12,7,0.86) 100%)",
+            "linear-gradient(180deg, rgba(20,12,7,0.45) 0%, rgba(20,12,7,0.6) 55%, rgba(20,12,7,0.82) 100%)",
         }}
       />
 
-      {/* selo de status do modelo */}
+      {/* selo de status */}
       <div className="absolute right-4 top-20 z-30 sm:right-6 sm:top-24">
         <span
           className={`flex items-center gap-2 border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] backdrop-blur-sm ${
@@ -296,8 +297,8 @@ export default function ModelIntro() {
           {glbStatus === "ready"
             ? "modelo 3d ativo"
             : glbStatus === "off"
-              ? pngOn
-                ? "exposição 2d · png"
+              ? hero.mode === "png"
+                ? "peça recortada 2d"
                 : "exposição 2d"
               : "baixando modelo 3d…"}
         </span>
@@ -333,6 +334,7 @@ export default function ModelIntro() {
             <circle className="mi-cord-knot" cx="120" cy="6" r="6" fill="#c2512b" stroke="#180f09" strokeWidth="2" />
           </svg>
 
+          {/* moldura de madeira + passe-partout (janela transparente) */}
           <div
             className="mi-frame relative p-[13px] shadow-[0_24px_60px_rgba(0,0,0,0.55)] sm:p-[15px]"
             style={{
@@ -363,6 +365,7 @@ export default function ModelIntro() {
             </div>
           </div>
 
+          {/* ficha de venda */}
           <div className="mi-info mt-4 w-[min(78vw,392px)] border-2 border-ink bg-cream px-5 py-4 text-ink shadow-[6px_8px_0_rgba(0,0,0,0.4)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay">
               peça única · saiu do tear hoje
@@ -407,11 +410,37 @@ export default function ModelIntro() {
           <ArrowDownIcon className="h-4 w-4 animate-bob" />
         </span>
       </div>
-      <div className="mi-cue2 absolute inset-x-0 bottom-6 z-30 flex justify-center">
-        <a href="#pecas" className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-ocre transition-colors hover:text-cream">
+      <div className="mi-cue2 absolute inset-x-0 bottom-6 z-50 flex justify-center">
+        <a
+          href="#pecas"
+          className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.26em] text-clay transition-colors hover:text-ink"
+        >
           entrar no varal
           <ArrowDownIcon className="h-4 w-4 animate-bob" />
         </a>
+      </div>
+
+      {/* onda de papel: entrega a página ao varal sem corte de cor */}
+      <div className="mi-exit pointer-events-none absolute inset-0 z-40">
+        <svg
+          viewBox="0 0 1440 90"
+          preserveAspectRatio="none"
+          className="absolute -top-[88px] h-[90px] w-full text-paper"
+          aria-hidden="true"
+        >
+          <path
+            d="M0 90 L0 46 C 240 10, 480 74, 720 40 C 960 8, 1200 66, 1440 34 L1440 90 Z"
+            fill="currentColor"
+          />
+          <path
+            d="M0 52 C 240 16, 480 80, 720 46 C 960 14, 1200 72, 1440 40"
+            fill="none"
+            stroke="var(--color-clay)"
+            strokeWidth="2.5"
+            strokeDasharray="7 9"
+          />
+        </svg>
+        <div className="weave h-full w-full bg-paper" />
       </div>
     </section>
   );

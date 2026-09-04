@@ -21,6 +21,7 @@ import MarqueeBand from "./components/MarqueeBand";
 import MotionToggle from "./components/MotionToggle";
 import MacrameBuild from "./components/MacrameBuild";
 import KnotDivider from "./components/KnotDivider";
+import HemDivider from "./components/HemDivider";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 /* chunk do Three.js compartilhado pelas experiências 3D */
@@ -140,6 +141,7 @@ export default function App() {
         <Custom />
         <KnotDivider label="nova carreira" />
         <Atelier />
+        <HemDivider />
       </main>
 
       <Footer />
