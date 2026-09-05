@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
+import { sample, HOLDS, MOVES, FINAL_AT } from "../lib/choreo";
 import FiberField from "./FiberField";
 import { ArrowDownIcon, BagIcon } from "./Icons";
 
@@ -12,31 +13,36 @@ const IntroCanvas = lazy(() => import("../three/IntroCanvas"));
 
 gsap.registerPlugin(ScrollTrigger);
 
-const LEN = 4400;
+const LEN = 5600; /* altura total da viagem */
+const DUR = 6; /* unidades da timeline = 100% do scroll */
 const PRICE = 420;
 const NAME = "Wall Hanging Trança";
+const pos = (p: number) => p * DUR;
 
-/* capítulos da história — cada janela de scroll conta um pedaço */
 const chapters = [
   {
+    n: "01",
     kicker: "capítulo 01 · a matéria",
     title: "O fio",
-    text: "Algodão orgânico que chegou do sertão ainda com cheiro de sol. Metade do fio, a Mariana tingiu com urucum; a outra metade, deixou da cor da terra.",
+    text: "Algodão orgânico que chegou do sertão ainda com cheiro de sol. Metade, a Mariana tingiu com urucum; a outra metade ficou da cor da terra.",
     side: "left",
   },
   {
+    n: "02",
     kicker: "capítulo 02 · a técnica",
     title: "O nó",
-    text: "3.412 nós quadrados, um de cada vez — cada um puxado com a mesma tensão. A medida exata só a memória das mãos dela conhece.",
+    text: "3.412 nós quadrados, um de cada vez, cada um puxado com a mesma tensão. A medida exata só a memória das mãos dela conhece.",
     side: "right",
   },
   {
+    n: "03",
     kicker: "capítulo 03 · a duração",
     title: "O tempo",
     text: "Quarenta horas entre o tear, o café passado e a rádio ligada. Pressa é o único material que nunca entrou neste ateliê.",
     side: "left",
   },
   {
+    n: "04",
     kicker: "capítulo 04 · a autora",
     title: "A mão",
     text: "Três anos de ateliê cabem nesta trança. Cada franja penteada até abrir, cada sobra de fio guardada pra próxima peça.",
@@ -44,10 +50,22 @@ const chapters = [
   },
 ];
 
+/* palavras mascaradas p/ revelação linha a linha */
+function MaskWords({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="wline inline-block overflow-hidden pb-[0.1em] -mb-[0.1em] align-bottom">
+          <span className="wline-inner inline-block">{w}&nbsp;</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
 /* ————————————————————————————————————————————————
-   Abertura-showroom: a peça (PNG recortado, ou o GLB
-   quando chega) flutua no centro e gira 360° conforme
-   o scroll — a cada volta, um capítulo da história.
+   Abertura-showroom: a peça gira 360° pelo scroll, com
+   pausas leves em cada capítulo e zoom in/out entre eles.
    ———————————————————————————————————————————————— */
 export default function ModelIntro() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -55,7 +73,9 @@ export default function ModelIntro() {
   const ringRef = useRef<SVGSVGElement | null>(null);
   const needleRef = useRef<SVGGElement | null>(null);
   const degRef = useRef<HTMLSpanElement | null>(null);
+  const threadFillRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLImageElement | null>(null);
+  const nodeRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const modelReady = useRef(false);
 
   const addItem = useStore((s) => s.addItem);
@@ -72,17 +92,31 @@ export default function ModelIntro() {
     return () => window.clearTimeout(t);
   }, []);
 
-  /* o scroll gira a peça, o anel e o mostrador */
+  /* aplica a pose da coreografia à peça 2D + mostrador + fio contador */
   const onProgress = (p: number) => {
-    if (modelReady.current) return; /* o GLB gira por conta própria */
-    const deg = p * 360;
-    if (spinRef.current)
-      spinRef.current.style.transform = `perspective(1100px) rotateY(${deg.toFixed(1)}deg)`;
+    const pose = sample(p);
+    if (!modelReady.current && spinRef.current) {
+      spinRef.current.style.transform =
+        `translateY(${(pose.y * 100).toFixed(2)}%) ` +
+        `scale(${pose.zoom.toFixed(4)}) ` +
+        `perspective(1200px) rotateY(${pose.deg.toFixed(1)}deg)`;
+    }
     if (ringRef.current)
-      ringRef.current.style.transform = `rotate(${(-p * 140).toFixed(1)}deg)`;
+      ringRef.current.style.transform = `rotate(${(-pose.deg * 0.4).toFixed(1)}deg)`;
     if (needleRef.current)
-      needleRef.current.style.transform = `rotate(${deg.toFixed(1)}deg)`;
-    if (degRef.current) degRef.current.textContent = `${Math.round(deg)}°`;
+      needleRef.current.style.transform = `rotate(${pose.deg.toFixed(1)}deg)`;
+    if (degRef.current) degRef.current.textContent = `${Math.round(pose.deg)}°`;
+
+    /* fio contador: preenchimento + nó ativo */
+    if (threadFillRef.current)
+      threadFillRef.current.style.height = `${(p * 100).toFixed(1)}%`;
+    const marks = [...HOLDS.map((h) => (h.from + h.to) / 2), FINAL_AT + 0.04];
+    nodeRefs.current.forEach((n, i) => {
+      if (!n) return;
+      const mp = marks[i];
+      n.classList.toggle("is-done", p > mp);
+      n.classList.toggle("is-active", Math.abs(p - mp) < 0.055);
+    });
   };
 
   useEffect(() => {
@@ -91,21 +125,26 @@ export default function ModelIntro() {
     const reduced = prefersReducedMotion();
 
     if (reduced) {
-      /* composição estática: peça + ficha, sem pin nem giro */
-      gsap.set(".mi-head", { autoAlpha: 1 });
-      gsap.set(".mi-chap, .mi-cue, .mi-dial", { autoAlpha: 0, display: "none" });
+      /* composição estática: peça em pose intermediária + ficha visível */
+      const pose = sample(0.5);
+      if (spinRef.current)
+        spinRef.current.style.transform =
+          `translateY(${pose.y * 100}%) scale(${pose.zoom}) perspective(1200px) rotateY(${pose.deg}deg)`;
+      gsap.set(".mi-head, .mi-chap, .mi-cue, .mi-slice, .mi-thread", { display: "none" });
       gsap.set(".mi-final", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-exit", { yPercent: 103 });
-      if (spinRef.current)
-        spinRef.current.style.transform = "perspective(1100px) rotateY(-16deg)";
       return;
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(".mi-head > *", { autoAlpha: 0, y: 30 });
-      gsap.set(".mi-chap, .mi-final", { autoAlpha: 0, y: 44 });
+      gsap.set(".mi-head > *", { autoAlpha: 0, y: 34 });
+      gsap.set(".mi-chap", { autoAlpha: 0 });
+      gsap.set(".mi-chap .wline-inner", { yPercent: 118 });
+      gsap.set(".mi-chap .mi-chap-sub", { autoAlpha: 0, y: 26 });
+      gsap.set(".mi-chap .mi-chap-kick", { scaleX: 0, transformOrigin: "left center" });
+      gsap.set(".mi-final", { autoAlpha: 0, y: 52 });
       gsap.set(".mi-cue", { autoAlpha: 0 });
-      gsap.set(".mi-dial", { autoAlpha: 0 });
+      gsap.set(".mi-slice", { scaleX: 0, autoAlpha: 0 });
       gsap.set(".mi-exit", { yPercent: 103 });
 
       const tl = gsap.timeline({
@@ -119,31 +158,55 @@ export default function ModelIntro() {
         },
       });
 
-      /* janela 0 — nome da peça + convite ao giro */
-      tl.to(".mi-head > *", { autoAlpha: 1, y: 0, duration: 0.25, stagger: 0.08 }, 0.02);
-      tl.to(".mi-cue", { autoAlpha: 1, duration: 0.2 }, 0.15);
-      tl.to(".mi-dial", { autoAlpha: 1, duration: 0.25 }, 0.2);
-      tl.to(".mi-head > *", { autoAlpha: 0, y: -24, duration: 0.22, stagger: 0.04 }, 0.78);
-      tl.to(".mi-cue", { autoAlpha: 0, duration: 0.15 }, 0.78);
+      /* janela 0 — nome + convite */
+      tl.to(".mi-head > *", { autoAlpha: 1, y: 0, duration: 0.3, stagger: 0.07 }, pos(0.005));
+      tl.to(".mi-cue", { autoAlpha: 1, duration: 0.2 }, pos(0.02));
+      tl.to(".mi-head > *", { autoAlpha: 0, y: -26, duration: 0.22, stagger: 0.04 }, pos(0.062));
+      tl.to(".mi-cue", { autoAlpha: 0, duration: 0.14 }, pos(0.062));
 
-      /* janelas 1–4 — os capítulos, alternando lados */
+      /* capítulos nas pausas; linhas de corte nas rampas */
       const chaps = gsap.utils.toArray<HTMLElement>(".mi-chap");
       chaps.forEach((el, i) => {
-        const at = 1 + i; /* janela começa em at, termina em at+1 */
-        tl.to(el, { autoAlpha: 1, y: 0, duration: 0.28, ease: "power2.out" }, at + 0.06);
-        tl.to(el, { autoAlpha: 0, y: -30, duration: 0.22, ease: "power2.in" }, at + 0.74);
+        const hold = HOLDS[i];
+        const at = pos(hold.from + 0.012);
+
+        tl.to(el, { autoAlpha: 1, duration: 0.05 }, at);
+        tl.to(el.querySelector(".mi-chap-kick"), { scaleX: 1, duration: 0.3, ease: "power2.out" }, at);
+        tl.to(
+          el.querySelectorAll(".wline-inner"),
+          { yPercent: 0, duration: 0.42, stagger: 0.07, ease: "power4.out" },
+          at + 0.06
+        );
+        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 1, y: 0, duration: 0.3 }, at + 0.24);
+
+        const outAt = pos(hold.to - 0.012);
+        tl.to(el.querySelectorAll(".wline-inner"), { yPercent: -118, duration: 0.3, stagger: 0.04, ease: "power3.in" }, outAt);
+        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 0, y: -18, duration: 0.2 }, outAt);
+        tl.to(el, { autoAlpha: 0, duration: 0.05 }, outAt + 0.32);
       });
 
-      /* janela 5 — o destino: a ficha de venda entra e fica */
-      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" }, 5.12);
-      tl.to(".mi-dial", { autoAlpha: 0, duration: 0.2 }, 5.3);
+      /* cortes minimalistas entre capítulos */
+      const slices = gsap.utils.toArray<HTMLElement>(".mi-slice");
+      slices.forEach((el, i) => {
+        const mv = MOVES[i];
+        const mid = pos((mv.from + mv.to) / 2);
+        tl.fromTo(
+          el,
+          { scaleX: 0, autoAlpha: 0 },
+          { scaleX: 1, autoAlpha: 1, duration: 0.26, ease: "power2.inOut", transformOrigin: i % 2 ? "right center" : "left center" },
+          mid - 0.26
+        );
+        tl.to(el, { autoAlpha: 0, duration: 0.22 }, mid + 0.1);
+      });
+
+      /* janela final — a ficha de venda entra e fica */
+      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power3.out" }, pos(FINAL_AT));
 
       /* onda de papel entregando a página ao varal */
-      tl.to(".mi-exit", { yPercent: 0, duration: 0.5, ease: "power3.inOut" }, 5.55);
+      tl.to(".mi-exit", { yPercent: 0, duration: 0.5, ease: "power3.inOut" }, pos(0.955));
     }, section);
 
     const onResize = () => {
-      /* mantém o giro correto após redimensionar */
       const st = ScrollTrigger.getAll().find((s) => s.trigger === section);
       if (st) onProgress(st.progress);
     };
@@ -156,7 +219,7 @@ export default function ModelIntro() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* o modelo 3D chegou: dissolve o PNG e deixa o GLB girar */
+  /* o modelo 3D chegou: dissolve o PNG e deixa o GLB seguir a coreografia */
   const onModelReady = () => {
     modelReady.current = true;
     setGlbStatus("ready");
@@ -198,7 +261,7 @@ export default function ModelIntro() {
         }}
       />
 
-      {/* anel gigante: gira em sentido contrário ao scroll */}
+      {/* anel gigante: contraponto ao giro da peça */}
       <svg
         ref={ringRef}
         viewBox="0 0 600 600"
@@ -222,19 +285,25 @@ export default function ModelIntro() {
         ))}
       </svg>
 
-      {/* A PEÇA — PNG recortado girando no centro */}
+      {/* linhas de corte minimalistas entre capítulos */}
+      <div className="mi-slice pointer-events-none absolute left-0 right-0 top-[30%] z-[6] mx-auto h-px w-[86vw] max-w-5xl bg-ocre/70" />
+      <div className="mi-slice pointer-events-none absolute left-0 right-0 top-[64%] z-[6] mx-auto h-px w-[70vw] max-w-4xl bg-clay/80" />
+      <div className="mi-slice pointer-events-none absolute left-0 right-0 top-[38%] z-[6] mx-auto h-px w-[78vw] max-w-4xl bg-cream/50" />
+      <div className="mi-slice pointer-events-none absolute left-0 right-0 top-[58%] z-[6] mx-auto h-px w-[64vw] max-w-3xl bg-ocre/60" />
+
+      {/* A PEÇA — PNG recortado seguindo a coreografia */}
       <div ref={spinRef} className="absolute inset-0 z-10 will-change-transform">
         <div className="mi-float absolute inset-0" style={{ "--bob-amp": 1 } as React.CSSProperties}>
           <img
             ref={heroRef}
             src={heroSrc}
             onError={() => setHeroSrc(BRAND.catPaineisXL)}
-            alt={`${NAME} — peça de macramê girando em exposição`}
+            alt={`${NAME} — peça de macramê em exposição 360°`}
             draggable={false}
-            className="absolute left-1/2 top-1/2 object-contain [filter:drop-shadow(0_30px_40px_rgba(0,0,0,0.55))]"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 object-contain [filter:drop-shadow(0_30px_40px_rgba(0,0,0,0.55))]"
             style={{
-              height: "min(62vh, 560px)",
-              maxWidth: "min(82vw, 500px)",
+              height: "min(58vh, 520px)",
+              maxWidth: "min(80vw, 470px)",
               transformOrigin: "50% 50%",
             }}
           />
@@ -251,6 +320,26 @@ export default function ModelIntro() {
             onFail={() => setGlbStatus((s) => (s === "ready" ? s : "off"))}
           />
         </Suspense>
+      </div>
+
+      {/* fio contador à direita — preenche e acende o nó do capítulo */}
+      <div className="mi-thread absolute right-5 top-1/2 z-30 hidden h-[44vh] -translate-y-1/2 flex-col items-center sm:flex">
+        <div className="relative w-px flex-1 bg-cream/15">
+          <div ref={threadFillRef} className="absolute left-0 top-0 w-px bg-ocre" style={{ height: "0%" }} />
+          {[...HOLDS.map((h) => (h.from + h.to) / 2), FINAL_AT + 0.04].map((mp, i) => (
+            <span
+              key={i}
+              ref={(el) => {
+                nodeRefs.current[i] = el;
+              }}
+              className="chap-node absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-cream/40 bg-ink transition-all duration-300"
+              style={{ top: `${mp * 100}%` }}
+            />
+          ))}
+        </div>
+        <span className="mt-3 font-mono text-[9px] uppercase tracking-[0.24em] text-cream/40 [writing-mode:vertical-rl]">
+          a volta completa
+        </span>
       </div>
 
       {/* selo de status */}
@@ -277,8 +366,8 @@ export default function ModelIntro() {
         </span>
       </div>
 
-      {/* janela 0 — abertura: nome + convite */}
-      <div className="mi-head pointer-events-none absolute inset-x-0 top-[9%] z-30 px-6 text-center text-cream">
+      {/* janela 0 — abertura */}
+      <div className="mi-head pointer-events-none absolute inset-x-0 top-[8%] z-30 px-6 text-center text-cream">
         <p className="mb-3 inline-block border border-ocre/50 bg-ink/30 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">
           peça única · nº 001 · saiu do tear hoje
         </p>
@@ -291,27 +380,30 @@ export default function ModelIntro() {
         </p>
       </div>
 
-      {/* janelas 1–4 — capítulos da história */}
+      {/* capítulos — entram na pausa, saem antes da próxima rampa */}
       {chapters.map((c) => (
         <div
-          key={c.title}
-          className={`mi-chap pointer-events-none absolute z-30 px-5 sm:px-10 ${
+          key={c.n}
+          className={`mi-chap pointer-events-none absolute z-30 ${
             c.side === "left"
-              ? "left-0 text-left sm:top-1/2 sm:w-[min(40vw,420px)] sm:-translate-y-1/2"
-              : "right-0 text-right sm:top-1/2 sm:w-[min(40vw,420px)] sm:-translate-y-1/2"
-          } bottom-[7%] w-full text-center sm:bottom-auto`}
+              ? "left-0 pl-5 text-left sm:pl-12 sm:top-1/2 sm:w-[min(38vw,430px)] sm:-translate-y-1/2"
+              : "right-0 pr-5 text-right sm:pr-12 sm:top-1/2 sm:w-[min(38vw,430px)] sm:-translate-y-1/2"
+          } bottom-[9%] w-full text-center sm:bottom-auto`}
         >
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">{c.kicker}</p>
-          <h2 className="mt-2 font-display text-[clamp(2rem,5vw,3.6rem)] font-extrabold leading-none tracking-tight text-cream">
-            {c.title}
+          <div className={`mi-chap-kick h-px w-14 bg-ocre ${c.side === "right" ? "ml-auto" : ""}`} />
+          <p className="mi-chap-sub mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">
+            {c.kicker}
+          </p>
+          <h2 className="mt-1 font-display text-[clamp(2.2rem,5.4vw,4rem)] font-extrabold leading-[0.98] tracking-tight text-cream">
+            <MaskWords text={c.title} />
           </h2>
-          <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-cream/75 sm:mx-0 sm:max-w-none">
+          <p className={`mi-chap-sub mt-3 max-w-xs text-[14px] leading-relaxed text-cream/75 sm:max-w-none ${c.side === "right" ? "sm:ml-auto" : ""}`}>
             {c.text}
           </p>
         </div>
       ))}
 
-      {/* janela 5 — o destino: ficha de venda */}
+      {/* janela final — a ficha de venda */}
       <div className="mi-final absolute inset-x-0 bottom-[5%] z-30 flex justify-center px-4">
         <div className="w-[min(92vw,430px)] border-2 border-ink bg-cream px-5 py-4 text-ink shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
           <div className="flex items-start justify-between gap-3">
@@ -350,8 +442,8 @@ export default function ModelIntro() {
         </div>
       </div>
 
-      {/* mostrador de giro — o conta-graus da vitrine */}
-      <div className="mi-dial absolute bottom-6 left-5 z-30 hidden items-center gap-3 sm:flex">
+      {/* mostrador de giro */}
+      <div className="absolute bottom-6 left-5 z-30 hidden items-center gap-3 sm:flex">
         <svg viewBox="0 0 64 64" className="h-14 w-14 text-cream/70">
           <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 6" />
           <circle cx="32" cy="32" r="21" fill="rgba(24,15,9,0.5)" stroke="currentColor" strokeWidth="1" />

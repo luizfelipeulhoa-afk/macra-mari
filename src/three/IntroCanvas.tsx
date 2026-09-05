@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { loadGlbSmart, normalize } from "./loadModel";
 import { MODELS } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
+import { sample } from "../lib/choreo";
 
 interface IntroCanvasProps {
   sectionRef: RefObject<HTMLElement>;
@@ -13,9 +14,9 @@ interface IntroCanvasProps {
 }
 
 /* ————————————————————————————————————————————————
-   Camada 3D da abertura-showroom: o GLB real gira 360°
-   conforme o scroll avança na seção pinada — a mesma
-   coreografia do PNG 2D, só que em três dimensões.
+   Camada 3D do showroom: o GLB segue a MESMA coreografia
+   da peça 2D — giro de 360° com pausas nos capítulos e
+   zoom in/out entre eles, tudo dirigido pelo scroll.
    ———————————————————————————————————————————————— */
 export default function IntroCanvas({
   sectionRef,
@@ -26,8 +27,10 @@ export default function IntroCanvas({
   const mountRef = useRef<HTMLDivElement | null>(null);
   const onReadyRef = useRef(onReady);
   const onFailRef = useRef(onFail);
-  onReadyRef.current = onReady;
-  onFailRef.current = onFail;
+  useEffect(() => {
+    onReadyRef.current = onReady;
+    onFailRef.current = onFail;
+  });
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -48,32 +51,30 @@ export default function IntroCanvas({
       return;
     }
 
-    const FOV = 36;
-    const CAM_Z = 8;
+    /* nitidez máxima + luz de vitrine */
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.12;
     mount.appendChild(renderer.domElement);
 
-    /* luz quente de ateliê */
     scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.5));
     const key = new THREE.DirectionalLight(0xffe3c0, 3);
     key.position.set(3.5, 4.5, 6);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc489, 1.6);
+    const rim = new THREE.DirectionalLight(0xffc489, 1.5);
     rim.position.set(-3, 1.5, -4);
     scene.add(rim);
-    const front = new THREE.DirectionalLight(0xfff6e8, 1.2);
+    const front = new THREE.DirectionalLight(0xfff6e8, 1.1);
     front.position.set(0, 1, 8);
     scene.add(front);
 
     const holder = new THREE.Group();
     scene.add(holder);
 
-    let modelOn = false;
     let disposed = false;
-    let baseScale = 3;
+    let modelOn = false;
+    let base = 1; /* escala que faz o modelo caber na vitrine */
 
     const resize = () => {
       const w = mount.clientWidth;
@@ -82,34 +83,36 @@ export default function IntroCanvas({
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      const vpWorldH = 2 * Math.tan((FOV * Math.PI) / 360) * CAM_Z;
-      baseScale = vpWorldH * 0.66;
-      if (reduced && modelOn) renderAt(0);
+      const vpWorldH = 2 * Math.tan((36 * Math.PI) / 360) * 8;
+      base = (vpWorldH * 0.62);
     };
 
-    const renderAt = (prog: number) => {
+    const renderAt = (p: number) => {
       if (!modelOn) return;
-      holder.scale.setScalar(baseScale);
-      holder.rotation.y = prog * Math.PI * 2;
+      const pose = sample(p);
+      holder.rotation.y = (pose.deg * Math.PI) / 180;
+      holder.rotation.x = pose.y * 0.5;
+      holder.position.y = pose.y * 1.6;
+      holder.scale.setScalar(Math.max(base * pose.zoom, 0.001));
       renderer.render(scene, camera);
     };
 
-    /* o modelo real, exatamente como saiu do arquivo */
+    /* o modelo real (local primeiro, Drive como reserva) */
     loadGlbSmart(MODELS.wallLocal, MODELS.wallDrive)
       .then((model) => {
         if (disposed) return;
         holder.add(normalize(model, 1));
         modelOn = true;
         resize();
-        if (reduced) renderAt(0);
+        if (reduced) renderAt(0.5);
         onReadyRef.current?.();
       })
       .catch(() => {
         if (!disposed) onFailRef.current?.();
       });
 
-    /* progresso do scroll → giro */
-    let target = reduced ? 0 : 0;
+    /* progresso do scroll na seção pinada */
+    let target = reduced ? 0.5 : 0;
     let p = target;
     const st = reduced
       ? null
@@ -121,15 +124,6 @@ export default function IntroCanvas({
             target = self.progress;
           },
         });
-
-    /* inclinação sutil pelo cursor */
-    const mouse = { x: 0, y: 0 };
-    const mTarget = { x: 0, y: 0 };
-    const onMove = (e: PointerEvent) => {
-      mTarget.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mTarget.y = (e.clientY / window.innerHeight) * 2 - 1;
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
 
     resize();
     const ro = new ResizeObserver(resize);
@@ -144,15 +138,8 @@ export default function IntroCanvas({
     const tick = () => {
       const t = clock.getElapsedTime();
       p += (target - p) * 0.09;
-      mouse.x += (mTarget.x - mouse.x) * 0.05;
-      mouse.y += (mTarget.y - mouse.y) * 0.05;
-      if (modelOn) {
-        holder.scale.setScalar(baseScale);
-        holder.rotation.y = p * Math.PI * 2 + mouse.x * 0.25;
-        holder.rotation.x = mouse.y * 0.12 + Math.sin(t * 0.6) * 0.02;
-        holder.position.y = Math.sin(t * 0.9) * 0.05;
-        renderer.render(scene, camera);
-      }
+      renderAt(p);
+      if (modelOn) holder.rotation.y += Math.sin(t * 0.5) * 0.0012;
       raf = requestAnimationFrame(tick);
     };
     const start = () => {
@@ -172,7 +159,6 @@ export default function IntroCanvas({
       st?.kill();
       ro.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onMove);
       scene.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (mesh.isMesh) mesh.geometry.dispose();
