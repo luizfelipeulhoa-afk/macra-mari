@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
+import FiberField from "./FiberField";
 import { ArrowDownIcon, BagIcon } from "./Icons";
 
 /* o canvas 3D entra como chunk separado */
@@ -49,6 +50,7 @@ export default function ModelIntro() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const windowRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLImageElement | null>(null);
+  const floatRef = useRef<HTMLDivElement | null>(null);
   const heroModeRef = useRef<"photo" | "png">("photo");
   const modelReady = useRef(false);
   const progRef = useRef(0);
@@ -71,11 +73,14 @@ export default function ModelIntro() {
     return () => window.clearTimeout(t);
   }, []);
 
-  /* morfologia: tela cheia → janela da moldura */
+  /* morfologia unificada: a peça flutua centrada e pousa exatamente no
+     centro da janela da moldura (encaixe proporcional, sem distorcer).
+     A flutuação de fundo (--bob-amp) amortece até zero no pouso. */
   const morphLayers = (p: number) => {
     progRef.current = p;
     const el = heroRef.current;
     const win = windowRef.current;
+    const floatEl = floatRef.current;
     if (!el || !win || modelReady.current) return;
     const r = win.getBoundingClientRect();
     if (r.width < 10) return;
@@ -83,25 +88,23 @@ export default function ModelIntro() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    if (heroModeRef.current === "png") {
-      /* peça recortada: flutua do centro da tela até a moldura */
-      const baseH = el.offsetHeight || vh;
-      const s = (r.height * 0.92) / baseH;
-      const dx = r.left + r.width / 2 - vw / 2;
-      const dy = r.top + r.height / 2 - vh / 2;
-      el.style.transform = `translate(calc(-50% + ${(dx * e).toFixed(1)}px), calc(-50% + ${(
-        dy * e
-      ).toFixed(1)}px)) scale(${(1 + (s - 1) * e).toFixed(4)}) rotate(${((1 - e) * -4).toFixed(
-        2
-      )}deg)`;
-    } else {
-      /* foto cheia: estica/encolhe até virar o quadro */
-      el.style.transform = `translate(${(r.left * e).toFixed(1)}px, ${(r.top * e).toFixed(
-        1
-      )}px) scale(${(1 + (r.width / vw - 1) * e).toFixed(4)}, ${(
-        1 + (r.height / vh - 1) * e
-      ).toFixed(4)})`;
-    }
+    /* a peça começa centrada um pouco abaixo do meio (56% da altura),
+       deixando o topo livre para o título; o pouso é no centro da moldura */
+    const startY = 0.56;
+    const dx = r.left + r.width / 2 - vw / 2;
+    const dy = r.top + r.height / 2 - vh * startY;
+
+    /* escala p/ caber na janela mantendo proporção (92% da área) */
+    const pw = el.offsetWidth || 1;
+    const ph = el.offsetHeight || 1;
+    const s = Math.min((r.width * 0.92) / pw, (r.height * 0.92) / ph);
+
+    el.style.transform =
+      `translate(calc(-50% + ${(dx * e).toFixed(1)}px), calc(-50% + ${(dy * e).toFixed(1)}px)) ` +
+      `scale(${(1 + (s - 1) * e).toFixed(4)}) rotate(${((1 - e) * -4).toFixed(2)}deg)`;
+
+    /* a flutuação desaparece quando a peça assenta na moldura */
+    if (floatEl) floatEl.style.setProperty("--bob-amp", (1 - e).toFixed(3));
   };
 
   useEffect(() => {
@@ -110,9 +113,15 @@ export default function ModelIntro() {
     const reduced = prefersReducedMotion();
 
     if (reduced) {
+      /* estado assentado: peça na moldura, fundo de papel, ficha visível */
       gsap.set(".mi-title", { autoAlpha: 0 });
       gsap.set(".mi-cue", { autoAlpha: 0 });
       gsap.set(".mi-exit", { yPercent: 103 });
+      gsap.set(".mi-blend", { opacity: 1 });
+      gsap.set(".mi-overlay", { opacity: 0.06 });
+      gsap.set(".mi-frame", { autoAlpha: 1 });
+      gsap.set(".mi-info", { autoAlpha: 1, y: 0 });
+      gsap.set(".mi-tag", { autoAlpha: 1 });
       morphLayers(1);
       return;
     }
@@ -160,8 +169,17 @@ export default function ModelIntro() {
       tl.to(".mi-info", { autoAlpha: 1, y: 0, duration: 0.4 }, 2.05);
       tl.to(".mi-info > *", { autoAlpha: 1, y: 0, duration: 0.3, stagger: 0.07 }, 2.15);
 
+      /* 5b — a peça pousa: o tom de papel irradia da moldura e se
+             mistura ao fundo, assentando a cena no quadro */
+      tl.fromTo(
+        ".mi-blend",
+        { opacity: 0, scale: 0.62, transformOrigin: "50% 42%" },
+        { opacity: 1, scale: 1, duration: 0.95, ease: "power2.out" },
+        1.9
+      );
+
       /* 6 — convite para o varal + onda de papel entregando a página */
-      tl.to(".mi-overlay", { opacity: 0.18, duration: 0.45 }, 2.7);
+      tl.to(".mi-overlay", { opacity: 0.06, duration: 0.45 }, 2.7);
       tl.to(".mi-cue2", { autoAlpha: 1, y: 0, duration: 0.3 }, 2.72);
       tl.to(".mi-exit", { yPercent: 0, duration: 0.32, ease: "power3.inOut" }, 2.82);
     }, section);
@@ -229,6 +247,9 @@ export default function ModelIntro() {
           "radial-gradient(120% 90% at 50% 20%, #332214 0%, #241812 45%, #180f09 100%)",
       }}
     >
+      {/* FUNDO VIVO — fios de algodão + luz quente atrás da peça */}
+      <FiberField className="absolute inset-0 z-0 h-full w-full" />
+
       {/* sondas: local primeiro, Drive como reserva
           (os *Drive já são URLs completas — usar direto) */}
       <ProbeImg
@@ -240,18 +261,37 @@ export default function ModelIntro() {
         onOk={applyPng}
       />
 
-      {/* CAMADA PROTAGONISTA — a única imagem que se move */}
-      <img
-        ref={heroRef}
-        src={hero.src}
-        alt="Peça de macramê da Macra Mari sendo conduzida para a moldura"
-        draggable={false}
-        className={
-          hero.mode === "png"
-            ? "absolute left-1/2 top-1/2 z-10 h-[130vh] w-auto max-w-none will-change-transform [filter:drop-shadow(0_28px_34px_rgba(0,0,0,0.5))]"
-            : "absolute inset-0 z-10 h-full w-full origin-top-left object-cover will-change-transform"
-        }
+      {/* CAMADA DE MESCLA — quando a peça pousa, um tom de papel
+          irradia da moldura e se mistura ao fundo, assentando a cena */}
+      <div
+        className="mi-blend pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(243,236,221,0.97) 0%, rgba(243,236,221,0.9) 32%, rgba(233,222,200,0.55) 55%, rgba(233,222,200,0) 78%)",
+          opacity: 0,
+        }}
       />
+
+      {/* CAMADA PROTAGONISTA — peça flutuando centrada sobre o fundo vivo */}
+      <div ref={floatRef} className="mi-float pointer-events-none absolute inset-0 z-10">
+        <img
+          ref={heroRef}
+          src={hero.src}
+          alt="Peça de macramê da Macra Mari sendo conduzida para a moldura"
+          draggable={false}
+          className={`absolute left-1/2 object-contain will-change-transform ${
+            hero.mode === "png"
+              ? "[filter:drop-shadow(0_26px_32px_rgba(0,0,0,0.5))]"
+              : "[filter:drop-shadow(0_22px_30px_rgba(0,0,0,0.45))]"
+          }`}
+          style={{
+            top: "56%",
+            height: "min(56vh, 500px)",
+            maxWidth: "min(84vw, 520px)",
+            transformOrigin: "50% 50%",
+          }}
+        />
+      </div>
 
       {/* camada 3D por cima da peça, quando o Drive/local entrega o GLB */}
       <div className="pointer-events-none absolute inset-0 z-[12]">
@@ -305,8 +345,8 @@ export default function ModelIntro() {
         </span>
       </div>
 
-      {/* fase 1 — título sobre a peça gigante */}
-      <div className="mi-title pointer-events-none absolute inset-0 z-30 grid place-items-center px-6">
+      {/* fase 1 — título no topo, peça flutuando abaixo */}
+      <div className="mi-title pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center px-6 pt-[8vh]">
         <div className="text-center text-cream">
           <p className="mi-kicker mb-5 inline-block border border-cream/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-cream/85">
             direto do tear · peça nº 001
