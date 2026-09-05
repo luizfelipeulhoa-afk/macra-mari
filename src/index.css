@@ -272,6 +272,20 @@ img.breathe {
   will-change: transform;
 }
 
+/* flutuação da peça de entrada — a amplitude (--bob-amp) vai a zero no pouso */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--bob-amp, 1) * -12px));
+  }
+}
+.mi-float {
+  animation: floaty 4.5s ease-in-out infinite;
+}
+
 /* franjas da bainha: se soltam quando a costura entra na tela */
 .hem-line {
   transform: scaleY(0);
