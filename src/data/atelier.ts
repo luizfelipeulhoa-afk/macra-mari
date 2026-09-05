@@ -271,8 +271,8 @@ export const marqueeWords = [
    ———————————————————————————————————————————————— */
 export const MODELS = {
   wallLocal: "/models/wall-hanging.glb",
-  /* macrame wall hanging 3d model (2).glb — pasta MMari */
-  wallDrive: "1n-HtLb9c-h-LsKueqLeuHGt6W2JpOeUl",
+  /* modelo 3D da peça de entrada (Drive — link compartilhado) */
+  wallDrive: "1jF_ff7FYJhm8u25X_Ct5zlJx-_lmV7Nx",
 };
 
 /* ————————————————————————————————————————————————
