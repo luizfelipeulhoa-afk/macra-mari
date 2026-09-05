@@ -1,7 +1,25 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
+import { BRAND, PIECE_ART, formatBRL, products } from "../data/atelier";
+
+/* colagem de peças reais para o fundo da abertura */
+const collageImgs = [
+  BRAND.catBolsas,
+  products[1]?.img,
+  BRAND.catPaineis,
+  products[3]?.img,
+  products[4]?.img,
+  BRAND.catBolsas,
+  products[5]?.img,
+  products[6]?.img,
+  BRAND.catPaineis,
+  products[7]?.img,
+  products[8]?.img,
+  products[9]?.img,
+].filter(Boolean) as string[];
+
+const collageRots = [-2.2, 1.6, -1.2, 2.4, -2.8, 1.1, 2, -1.6, 1.4, -2, 2.6, -1.4];
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
 import FiberField from "./FiberField";
@@ -122,6 +140,7 @@ export default function ModelIntro() {
       gsap.set(".mi-frame", { autoAlpha: 1 });
       gsap.set(".mi-info", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-tag", { autoAlpha: 1 });
+      gsap.set(".mi-collage", { autoAlpha: 0 });
       morphLayers(1);
       return;
     }
@@ -176,6 +195,14 @@ export default function ModelIntro() {
         { opacity: 0, scale: 0.62, transformOrigin: "50% 42%" },
         { opacity: 1, scale: 1, duration: 0.95, ease: "power2.out" },
         1.9
+      );
+
+      /* 5c — a colagem de fundo se dissolve enquanto a peça assenta,
+             como se o moodboard cedesse lugar à peça emoldurada */
+      tl.to(
+        ".mi-collage",
+        { autoAlpha: 0, scale: 0.94, duration: 0.85, ease: "power2.inOut" },
+        1.95
       );
 
       /* 6 — convite para o varal + onda de papel entregando a página */
@@ -250,6 +277,30 @@ export default function ModelIntro() {
       {/* FUNDO VIVO — fios de algodão + luz quente atrás da peça */}
       <FiberField className="absolute inset-0 z-0 h-full w-full" />
 
+      {/* COLAGEM — moodboard de peças reais como plano de fundo.
+          Só o PNG do macramê se desprende dela e vai à moldura. */}
+      <div className="mi-collage pointer-events-none absolute inset-0 z-[2] overflow-hidden">
+        <div className="mi-collage-inner grid h-full w-full grid-cols-3 grid-rows-4 gap-3 p-3 sm:grid-cols-4 sm:grid-rows-3 sm:gap-4 sm:p-4">
+          {collageImgs.map((src, i) => (
+            <figure
+              key={i}
+              className="relative overflow-hidden border-2 border-cream/20 bg-cream/10 shadow-[0_12px_32px_rgba(0,0,0,0.4)]"
+              style={{ transform: `rotate(${collageRots[i % collageRots.length]}deg)` }}
+            >
+              <img
+                src={src}
+                alt=""
+                loading="eager"
+                className="breathe h-full w-full object-cover"
+                style={{ animationDelay: `${(i % 6) * 1.4}s` }}
+              />
+            </figure>
+          ))}
+        </div>
+        {/* vinheta para a peça em destaque sobressair */}
+        <div className="absolute inset-0 bg-[radial-gradient(85%_75%_at_50%_52%,rgba(20,12,7,0.12)_0%,rgba(20,12,7,0.68)_100%)]" />
+      </div>
+
       {/* sondas: local primeiro, Drive como reserva
           (os *Drive já são URLs completas — usar direto) */}
       <ProbeImg
@@ -264,7 +315,7 @@ export default function ModelIntro() {
       {/* CAMADA DE MESCLA — quando a peça pousa, um tom de papel
           irradia da moldura e se mistura ao fundo, assentando a cena */}
       <div
-        className="mi-blend pointer-events-none absolute inset-0 z-[1]"
+        className="mi-blend pointer-events-none absolute inset-0 z-[3]"
         style={{
           background:
             "radial-gradient(ellipse at 50% 42%, rgba(243,236,221,0.97) 0%, rgba(243,236,221,0.9) 32%, rgba(233,222,200,0.55) 55%, rgba(233,222,200,0) 78%)",
