@@ -248,13 +248,13 @@ export default function ModelIntro() {
         draggable={false}
         className={
           hero.mode === "png"
-            ? "absolute left-1/2 top-1/2 z-10 h-[130vh] w-auto max-w-none will-change-transform"
+            ? "absolute left-1/2 top-1/2 z-10 h-[130vh] w-auto max-w-none will-change-transform [filter:drop-shadow(0_28px_34px_rgba(0,0,0,0.5))]"
             : "absolute inset-0 z-10 h-full w-full origin-top-left object-cover will-change-transform"
         }
       />
 
-      {/* camada 3D por cima, quando o Drive/local entrega o GLB */}
-      <div className="pointer-events-none absolute inset-0 z-10">
+      {/* camada 3D por cima da peça, quando o Drive/local entrega o GLB */}
+      <div className="pointer-events-none absolute inset-0 z-[12]">
         <Suspense fallback={null}>
           <IntroCanvas
             sectionRef={sectionRef}
@@ -326,8 +326,10 @@ export default function ModelIntro() {
         </div>
       </div>
 
-      {/* fase 2/3 — cordão + moldura + etiqueta + ficha de venda */}
-      <div className="mi-stage absolute inset-0 z-30 grid place-items-center px-4">
+      {/* fase 2/3 — cordão + moldura + etiqueta
+          ATRÁS da peça: a imagem/PNG protagonista fica sempre
+          uma camada acima do quadro (z-10 > z-6). */}
+      <div className="mi-stage pointer-events-none absolute inset-0 z-[6] grid place-items-center px-4">
         <div className="flex flex-col items-center">
           <svg viewBox="0 0 240 52" className="mi-cord -mb-1 h-9 w-[min(46vw,220px)]" aria-hidden="true">
             <path className="mi-cord-path" d="M14 48 L120 6" pathLength={1} strokeDasharray="1" fill="none" stroke="#d89b3d" strokeWidth="3.5" strokeLinecap="round" />
@@ -366,8 +368,12 @@ export default function ModelIntro() {
             </div>
           </div>
 
-          {/* ficha de venda */}
-          <div className="mi-info mt-4 w-[min(78vw,392px)] border-2 border-ink bg-cream px-5 py-4 text-ink shadow-[6px_8px_0_rgba(0,0,0,0.4)]">
+        </div>
+      </div>
+
+      {/* ficha de venda — camada própria, acima de tudo */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-5 z-30 flex justify-center px-4">
+        <div className="mi-info pointer-events-auto w-[min(78vw,392px)] border-2 border-ink bg-cream px-5 py-4 text-ink shadow-[6px_8px_0_rgba(0,0,0,0.4)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-clay">
               peça única · saiu do tear hoje
             </p>
@@ -402,7 +408,6 @@ export default function ModelIntro() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* dicas de scroll */}
       <div className="mi-cue absolute inset-x-0 bottom-6 z-30 flex justify-center">
