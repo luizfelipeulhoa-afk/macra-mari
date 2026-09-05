@@ -272,6 +272,23 @@ img.breathe {
   will-change: transform;
 }
 
+/* deriva lenta da colagem de fundo — o moodboard "respira" junto */
+@keyframes collageDrift {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.045) translate(-1%, 0.8%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+.mi-collage-inner {
+  animation: collageDrift 30s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* flutuação da peça de entrada — a amplitude (--bob-amp) vai a zero no pouso */
 @keyframes floaty {
   0%,
