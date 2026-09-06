@@ -289,6 +289,18 @@ img.breathe {
   will-change: transform;
 }
 
+/* nós do fio contador — acendem conforme a volta avança */
+.chap-node.is-done {
+  background: rgba(251, 246, 234, 0.75);
+  border-color: rgba(251, 246, 234, 0.9);
+}
+.chap-node.is-active {
+  background: var(--color-ocre);
+  border-color: var(--color-ocre);
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.5);
+  box-shadow: 0 0 0 5px rgba(216, 155, 61, 0.22);
+}
+
 /* flutuação da peça de entrada — a amplitude (--bob-amp) vai a zero no pouso */
 @keyframes floaty {
   0%,
