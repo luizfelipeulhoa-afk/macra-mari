@@ -25,7 +25,8 @@ const K: Key[] = [
   { p: 0.52, deg: 202, zoom: 0.94, y: -0.01 },
   { p: 0.64, deg: 202, zoom: 0.94, y: -0.01 }, /* pausa — cap. 03 · o tempo */
   { p: 0.74, deg: 292, zoom: 1.2, y: 0.02 },
-  { p: 0.86, deg: 292, zoom: 1.2, y: 0.02 }, /* pausa — cap. 04 · a mão */
+  { p: 0.82, deg: 292, zoom: 1.2, y: 0.02 }, /* pausa — cap. 04 · a mão */
+  { p: 0.90, deg: 360, zoom: 1.0, y: 0 },
   { p: 1.0, deg: 360, zoom: 1.0, y: 0 },
 ];
 
@@ -67,3 +68,26 @@ export const MOVES = [
 ];
 
 export const FINAL_AT = 0.9;
+
+/** A continuous lens move layered over the complete object revolution. */
+export function sampleCamera(p: number) {
+  const keys = [
+    {p:0, dolly:1, offset:0, focus:0},
+    {p:.08, dolly:1.05, offset:-.28, focus:0},
+    {p:.20, dolly:1.05, offset:-.28, focus:0},
+    {p:.30, dolly:1.28, offset:.26, focus:.1},
+    {p:.42, dolly:1.28, offset:.26, focus:.1},
+    {p:.52, dolly:1.08, offset:-.28, focus:0},
+    {p:.64, dolly:1.08, offset:-.28, focus:0},
+    {p:.74, dolly:1.22, offset:.26, focus:-.06},
+    {p:.82, dolly:1.22, offset:.26, focus:-.06},
+    {p:.90, dolly:1, offset:0, focus:-.04},
+    {p:1, dolly:1, offset:0, focus:-.04},
+  ];
+  const x=Math.max(0,Math.min(1,p));
+  for(let i=0;i<keys.length-1;i++) {
+    const a=keys[i],b=keys[i+1];
+    if(x<=b.p){const t=smooth((x-a.p)/(b.p-a.p));return {dolly:lerp(a.dolly,b.dolly,t),offset:lerp(a.offset,b.offset,t),focus:lerp(a.focus,b.focus,t)};}
+  }
+  return keys[keys.length-1];
+}

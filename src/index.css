@@ -531,3 +531,28 @@ img.breathe {
     stroke-dashoffset: 0;
   }
 }
+
+/* Showroom refinements keep the existing atelier palette and typography. */
+.mi-showroom { height: 100svh; }
+.mi-showroom .mi-head { top: 14%; }
+.mi-showroom .mi-head h1 { font-size: clamp(2.5rem, 6vw, 5.2rem); }
+.mi-showroom .mi-head > p:last-child { max-width: 28rem; }
+.mi-showroom .mi-chap { text-wrap: pretty; }
+.mi-showroom .mi-skip { transition: color .2s; }
+@media (min-width: 900px) {
+  .mi-showroom .mi-head { inset-inline: 5%; top: 35%; width: 29%; text-align: left; }
+  .mi-showroom .mi-head > p:last-child { margin-left: 0; }
+  .mi-showroom .mi-chap { width: min(29vw, 370px); }
+}
+@media (max-width: 699px) {
+  .mi-showroom .mi-head { top: 16%; }
+  .mi-showroom .mi-head h1 { font-size: 2.4rem; }
+  .mi-showroom .mi-head > p:last-child { font-size: 12px; max-width: 260px; }
+  .mi-showroom .mi-chap { bottom: 10%; padding-inline: 24px; text-align: left; }
+  .mi-showroom .mi-chap > p:last-child { max-width: 32ch; font-size: 12px; }
+  .mi-showroom .mi-chap h2 { font-size: 2rem; }
+  .mi-showroom .mi-chap-kick { margin-left: 0; }
+  .mi-showroom .mi-final { bottom: 8%; }
+  .mi-showroom .mi-final > div { padding: 12px 16px; }
+  .mi-showroom .mi-skip { top: 82px; left: 16px; font-size: 8px; }
+}

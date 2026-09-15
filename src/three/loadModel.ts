@@ -77,10 +77,9 @@ export function normalize(obj: THREE.Object3D, targetH: number): THREE.Group {
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const s = targetH / Math.max(size.y, 0.001);
-  obj.position.sub(center);
-  obj.position.y += (size.y * s) / 2 - targetH / 2;
-  obj.scale.setScalar(s);
   wrap.add(obj);
+  wrap.scale.setScalar(s);
+  wrap.position.copy(center).multiplyScalar(-s);
   return wrap;
 }
 

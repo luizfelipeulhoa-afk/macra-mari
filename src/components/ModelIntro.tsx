@@ -13,7 +13,7 @@ const IntroCanvas = lazy(() => import("../three/IntroCanvas"));
 
 gsap.registerPlugin(ScrollTrigger);
 
-const LEN = 5600; /* altura total da viagem */
+const LEN = 4200; /* altura total da viagem */
 const DUR = 6; /* unidades da timeline = 100% do scroll */
 const PRICE = 420;
 const NAME = "Wall Hanging Trança";
@@ -77,6 +77,7 @@ export default function ModelIntro() {
   const heroRef = useRef<HTMLImageElement | null>(null);
   const nodeRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const modelReady = useRef(false);
+  const progressRef = useRef(0);
 
   const addItem = useStore((s) => s.addItem);
   const setDrawer = useStore((s) => s.setDrawer);
@@ -94,12 +95,13 @@ export default function ModelIntro() {
 
   /* aplica a pose da coreografia à peça 2D + mostrador + fio contador */
   const onProgress = (p: number) => {
+    progressRef.current = p;
     const pose = sample(p);
     if (!modelReady.current && spinRef.current) {
       spinRef.current.style.transform =
         `translateY(${(pose.y * 100).toFixed(2)}%) ` +
         `scale(${pose.zoom.toFixed(4)}) ` +
-        `perspective(1200px) rotateY(${pose.deg.toFixed(1)}deg)`;
+        `rotate(${Math.sin(p * Math.PI) * 2}deg)`;
     }
     if (ringRef.current)
       ringRef.current.style.transform = `rotate(${(-pose.deg * 0.4).toFixed(1)}deg)`;
@@ -126,10 +128,10 @@ export default function ModelIntro() {
 
     if (reduced) {
       /* composição estática: peça em pose intermediária + ficha visível */
-      const pose = sample(0.5);
+      const pose = sample(0);
       if (spinRef.current)
         spinRef.current.style.transform =
-          `translateY(${pose.y * 100}%) scale(${pose.zoom}) perspective(1200px) rotateY(${pose.deg}deg)`;
+          `translateY(${pose.y * 100}%) scale(${pose.zoom}) rotate(0deg)`;
       gsap.set(".mi-head, .mi-chap, .mi-cue, .mi-slice, .mi-thread", { display: "none" });
       gsap.set(".mi-final", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-exit", { yPercent: 103 });
@@ -137,30 +139,30 @@ export default function ModelIntro() {
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(".mi-head > *", { autoAlpha: 0, y: 34 });
+      gsap.set(".mi-head > *", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-chap", { autoAlpha: 0 });
       gsap.set(".mi-chap .wline-inner", { yPercent: 118 });
       gsap.set(".mi-chap .mi-chap-sub", { autoAlpha: 0, y: 26 });
       gsap.set(".mi-chap .mi-chap-kick", { scaleX: 0, transformOrigin: "left center" });
       gsap.set(".mi-final", { autoAlpha: 0, y: 52 });
-      gsap.set(".mi-cue", { autoAlpha: 0 });
+      gsap.set(".mi-cue", { autoAlpha: 1 });
       gsap.set(".mi-slice", { scaleX: 0, autoAlpha: 0 });
       gsap.set(".mi-exit", { yPercent: 103 });
 
+      const playhead = { value: 0 };
       const tl = gsap.timeline({
+        onUpdate: () => onProgress(playhead.value),
         scrollTrigger: {
           trigger: section,
           start: "top top",
           end: `+=${LEN}`,
           scrub: 0.55,
           pin: true,
-          onUpdate: (self) => onProgress(self.progress),
         },
       });
 
+      tl.to(playhead, {value: 1, duration: DUR, ease: "none"}, 0);
       /* janela 0 — nome + convite */
-      tl.to(".mi-head > *", { autoAlpha: 1, y: 0, duration: 0.3, stagger: 0.07 }, pos(0.005));
-      tl.to(".mi-cue", { autoAlpha: 1, duration: 0.2 }, pos(0.02));
       tl.to(".mi-head > *", { autoAlpha: 0, y: -26, duration: 0.22, stagger: 0.04 }, pos(0.062));
       tl.to(".mi-cue", { autoAlpha: 0, duration: 0.14 }, pos(0.062));
 
@@ -203,7 +205,7 @@ export default function ModelIntro() {
       tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power3.out" }, pos(FINAL_AT));
 
       /* onda de papel entregando a página ao varal */
-      tl.to(".mi-exit", { yPercent: 0, duration: 0.5, ease: "power3.inOut" }, pos(0.955));
+      tl.to(".mi-exit", { yPercent: 0, duration: 0.24, ease: "power3.inOut" }, pos(0.96));
     }, section);
 
     const onResize = () => {
@@ -243,7 +245,7 @@ export default function ModelIntro() {
     <section
       id="entrada"
       ref={sectionRef}
-      className="relative h-screen overflow-hidden"
+      className="mi-showroom relative h-screen overflow-hidden"
       style={{
         background:
           "radial-gradient(120% 90% at 50% 18%, #332214 0%, #241812 45%, #160e08 100%)",
@@ -314,10 +316,9 @@ export default function ModelIntro() {
       <div className="pointer-events-none absolute inset-0 z-[12]">
         <Suspense fallback={null}>
           <IntroCanvas
-            sectionRef={sectionRef}
-            len={LEN}
+            progressRef={progressRef}
             onReady={onModelReady}
-            onFail={() => setGlbStatus((s) => (s === "ready" ? s : "off"))}
+            onFail={() => { modelReady.current = false; setGlbStatus("off"); if (heroRef.current) gsap.set(heroRef.current, {autoAlpha: 1}); }}
           />
         </Suspense>
       </div>
@@ -362,9 +363,11 @@ export default function ModelIntro() {
                   : "animate-pulse-dot bg-ocre"
             }`}
           />
-          {glbStatus === "ready" ? "3d real ativo" : glbStatus === "off" ? "giro 2d" : "baixando modelo 3d…"}
+          {glbStatus === "ready" ? "Explore cada ângulo" : glbStatus === "off" ? "Vista em fotografia" : "Preparando a peça…"}
         </span>
       </div>
+
+      <a href="#inicio" className="mi-skip absolute left-5 top-24 z-30 border-b border-cream/40 pb-1 font-mono text-[10px] uppercase tracking-widest text-cream/70 hover:text-ocre">Ir direto ao atelier ↗</a>
 
       {/* janela 0 — abertura */}
       <div className="mi-head pointer-events-none absolute inset-x-0 top-[8%] z-30 px-6 text-center text-cream">
