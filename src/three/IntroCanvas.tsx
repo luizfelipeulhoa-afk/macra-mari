@@ -42,7 +42,7 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.75 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = .98;
+    renderer.toneMappingExposure = .88;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mount.append(renderer.domElement);
@@ -56,8 +56,8 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     scene.environment = environment;
     pmrem.dispose();
     studio.dispose();
-    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.15));
-    const key = new THREE.DirectionalLight(0xffe3c0, 3.2);
+    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, .82));
+    const key = new THREE.DirectionalLight(0xffe3c0, 2.35);
     key.position.set(-2.8, 4.2, 5);
     key.castShadow = true;
     key.shadow.mapSize.set(innerWidth < 700 ? 1024 : 2048, innerWidth < 700 ? 1024 : 2048);
@@ -66,13 +66,13 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     key.shadow.normalBias = .012;
     key.shadow.radius = 4;
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffb66f, 2.15);
+    const rim = new THREE.DirectionalLight(0xffb66f, 1.3);
     rim.position.set(3.2, 1.8, -3); scene.add(rim);
-    const fill = new THREE.DirectionalLight(0xfff6e8, .72);
+    const fill = new THREE.DirectionalLight(0xfff6e8, .48);
     fill.position.set(1.4, -.4, 4); scene.add(fill);
     const wall = new THREE.Mesh(
       new THREE.PlaneGeometry(4, 4),
-      new THREE.ShadowMaterial({color:0x080401, opacity:.3, transparent:true}),
+      new THREE.ShadowMaterial({color:0x080401, opacity:.17, transparent:true}),
     );
     wall.position.z = -.34;
     wall.receiveShadow = true;
@@ -109,7 +109,7 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
         camera.position.set(lookX*.045, (mobile?.12:0)+lookY*.035, fit/shot.dolly);
         target.set(mobile?0:shot.offset, mobile?.07:shot.focus, 0);
         camera.lookAt(target);
-        rim.intensity=1.5+Math.sin(p*Math.PI)*.7;
+        rim.intensity=.9+Math.sin(p*Math.PI)*.35;
         renderer.render(scene,camera);
         mount.dataset.angle=pose.deg.toFixed(2);
         mount.dataset.progress=p.toFixed(4);
@@ -135,9 +135,9 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
         for(const material of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
           const m=material as THREE.MeshStandardMaterial;
           m.metalness=0;
-          m.roughness=Math.min(.86, Math.max(.72, m.roughness ?? .8));
-          m.envMapIntensity=.42;
-          if(m.normalScale)m.normalScale.set(.82,.82);
+          m.roughness=Math.min(.92, Math.max(.82, m.roughness ?? .86));
+          m.envMapIntensity=.24;
+          if(m.normalScale)m.normalScale.set(.68,.68);
           for(const value of Object.values(m)) {
             if(value instanceof THREE.Texture) {
               value.anisotropy=Math.min(12,renderer.capabilities.getMaxAnisotropy());

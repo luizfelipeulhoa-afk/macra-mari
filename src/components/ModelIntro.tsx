@@ -156,15 +156,15 @@ export default function ModelIntro() {
           trigger: section,
           start: "top top",
           end: `+=${LEN}`,
-          scrub: 0.32,
+          scrub: 0.42,
           pin: true,
         },
       });
 
       tl.to(playhead, {value: 1, duration: DUR, ease: "none"}, 0);
       /* janela 0 — nome + convite */
-      tl.to(".mi-head > *", { autoAlpha: 0, y: -26, duration: 0.22, stagger: 0.04 }, pos(0.062));
-      tl.to(".mi-cue", { autoAlpha: 0, duration: 0.14 }, pos(0.062));
+      tl.to(".mi-head > *", { autoAlpha: 0, y: -22, duration: 0.32, stagger: 0.04, ease: "power2.inOut" }, pos(0.062));
+      tl.to(".mi-cue", { autoAlpha: 0, duration: 0.28, ease: "power1.inOut" }, pos(0.062));
 
       /* capítulos nas pausas; linhas de corte nas rampas */
       const chaps = gsap.utils.toArray<HTMLElement>(".mi-chap");
@@ -172,19 +172,19 @@ export default function ModelIntro() {
         const hold = HOLDS[i];
         const at = pos(hold.from + 0.012);
 
-        tl.to(el, { autoAlpha: 1, duration: 0.05 }, at);
-        tl.to(el.querySelector(".mi-chap-kick"), { scaleX: 1, duration: 0.3, ease: "power2.out" }, at);
+        tl.to(el, { autoAlpha: 1, duration: 0.2, ease: "power1.out" }, at);
+        tl.to(el.querySelector(".mi-chap-kick"), { scaleX: 1, duration: 0.38, ease: "power2.inOut" }, at);
         tl.to(
           el.querySelectorAll(".wline-inner"),
-          { yPercent: 0, duration: 0.42, stagger: 0.07, ease: "power4.out" },
+          { yPercent: 0, duration: 0.5, stagger: 0.065, ease: "power3.out" },
           at + 0.06
         );
-        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 1, y: 0, duration: 0.3 }, at + 0.24);
+        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 1, y: 0, duration: 0.38, ease: "power2.out" }, at + 0.2);
 
         const outAt = pos(hold.to - 0.012);
-        tl.to(el.querySelectorAll(".wline-inner"), { yPercent: -118, duration: 0.3, stagger: 0.04, ease: "power3.in" }, outAt);
-        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 0, y: -18, duration: 0.2 }, outAt);
-        tl.to(el, { autoAlpha: 0, duration: 0.05 }, outAt + 0.32);
+        tl.to(el.querySelectorAll(".wline-inner"), { yPercent: -112, duration: 0.38, stagger: 0.035, ease: "power2.inOut" }, outAt);
+        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 0, y: -14, duration: 0.3, ease: "power2.inOut" }, outAt);
+        tl.to(el, { autoAlpha: 0, duration: 0.18, ease: "power1.in" }, outAt + 0.22);
       });
 
       /* cortes minimalistas entre capítulos */
@@ -195,17 +195,17 @@ export default function ModelIntro() {
         tl.fromTo(
           el,
           { scaleX: 0, autoAlpha: 0 },
-          { scaleX: 1, autoAlpha: 1, duration: 0.26, ease: "power2.inOut", transformOrigin: i % 2 ? "right center" : "left center" },
+          { scaleX: 1, autoAlpha: 1, duration: 0.32, ease: "power2.inOut", transformOrigin: i % 2 ? "right center" : "left center" },
           mid - 0.26
         );
-        tl.to(el, { autoAlpha: 0, duration: 0.22 }, mid + 0.1);
+        tl.to(el, { autoAlpha: 0, duration: 0.28, ease: "power1.inOut" }, mid + 0.08);
       });
 
       /* janela final — a ficha de venda entra e fica */
-      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power3.out" }, pos(FINAL_AT));
+      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.46, ease: "power2.out" }, pos(FINAL_AT - 0.03));
 
       /* onda de papel entregando a página ao varal */
-      tl.to(".mi-exit", { yPercent: 0, duration: 0.24, ease: "power3.inOut" }, pos(0.96));
+      tl.to(".mi-exit", { yPercent: 0, duration: 0.42, ease: "power2.inOut" }, pos(0.93));
     }, section);
 
     const onResize = () => {

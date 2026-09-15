@@ -10,6 +10,11 @@ for(let i=0;i<=1000;i++){
  assert(Object.values(shot).every(Number.isFinite));previous=pose.deg;
 }
 assert.equal(sample(0).deg,0);assert.equal(sample(.9).deg,360);assert.equal(sample(1).deg,360);
+const turnStep=sample(.1).deg-sample(0).deg;
+for(let i=1;i<9;i++){
+ const delta=sample((i+1)/10).deg-sample(i/10).deg;
+ assert(Math.abs(delta-turnStep)<1e-9,'The 3D revolution must keep a constant speed');
+}
 const mesh=new T.Mesh(new T.BoxGeometry(2,4,.3));mesh.position.set(3,5,1);
 const normalized=normalize(mesh,1);normalized.updateMatrixWorld(true);
 const box=new T.Box3().setFromObject(normalized);

@@ -1,8 +1,7 @@
 /* ————————————————————————————————————————————————
    Coreografia do showroom 360° — compartilhada entre a
-   peça 2D (PNG) e o modelo 3D (GLB), para que ambos façam
-   EXATAMENTE o mesmo movimento: giro com pausas nos
-   capítulos e zoom in/out entre eles.
+   peça 2D (PNG) e o modelo 3D (GLB). O giro mantém velocidade
+   constante; câmera e texto respiram sem travar a peça.
    ———————————————————————————————————————————————— */
 
 export interface Pose {
@@ -15,7 +14,7 @@ interface Key extends Pose {
   p: number;
 }
 
-/* platôs = pausas (deg/zoom constantes); rampas = movimento */
+/* Os platôs seguram apenas enquadramento e altura; o giro segue contínuo. */
 const K: Key[] = [
   { p: 0.0, deg: 0, zoom: 0.82, y: -0.03 },
   { p: 0.08, deg: 24, zoom: 0.9, y: 0 },
@@ -30,8 +29,10 @@ const K: Key[] = [
   { p: 1.0, deg: 360, zoom: 1.0, y: 0 },
 ];
 
-const smooth = (t: number) => t * t * (3 - 2 * t);
+/* smootherstep evita mudança perceptível de aceleração nos cortes de câmera. */
+const smooth = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const TURN_END = 0.9;
 
 export function sample(p: number): Pose {
   const x = Math.min(1, Math.max(0, p));
@@ -41,7 +42,7 @@ export function sample(p: number): Pose {
     if (x >= a.p && x <= b.p) {
       const t = smooth((x - a.p) / Math.max(b.p - a.p, 1e-6));
       return {
-        deg: lerp(a.deg, b.deg, t),
+        deg: Math.min(x / TURN_END, 1) * 360,
         zoom: lerp(a.zoom, b.zoom, t),
         y: lerp(a.y, b.y, t),
       };

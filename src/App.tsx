@@ -102,8 +102,8 @@ export default function App() {
         gsap.utils.toArray<HTMLElement>(".wipe").forEach((el) => {
           gsap.to(el, {
             clipPath: "inset(0 0 0% 0)",
-            duration: 1.1,
-            ease: "power3.inOut",
+            duration: 1.3,
+            ease: "power2.inOut",
             scrollTrigger: { trigger: el, start: "top 86%", once: true },
           });
         });

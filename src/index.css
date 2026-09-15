@@ -81,6 +81,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -198,10 +199,10 @@ body {
 
 .reveal {
   opacity: 0;
-  transform: translateY(30px) rotate(var(--rot, 0deg));
+  transform: translateY(22px) rotate(var(--rot, 0deg));
   transition:
-    opacity 0.75s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 0.75s cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .reveal.is-in {
   opacity: 1;

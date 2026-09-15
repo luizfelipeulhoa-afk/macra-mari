@@ -98,30 +98,48 @@ export default function Hero() {
   /* timeline de entrada + parallax de saída: o scroll já começa narrando */
   useEffect(() => {
     if (prefersReducedMotion()) return;
+    const section = scopeRef.current;
+    if (!section) return;
     const ctx = gsap.context(() => {
-      gsap.from(".hline-inner", {
+      const entrance = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 92%",
+          once: true,
+        },
+      });
+      entrance.from(".hline-inner", {
         yPercent: 118,
-        duration: 1.05,
-        ease: "power4.out",
-        stagger: 0.09,
-        delay: 0.15,
-      });
-      gsap.from(".hero-fade", {
-        opacity: 0,
-        y: 26,
-        duration: 0.85,
+        duration: 1.15,
         ease: "power3.out",
-        stagger: 0.08,
-        delay: 0.55,
+        stagger: 0.09,
       });
-      /* as peças despencam na corda e balançam até assentar */
+      entrance.from(".hero-fade", {
+        opacity: 0,
+        y: 22,
+        duration: 0.95,
+        ease: "power2.out",
+        stagger: 0.08,
+      }, "-=0.72");
+      entrance.from(".hero-mandala", {
+        autoAlpha: 0,
+        y: 36,
+        scale: 0.97,
+        duration: 1.1,
+        ease: "power2.out",
+      }, "-=0.85");
+      /* O varal só entra quando ele próprio alcança a viewport. */
       gsap.from(".hang-card", {
         y: -140,
         opacity: 0,
-        duration: 1,
-        ease: "back.out(1.6)",
+        duration: 1.05,
+        ease: "back.out(1.35)",
         stagger: 0.13,
-        delay: 0.8,
+        scrollTrigger: {
+          trigger: ".hang-wrap",
+          start: "top 88%",
+          once: true,
+        },
       });
       gsap.to(".hero-mandala", {
         yPercent: 14,
