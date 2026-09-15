@@ -13,7 +13,7 @@ const IntroCanvas = lazy(() => import("../three/IntroCanvas"));
 
 gsap.registerPlugin(ScrollTrigger);
 
-const LEN = 4200; /* altura total da viagem */
+const LEN = 3000; /* viagem mais direta, mantendo os quatro capítulos */
 const DUR = 6; /* unidades da timeline = 100% do scroll */
 const PRICE = 420;
 const NAME = "Wall Hanging Trança";
@@ -156,7 +156,7 @@ export default function ModelIntro() {
           trigger: section,
           start: "top top",
           end: `+=${LEN}`,
-          scrub: 0.55,
+          scrub: 0.32,
           pin: true,
         },
       });

@@ -1,5 +1,6 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { loadGlbSmart, normalize } from "./loadModel";
 import { MODELS } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
@@ -36,36 +37,72 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     if (!mount) return;
     const reduced = prefersReducedMotion();
     let renderer: THREE.WebGLRenderer;
-    try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, powerPreference:"low-power"}); }
+    try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, powerPreference:"high-performance"}); }
     catch { callbacks.current.onFail?.(); return; }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 1.8));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.75 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.03;
+    renderer.toneMappingExposure = .98;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mount.append(renderer.domElement);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, .05, 50);
     const holder = new THREE.Group();
     scene.add(holder);
-    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.5));
-    const key = new THREE.DirectionalLight(0xffe3c0, 2.5);
-    key.position.set(-3, 4, 5); scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc489, 1.8);
-    rim.position.set(3, 2, -4); scene.add(rim);
-    const fill = new THREE.DirectionalLight(0xfff6e8, .65);
-    fill.position.set(1, 0, 5); scene.add(fill);
-    let disposed=false, loaded=false, visible=true, raf=0, last=-1, dirty=true;
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const studio = new RoomEnvironment();
+    const environment = pmrem.fromScene(studio, .04).texture;
+    scene.environment = environment;
+    pmrem.dispose();
+    studio.dispose();
+    scene.add(new THREE.HemisphereLight(0xfff2dd, 0x2c1e13, 1.15));
+    const key = new THREE.DirectionalLight(0xffe3c0, 3.2);
+    key.position.set(-2.8, 4.2, 5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(innerWidth < 700 ? 1024 : 2048, innerWidth < 700 ? 1024 : 2048);
+    Object.assign(key.shadow.camera, {left:-1.25, right:1.25, top:1.25, bottom:-1.25, near:.1, far:9});
+    key.shadow.bias = -.00015;
+    key.shadow.normalBias = .012;
+    key.shadow.radius = 4;
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffb66f, 2.15);
+    rim.position.set(3.2, 1.8, -3); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0xfff6e8, .72);
+    fill.position.set(1.4, -.4, 4); scene.add(fill);
+    const wall = new THREE.Mesh(
+      new THREE.PlaneGeometry(4, 4),
+      new THREE.ShadowMaterial({color:0x080401, opacity:.3, transparent:true}),
+    );
+    wall.position.z = -.34;
+    wall.receiveShadow = true;
+    scene.add(wall);
+    let disposed=false, loaded=false, visible=true, raf=0, dirty=true;
+    let shownProgress = reduced ? 0 : progressRef.current;
+    let previousTime = performance.now();
     let pointerX=0, pointerY=0, lookX=0, lookY=0;
     const target = new THREE.Vector3();
-    const draw = () => {
+    const draw = (time = performance.now()) => {
       raf=0;
       if (disposed || !visible || document.hidden || !loaded) return;
-      const p = reduced ? 0 : progressRef.current;
-      lookX += (pointerX-lookX)*.065;
-      lookY += (pointerY-lookY)*.065;
-      if (dirty || p!==last || Math.abs(pointerX-lookX)+Math.abs(pointerY-lookY)>.0001) {
+      const delta = Math.min(Math.max((time - previousTime) / 1000, 0), .05);
+      previousTime = time;
+      const requestedProgress = reduced ? 0 : progressRef.current;
+      shownProgress = reduced
+        ? 0
+        : THREE.MathUtils.damp(shownProgress, requestedProgress, 14, delta);
+      lookX = THREE.MathUtils.damp(lookX, pointerX, 9, delta);
+      lookY = THREE.MathUtils.damp(lookY, pointerY, 9, delta);
+      const moving = Math.abs(requestedProgress-shownProgress)>.00004;
+      const looking = Math.abs(pointerX-lookX)+Math.abs(pointerY-lookY)>.0001;
+      if (dirty || moving || looking) {
+        const p = shownProgress;
         const pose=sample(p), shot=sampleCamera(p), mobile=mount.clientWidth<700;
-        holder.rotation.set(pose.y*.3, THREE.MathUtils.degToRad(pose.deg), 0);
+        holder.rotation.set(
+          pose.y*.3 + Math.sin(p*Math.PI)*.012,
+          THREE.MathUtils.degToRad(pose.deg),
+          Math.sin(p*Math.PI*2)*.006,
+        );
         holder.position.set(0, pose.y*.1, 0);
         // Camera framing leaves room for each chapter; the object's rotation stays exactly 360°.
         const fit = mobile ? Math.max(2.25, 1.02/(2*Math.tan(THREE.MathUtils.degToRad(16))*camera.aspect)) : 2.35;
@@ -76,7 +113,7 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
         renderer.render(scene,camera);
         mount.dataset.angle=pose.deg.toFixed(2);
         mount.dataset.progress=p.toFixed(4);
-        last=p;dirty=false;
+        dirty=false;
       }
       if (!reduced) raf=requestAnimationFrame(draw);
     };
@@ -93,16 +130,28 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     loadGlbSmart(MODELS.wallLocal,MODELS.wallDrive).then(model=>{
       if(disposed){release(model);return;}
       model.traverse(o=>{const mesh=o as THREE.Mesh;if(!mesh.isMesh)return;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         for(const material of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
-          const m=material as THREE.MeshStandardMaterial;m.metalness=0;m.roughness=.92;
-          if(m.map)m.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+          const m=material as THREE.MeshStandardMaterial;
+          m.metalness=0;
+          m.roughness=Math.min(.86, Math.max(.72, m.roughness ?? .8));
+          m.envMapIntensity=.42;
+          if(m.normalScale)m.normalScale.set(.82,.82);
+          for(const value of Object.values(m)) {
+            if(value instanceof THREE.Texture) {
+              value.anisotropy=Math.min(12,renderer.capabilities.getMaxAnisotropy());
+              value.needsUpdate=true;
+            }
+          }
+          m.needsUpdate=true;
         }
       });
       holder.add(normalize(model,1));loaded=true;
       // Publish readiness only after the first frame is painted.
       cancelAnimationFrame(raf);draw();callbacks.current.onReady?.();
     }).catch(()=>{if(!disposed)callbacks.current.onFail?.();});
-    return()=>{disposed=true;cancelAnimationFrame(raf);ro.disconnect();io.disconnect();document.removeEventListener("visibilitychange",onVisibility);window.removeEventListener("pointermove",onPointer);renderer.domElement.removeEventListener("webglcontextlost",onLost);release(scene);renderer.dispose();renderer.domElement.remove();};
+    return()=>{disposed=true;cancelAnimationFrame(raf);ro.disconnect();io.disconnect();document.removeEventListener("visibilitychange",onVisibility);window.removeEventListener("pointermove",onPointer);renderer.domElement.removeEventListener("webglcontextlost",onLost);environment.dispose();release(scene);renderer.dispose();renderer.domElement.remove();};
   },[progressRef]);
   return <div ref={mountRef} className="absolute inset-0" data-macrame-canvas aria-hidden="true"/>;
 }
