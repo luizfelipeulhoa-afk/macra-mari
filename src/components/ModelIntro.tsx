@@ -135,7 +135,6 @@ export default function ModelIntro() {
       gsap.set(".mi-head, .mi-chap, .mi-cue, .mi-slice, .mi-thread", { display: "none" });
       gsap.set(".mi-final", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-handoff", { autoAlpha: 0 });
-      gsap.set(".mi-wall-piece", { autoAlpha: 1 });
       return;
     }
 
@@ -151,8 +150,6 @@ export default function ModelIntro() {
       gsap.set(".mi-handoff", { autoAlpha: 0 });
       gsap.set(".mi-handoff-copy", { autoAlpha: 0, y: 28 });
       gsap.set(".mi-wall-photo", { scale: 1.12, filter: "brightness(.58) saturate(.82) blur(5px)" });
-      gsap.set(".mi-wall-piece", { autoAlpha: 0, scale: 1.08, y: 18, filter: "blur(3px)" });
-      gsap.set(".mi-canvas-layer", { autoAlpha: 1 });
 
       const playhead = { value: 0 };
       const tl = gsap.timeline({
@@ -213,8 +210,6 @@ export default function ModelIntro() {
       tl.to(".mi-wall-photo", { scale: 1, filter: "brightness(1) saturate(1) blur(0px)", duration: 1.18, ease: "power2.inOut" }, pos(0.76));
       tl.to(".mi-handoff-copy", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power2.out" }, pos(0.82));
       tl.to(".mi-handoff-copy", { autoAlpha: 0, y: -18, duration: 0.22, ease: "power2.in" }, pos(0.88));
-      tl.to(".mi-wall-piece", { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.48, ease: "sine.inOut" }, pos(0.925));
-      tl.to(".mi-canvas-layer", { autoAlpha: 0, duration: 0.48, ease: "sine.inOut" }, pos(0.925));
       tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power2.out" }, pos(0.955));
     }, section);
 
@@ -297,7 +292,7 @@ export default function ModelIntro() {
       </div>
 
       {/* camada 3D por cima, quando o GLB chega */}
-      <div className="mi-canvas-layer pointer-events-none absolute inset-0 z-[12]">
+      <div className="pointer-events-none absolute inset-0 z-[12]">
         <Suspense fallback={null}>
           <IntroCanvas
             progressRef={progressRef}
@@ -394,7 +389,7 @@ export default function ModelIntro() {
       ))}
 
       {/* janela final — a ficha de venda */}
-      <div className="mi-final absolute inset-x-0 bottom-[5%] z-30 flex justify-center px-4">
+      <div className="mi-final absolute inset-x-0 bottom-[4%] z-30 flex justify-center px-4 md:justify-start md:px-10 lg:px-16">
         <div className="w-[min(92vw,430px)] border-2 border-ink bg-cream px-5 py-4 text-ink shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -478,14 +473,6 @@ export default function ModelIntro() {
         </div>
       </div>
 
-      {/* Quadro final 2D: ocupa exatamente o pouso frontal do GLB. */}
-      <img
-        src={heroSrc}
-        onError={() => setHeroSrc(BRAND.catPaineisXL)}
-        alt={`${NAME} aplicado em uma parede de sala`}
-        className="mi-wall-piece pointer-events-none absolute left-1/2 top-[47%] z-[13] -translate-x-1/2 -translate-y-1/2 object-contain [filter:drop-shadow(0_22px_22px_rgba(44,30,19,.28))]"
-        style={{ height: "min(58vh, 560px)", maxWidth: "min(64vw, 520px)" }}
-      />
     </section>
   );
 }
