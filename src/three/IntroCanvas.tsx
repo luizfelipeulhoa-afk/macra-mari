@@ -39,7 +39,7 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, powerPreference:"high-performance"}); }
     catch { callbacks.current.onFail?.(); return; }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.75 : 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = .88;
@@ -105,10 +105,17 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
         );
         holder.position.set(0, pose.y*.1, 0);
         // Camera framing leaves room for each chapter; the object's rotation stays exactly 360°.
-        const fit = mobile ? Math.max(2.25, 1.02/(2*Math.tan(THREE.MathUtils.degToRad(16))*camera.aspect)) : 2.35;
-        camera.position.set(lookX*.045, (mobile?.12:0)+lookY*.035, fit/shot.dolly);
+        const cinematicDolly = mobile ? Math.min(shot.dolly, 1.2) : shot.dolly;
+        const cinematicFov = mobile ? Math.max(29, shot.fov) : shot.fov;
+        const fit = mobile ? Math.max(2.25, 1.02/(2*Math.tan(THREE.MathUtils.degToRad(cinematicFov/2))*camera.aspect)) : 2.35;
+        camera.fov = cinematicFov;
+        camera.updateProjectionMatrix();
+        camera.position.set((mobile?0:shot.offset*.42)+lookX*.045, (mobile?.12:shot.focus*.22)+lookY*.035, fit/cinematicDolly);
         target.set(mobile?0:shot.offset, mobile?.07:shot.focus, 0);
         camera.lookAt(target);
+        camera.rotation.z += THREE.MathUtils.degToRad(mobile ? shot.roll*.35 : shot.roll);
+        key.position.x = -2.8 + Math.sin(p*Math.PI*2)*.7;
+        rim.position.x = 3.2 - Math.sin(p*Math.PI*2)*.55;
         rim.intensity=.9+Math.sin(p*Math.PI)*.35;
         renderer.render(scene,camera);
         mount.dataset.angle=pose.deg.toFixed(2);

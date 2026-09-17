@@ -22,6 +22,7 @@ export default function FiberField({ className = "" }: { className?: string }) {
     let h = 0;
     let raf = 0;
     let running = false;
+    let lastPaint = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     const palette = ["243,236,221", "216,155,61", "194,81,43", "230,217,191"];
@@ -100,6 +101,12 @@ export default function FiberField({ className = "" }: { className?: string }) {
     };
 
     const step = (ms: number) => {
+      /* O fundo é atmosférico: 30 fps bastam e liberam a GPU para o 3D. */
+      if (ms - lastPaint < 32) {
+        raf = requestAnimationFrame(step);
+        return;
+      }
+      lastPaint = ms;
       const t = ms / 1000;
       for (const b of bokeh) {
         b.y += b.vy;

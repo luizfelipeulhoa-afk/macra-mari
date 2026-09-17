@@ -59,7 +59,9 @@ export default function Header() {
       const hero = document.getElementById("inicio");
       const heroTop = hero ? hero.offsetTop : 0;
       setScrolled(y > 30);
-      setOverIntro(y < heroTop - 60);
+      /* A pele clara entra junto da dissolução do showroom, antes do hero. */
+      const handoffStart = Math.max(0, heroTop - window.innerHeight * 1.5);
+      setOverIntro(y < handoffStart);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

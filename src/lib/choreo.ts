@@ -70,25 +70,53 @@ export const MOVES = [
 
 export const FINAL_AT = 0.9;
 
-/** A continuous lens move layered over the complete object revolution. */
-export function sampleCamera(p: number) {
-  const keys = [
-    {p:0, dolly:1, offset:0, focus:0},
-    {p:.08, dolly:1.05, offset:-.28, focus:0},
-    {p:.20, dolly:1.05, offset:-.28, focus:0},
-    {p:.30, dolly:1.28, offset:.26, focus:.1},
-    {p:.42, dolly:1.28, offset:.26, focus:.1},
-    {p:.52, dolly:1.08, offset:-.28, focus:0},
-    {p:.64, dolly:1.08, offset:-.28, focus:0},
-    {p:.74, dolly:1.22, offset:.26, focus:-.06},
-    {p:.82, dolly:1.22, offset:.26, focus:-.06},
-    {p:.90, dolly:1, offset:0, focus:-.04},
-    {p:1, dolly:1, offset:0, focus:-.04},
-  ];
-  const x=Math.max(0,Math.min(1,p));
-  for(let i=0;i<keys.length-1;i++) {
-    const a=keys[i],b=keys[i+1];
-    if(x<=b.p){const t=smooth((x-a.p)/(b.p-a.p));return {dolly:lerp(a.dolly,b.dolly,t),offset:lerp(a.offset,b.offset,t),focus:lerp(a.focus,b.focus,t)};}
-  }
-  return keys[keys.length-1];
+export interface CameraShot {
+  dolly: number;
+  offset: number;
+  focus: number;
+  fov: number;
+  roll: number;
+}
+
+interface CameraKey extends CameraShot { p: number }
+
+/*
+ * Travelling de campanha: plano geral → detalhe do nó → recuo → detalhe das
+ * franjas → hero shot. Catmull-Rom mantém velocidade e direção contínuas nos
+ * pontos de passagem, sem os platôs mecânicos da versão anterior.
+ */
+const CAMERA_KEYS: CameraKey[] = [
+  { p: 0,    dolly: .92, offset: 0,    focus: .03,  fov: 34, roll: 0 },
+  { p: .12,  dolly: 1.08, offset: -.14, focus: .15,  fov: 31, roll: -.45 },
+  { p: .29,  dolly: 1.43, offset: .23,  focus: .2,   fov: 27, roll: .7 },
+  { p: .47,  dolly: 1.1,  offset: -.2,  focus: -.06, fov: 32, roll: -.35 },
+  { p: .65,  dolly: 1.48, offset: .2,   focus: -.18, fov: 26, roll: .6 },
+  { p: .8,   dolly: 1.16, offset: -.12, focus: .06,  fov: 30, roll: -.25 },
+  { p: .92,  dolly: .96, offset: 0,     focus: 0,    fov: 34, roll: 0 },
+  { p: 1,    dolly: .9,  offset: 0,     focus: -.02, fov: 35, roll: 0 },
+];
+
+const catmull = (a: number, b: number, c: number, d: number, t: number) => {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return .5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+};
+
+export function sampleCamera(p: number): CameraShot {
+  const x = Math.max(0, Math.min(1, p));
+  let i = CAMERA_KEYS.findIndex((key) => x <= key.p);
+  if (i <= 0) return { ...CAMERA_KEYS[0] };
+  if (i < 0) return { ...CAMERA_KEYS[CAMERA_KEYS.length - 1] };
+  const b = CAMERA_KEYS[i - 1];
+  const c = CAMERA_KEYS[i];
+  const a = CAMERA_KEYS[Math.max(0, i - 2)];
+  const d = CAMERA_KEYS[Math.min(CAMERA_KEYS.length - 1, i + 1)];
+  const t = (x - b.p) / Math.max(c.p - b.p, 1e-6);
+  return {
+    dolly: Math.max(.86, Math.min(1.52, catmull(a.dolly, b.dolly, c.dolly, d.dolly, t))),
+    offset: catmull(a.offset, b.offset, c.offset, d.offset, t),
+    focus: catmull(a.focus, b.focus, c.focus, d.focus, t),
+    fov: catmull(a.fov, b.fov, c.fov, d.fov, t),
+    roll: catmull(a.roll, b.roll, c.roll, d.roll, t),
+  };
 }

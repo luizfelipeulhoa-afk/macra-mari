@@ -23,29 +23,33 @@ const chapters = [
   {
     n: "01",
     kicker: "capítulo 01 · a matéria",
-    title: "O fio",
-    text: "Algodão orgânico que chegou do sertão ainda com cheiro de sol. Metade, a Mariana tingiu com urucum; a outra metade ficou da cor da terra.",
+    title: "Fibra que respira",
+    subtitle: "Textura macia. Presença sem pesar.",
+    text: "O algodão cru deixa cada torção visível; o azul-petróleo desenha profundidade e muda de tom conforme a luz do ambiente.",
     side: "left",
   },
   {
     n: "02",
     kicker: "capítulo 02 · a técnica",
-    title: "O nó",
-    text: "3.412 nós quadrados, um de cada vez, cada um puxado com a mesma tensão. A medida exata só a memória das mãos dela conhece.",
+    title: "Tensão precisa",
+    subtitle: "Nós firmes. Desenho leve.",
+    text: "Cada nó é apertado à mão para manter a trama alinhada, preservar o relevo e fazer a peça cair reta na parede.",
     side: "right",
   },
   {
     n: "03",
-    kicker: "capítulo 03 · a duração",
-    title: "O tempo",
-    text: "Quarenta horas entre o tear, o café passado e a rádio ligada. Pressa é o único material que nunca entrou neste ateliê.",
+    kicker: "capítulo 03 · o tempo",
+    title: "Feita devagar",
+    subtitle: "O acabamento aparece de perto.",
+    text: "Trança, franjas e encontros recebem o mesmo cuidado. É esse ritmo manual que evita a aparência repetida de uma peça industrial.",
     side: "left",
   },
   {
     n: "04",
-    kicker: "capítulo 04 · a autora",
-    title: "A mão",
-    text: "Três anos de ateliê cabem nesta trança. Cada franja penteada até abrir, cada sobra de fio guardada pra próxima peça.",
+    kicker: "capítulo 04 · na sua casa",
+    title: "Ponto focal",
+    subtitle: "62 × 84 cm de presença artesanal.",
+    text: "A proporção ocupa a parede sem dominar o espaço. Funciona sobre aparador, cabeceira ou naquele canto que ainda pede identidade.",
     side: "right",
   },
 ];
@@ -134,7 +138,7 @@ export default function ModelIntro() {
           `translateY(${pose.y * 100}%) scale(${pose.zoom}) rotate(0deg)`;
       gsap.set(".mi-head, .mi-chap, .mi-cue, .mi-slice, .mi-thread", { display: "none" });
       gsap.set(".mi-final", { autoAlpha: 1, y: 0 });
-      gsap.set(".mi-exit", { yPercent: 103 });
+      gsap.set(".mi-handoff", { autoAlpha: 0 });
       return;
     }
 
@@ -142,12 +146,13 @@ export default function ModelIntro() {
       gsap.set(".mi-head > *", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-chap", { autoAlpha: 0 });
       gsap.set(".mi-chap .wline-inner", { yPercent: 118 });
-      gsap.set(".mi-chap .mi-chap-sub", { autoAlpha: 0, y: 26 });
+      gsap.set(".mi-chap .mi-chap-detail", { autoAlpha: 0, y: 22 });
       gsap.set(".mi-chap .mi-chap-kick", { scaleX: 0, transformOrigin: "left center" });
       gsap.set(".mi-final", { autoAlpha: 0, y: 52 });
       gsap.set(".mi-cue", { autoAlpha: 1 });
       gsap.set(".mi-slice", { scaleX: 0, autoAlpha: 0 });
-      gsap.set(".mi-exit", { yPercent: 103 });
+      gsap.set(".mi-handoff", { autoAlpha: 0 });
+      gsap.set(".mi-handoff-copy", { autoAlpha: 0, y: 28 });
 
       const playhead = { value: 0 };
       const tl = gsap.timeline({
@@ -156,8 +161,10 @@ export default function ModelIntro() {
           trigger: section,
           start: "top top",
           end: `+=${LEN}`,
-          scrub: 0.42,
+          scrub: 0.28,
           pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
@@ -179,11 +186,11 @@ export default function ModelIntro() {
           { yPercent: 0, duration: 0.5, stagger: 0.065, ease: "power3.out" },
           at + 0.06
         );
-        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 1, y: 0, duration: 0.38, ease: "power2.out" }, at + 0.2);
+        tl.to(el.querySelectorAll(".mi-chap-detail"), { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.055, ease: "power2.out" }, at + 0.14);
 
         const outAt = pos(hold.to - 0.012);
         tl.to(el.querySelectorAll(".wline-inner"), { yPercent: -112, duration: 0.38, stagger: 0.035, ease: "power2.inOut" }, outAt);
-        tl.to(el.querySelector(".mi-chap-sub"), { autoAlpha: 0, y: -14, duration: 0.3, ease: "power2.inOut" }, outAt);
+        tl.to(el.querySelectorAll(".mi-chap-detail"), { autoAlpha: 0, y: -12, duration: 0.34, stagger: 0.025, ease: "power2.inOut" }, outAt);
         tl.to(el, { autoAlpha: 0, duration: 0.18, ease: "power1.in" }, outAt + 0.22);
       });
 
@@ -204,8 +211,10 @@ export default function ModelIntro() {
       /* janela final — a ficha de venda entra e fica */
       tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.46, ease: "power2.out" }, pos(FINAL_AT - 0.03));
 
-      /* onda de papel entregando a página ao varal */
-      tl.to(".mi-exit", { yPercent: 0, duration: 0.42, ease: "power2.inOut" }, pos(0.93));
+      /* Dissolução contínua: a luz do próximo hero invade o estúdio sem corte. */
+      tl.to(".mi-handoff", { autoAlpha: 1, duration: 1.08, ease: "sine.inOut" }, pos(0.79));
+      tl.to(".mi-handoff-glow", { scale: 1.08, duration: 1.18, ease: "sine.inOut" }, pos(0.79));
+      tl.to(".mi-handoff-copy", { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, pos(0.88));
     }, section);
 
     const onResize = () => {
@@ -394,13 +403,16 @@ export default function ModelIntro() {
           } bottom-[9%] w-full text-center sm:bottom-auto`}
         >
           <div className={`mi-chap-kick h-px w-14 bg-ocre ${c.side === "right" ? "ml-auto" : ""}`} />
-          <p className="mi-chap-sub mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">
+          <p className="mi-chap-detail mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">
             {c.kicker}
           </p>
           <h2 className="mt-1 font-display text-[clamp(2.2rem,5.4vw,4rem)] font-extrabold leading-[0.98] tracking-tight text-cream">
             <MaskWords text={c.title} />
           </h2>
-          <p className={`mi-chap-sub mt-3 max-w-xs text-[14px] leading-relaxed text-cream/75 sm:max-w-none ${c.side === "right" ? "sm:ml-auto" : ""}`}>
+          <p className={`mi-chap-detail mt-3 font-display text-[17px] font-semibold leading-snug text-cream sm:text-[19px] ${c.side === "right" ? "sm:ml-auto" : ""}`}>
+            {c.subtitle}
+          </p>
+          <p className={`mi-chap-detail mt-2 max-w-xs text-[13px] leading-relaxed text-cream/65 sm:max-w-none sm:text-[14px] ${c.side === "right" ? "sm:ml-auto" : ""}`}>
             {c.text}
           </p>
         </div>
@@ -471,27 +483,26 @@ export default function ModelIntro() {
         </span>
       </div>
 
-      {/* onda de papel: entrega a página ao varal sem corte de cor */}
-      <div className="mi-exit pointer-events-none absolute inset-0 z-40">
-        <svg
-          viewBox="0 0 1440 90"
-          preserveAspectRatio="none"
-          className="absolute -top-[88px] h-[90px] w-full text-paper"
-          aria-hidden="true"
-        >
-          <path
-            d="M0 90 L0 46 C 240 10, 480 74, 720 40 C 960 8, 1200 66, 1440 34 L1440 90 Z"
-            fill="currentColor"
-          />
-          <path
-            d="M0 52 C 240 16, 480 80, 720 46 C 960 14, 1200 72, 1440 40"
-            fill="none"
-            stroke="var(--color-clay)"
-            strokeWidth="2.5"
-            strokeDasharray="7 9"
-          />
-        </svg>
-        <div className="weave h-full w-full bg-paper" />
+      {/* A luz do atelier dissolve o fundo escuro antes do próximo hero. */}
+      <div className="mi-handoff pointer-events-none absolute inset-0 z-40 overflow-hidden bg-paper/95">
+        <div
+          className="mi-handoff-glow absolute inset-[-12%]"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 45%, rgba(251,246,234,1) 0%, rgba(243,236,221,.96) 42%, rgba(230,217,191,.9) 72%, rgba(243,236,221,1) 100%)",
+          }}
+        />
+        <div className="weave absolute inset-0 opacity-55" />
+        <div className="mi-handoff-copy absolute inset-0 grid place-content-center px-6 text-center text-ink">
+          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-clay sm:text-[11px]">
+            do detalhe ao ambiente
+          </p>
+          <p className="mt-4 font-display text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.92] tracking-tight">
+            Uma peça muda
+            <span className="block text-clay">todo o espaço.</span>
+          </p>
+          <span className="mx-auto mt-7 h-px w-20 bg-ocre" />
+        </div>
       </div>
     </section>
   );

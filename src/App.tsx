@@ -43,7 +43,11 @@ export default function App() {
   /* rolagem cinematográfica (Lenis) — desktop sem movimento reduzido */
   useEffect(() => {
     if (prefersReducedMotion() || isCoarsePointer()) return;
-    const lenis = new Lenis({ lerp: 0.1 });
+    const lenis = new Lenis({
+      lerp: 0.135,
+      smoothWheel: true,
+      wheelMultiplier: 0.92,
+    });
     window.__lenis = lenis;
     lenis.on("scroll", ScrollTrigger.update);
     const raf = (time: number) => lenis.raf(time * 1000);
