@@ -14,8 +14,23 @@ for(let i=0;i<=1000;i++){
  previous=pose.deg;previousShot=shot;
 }
 assert.equal(sample(0).deg,0);assert.equal(sample(.9).deg,360);assert.equal(sample(1).deg,360);
-assert(sampleCamera(.29).dolly>1.35,'First detail shot must visibly zoom in');
-assert(sampleCamera(.65).dolly>1.4,'Second detail shot must visibly zoom in');
+const shots=Array.from({length:1001},(_,i)=>sampleCamera(i/1000));
+assert(Math.max(...shots.map(s=>s.dolly))-Math.min(...shots.map(s=>s.dolly))>.7,'Wide and detail shots must have distinct magnifications');
+assert(Math.min(...shots.map(s=>s.azimuth))<-15 && Math.max(...shots.map(s=>s.azimuth))>15,'Orbit must explore both sides');
+let reversals=0,previousDirection=0;
+for(let i=1;i<shots.length;i++){
+ const direction=Math.sign(shots[i].azimuth-shots[i-1].azimuth);
+ if(direction && previousDirection && direction!==previousDirection)reversals++;
+ if(direction)previousDirection=direction;
+}
+assert(reversals>=4,'Camera must change orbit direction independently of the product revolution');
+for(const p of [.085,.21,.345,.43,.565,.705,.805,.92]){
+ const epsilon=.000001,b=sampleCamera(p),a=sampleCamera(p-epsilon),c=sampleCamera(p+epsilon);
+ for(const field of ['dolly','offset','focus','fov','roll','azimuth','elevation']){
+  const left=(b[field]-a[field])/epsilon,right=(c[field]-b[field])/epsilon;
+  assert(Math.abs(left-right)<.08,`${field} velocity must remain continuous at ${p}`);
+ }
+}
 const turnStep=sample(.1).deg-sample(0).deg;
 for(let i=1;i<9;i++){
  const delta=sample((i+1)/10).deg-sample(i/10).deg;

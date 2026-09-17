@@ -5,7 +5,6 @@ import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
 import { useStore, toast } from "../store/useStore";
 import { prefersReducedMotion } from "../lib/motion";
 import { sample, HOLDS, MOVES, FINAL_AT } from "../lib/choreo";
-import FiberField from "./FiberField";
 import { ArrowDownIcon, BagIcon } from "./Icons";
 
 /* o canvas 3D entra como chunk separado */
@@ -74,7 +73,6 @@ function MaskWords({ text }: { text: string }) {
 export default function ModelIntro() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const spinRef = useRef<HTMLDivElement | null>(null);
-  const ringRef = useRef<SVGSVGElement | null>(null);
   const needleRef = useRef<SVGGElement | null>(null);
   const degRef = useRef<HTMLSpanElement | null>(null);
   const threadFillRef = useRef<HTMLDivElement | null>(null);
@@ -107,8 +105,6 @@ export default function ModelIntro() {
         `scale(${pose.zoom.toFixed(4)}) ` +
         `rotate(${Math.sin(p * Math.PI) * 2}deg)`;
     }
-    if (ringRef.current)
-      ringRef.current.style.transform = `rotate(${(-pose.deg * 0.4).toFixed(1)}deg)`;
     if (needleRef.current)
       needleRef.current.style.transform = `rotate(${pose.deg.toFixed(1)}deg)`;
     if (degRef.current) degRef.current.textContent = `${Math.round(pose.deg)}°`;
@@ -260,10 +256,8 @@ export default function ModelIntro() {
           "radial-gradient(120% 90% at 50% 18%, #332214 0%, #241812 45%, #160e08 100%)",
       }}
     >
-      {/* fundo vivo: fios de algodão + poeira de luz */}
-      <FiberField className="absolute inset-0 z-0 h-full w-full" />
-
-      {/* halo quente atrás da peça */}
+      {/* Cenário de segurança antes do GLB; a superfície 3D assume luz e perspectiva. */}
+      <div className="weave pointer-events-none absolute inset-0 z-0 opacity-20" aria-hidden="true" />
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
@@ -271,30 +265,6 @@ export default function ModelIntro() {
             "radial-gradient(46% 42% at 50% 46%, rgba(216,155,61,0.22) 0%, rgba(194,81,43,0.1) 48%, rgba(0,0,0,0) 75%)",
         }}
       />
-
-      {/* anel gigante: contraponto ao giro da peça */}
-      <svg
-        ref={ringRef}
-        viewBox="0 0 600 600"
-        className="pointer-events-none absolute left-1/2 top-1/2 z-[2] h-[118vmin] w-[118vmin] -translate-x-1/2 -translate-y-1/2 text-cream/[0.13]"
-        aria-hidden="true"
-      >
-        <circle cx="300" cy="300" r="292" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 14" />
-        <circle cx="300" cy="300" r="238" fill="none" stroke="currentColor" strokeWidth="1" />
-        <circle cx="300" cy="300" r="182" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="1 9" />
-        {Array.from({ length: 24 }).map((_, i) => (
-          <line
-            key={i}
-            x1="300"
-            y1="12"
-            x2="300"
-            y2={i % 6 === 0 ? "34" : "24"}
-            stroke="currentColor"
-            strokeWidth={i % 6 === 0 ? 2.5 : 1.2}
-            transform={`rotate(${i * 15} 300 300)`}
-          />
-        ))}
-      </svg>
 
       {/* linhas de corte minimalistas entre capítulos */}
       <div className="mi-slice pointer-events-none absolute left-0 right-0 top-[30%] z-[6] mx-auto h-px w-[86vw] max-w-5xl bg-ocre/70" />

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useStore, cartCount, curtain } from "../store/useStore";
 import Logo from "./Logo";
 import {
@@ -57,7 +58,7 @@ export default function Header() {
     const onScroll = () => {
       const y = window.scrollY;
       const hero = document.getElementById("inicio");
-      const heroTop = hero ? hero.offsetTop : 0;
+      const heroTop = hero ? hero.getBoundingClientRect().top + y : Infinity;
       setScrolled(y > 30);
       /* A pele clara entra junto da dissolução do showroom, antes do hero. */
       const handoffStart = Math.max(0, heroTop - window.innerHeight * 1.5);
@@ -66,9 +67,11 @@ export default function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    ScrollTrigger.addEventListener("refresh", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      ScrollTrigger.removeEventListener("refresh", onScroll);
     };
   }, []);
 

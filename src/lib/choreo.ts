@@ -76,24 +76,28 @@ export interface CameraShot {
   focus: number;
   fov: number;
   roll: number;
+  azimuth: number;
+  elevation: number;
 }
 
 interface CameraKey extends CameraShot { p: number }
 
 /*
- * Travelling de campanha: plano geral → detalhe do nó → recuo → detalhe das
- * franjas → hero shot. Hermite com tangentes no tempo mantém direção contínua nos
- * pontos de passagem, sem os platôs mecânicos da versão anterior.
+ * Travelling assimétrico: aproximação oblíqua, recuo alto, passagem lateral,
+ * detalhe baixo e retorno frontal. A órbita troca de direção em tempos distintos
+ * do zoom. Tangentes compartilhadas mantêm velocidade contínua ao voltar o scroll.
  */
 const CAMERA_KEYS: CameraKey[] = [
-  { p: 0,    dolly: .92, offset: 0,    focus: .03,  fov: 34, roll: 0 },
-  { p: .12,  dolly: 1.08, offset: -.14, focus: .15,  fov: 31, roll: -.45 },
-  { p: .29,  dolly: 1.43, offset: .23,  focus: .2,   fov: 27, roll: .7 },
-  { p: .47,  dolly: 1.1,  offset: -.2,  focus: -.06, fov: 32, roll: -.35 },
-  { p: .65,  dolly: 1.48, offset: .2,   focus: -.18, fov: 26, roll: .6 },
-  { p: .8,   dolly: 1.16, offset: -.12, focus: .06,  fov: 30, roll: -.25 },
-  { p: .92,  dolly: .96, offset: 0,     focus: 0,    fov: 34, roll: 0 },
-  { p: 1,    dolly: .9,  offset: 0,     focus: -.02, fov: 35, roll: 0 },
+  { p: 0,    dolly: .94, offset: 0,    focus: .02, fov: 34, roll: 0,    azimuth: -6, elevation: .08 },
+  { p: .085, dolly: 1.3, offset: -.16, focus: .16, fov: 30, roll: -1.4, azimuth: 12, elevation: -.09 },
+  { p: .21,  dolly: .88, offset: -.11, focus: .06, fov: 36, roll: .4,   azimuth: -17,elevation: .22 },
+  { p: .345,dolly: 1.48,offset: .21,   focus: .19, fov: 28, roll: 1.8,  azimuth: -8, elevation: .12 },
+  { p: .43,  dolly: 1.17,offset: .16,  focus: -.04,fov: 32, roll: -.6,  azimuth: 18, elevation: -.12 },
+  { p: .565,dolly: .96, offset: -.18,  focus: -.08,fov: 35, roll: -1.2, azimuth: 7,  elevation: .17 },
+  { p: .705,dolly: 1.24,offset: -.09,  focus: -.15,fov: 31, roll: .8,   azimuth: -14,elevation: -.18 },
+  { p: .805,dolly: 1.6, offset: .12,   focus: -.12,fov: 27, roll: 1.3,  azimuth: 11, elevation: -.04 },
+  { p: .92, dolly: .98, offset: 0,     focus: .02, fov: 34, roll: 0,    azimuth: 0,  elevation: .08 },
+  { p: 1,   dolly: .92, offset: 0,     focus: 0,   fov: 35, roll: 0,    azimuth: 0,  elevation: .08 },
 ];
 
 export function sampleCamera(p: number): CameraShot {
@@ -116,10 +120,12 @@ export function sampleCamera(p: number): CameraShot {
       + (-2*t3+3*t2)*c[field] + (t3-t2)*span*m2;
   };
   return {
-    dolly: Math.max(.86, Math.min(1.52, curve('dolly'))),
+    dolly: Math.max(.84, Math.min(1.65, curve('dolly'))),
     offset: curve('offset'),
     focus: curve('focus'),
     fov: curve('fov'),
     roll: curve('roll'),
+    azimuth: curve('azimuth'),
+    elevation: curve('elevation'),
   };
 }

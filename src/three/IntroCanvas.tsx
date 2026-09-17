@@ -5,6 +5,7 @@ import { loadGlbSmart, normalize } from "./loadModel";
 import { MODELS } from "../data/atelier";
 import { prefersReducedMotion } from "../lib/motion";
 import { sample, sampleCamera } from "../lib/choreo";
+import { createAtelierBackdrop } from "./atelierBackdrop";
 
 interface IntroCanvasProps {
   progressRef: MutableRefObject<number>;
@@ -44,9 +45,12 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = .88;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMap.autoUpdate = false;
     mount.append(renderer.domElement);
     const scene = new THREE.Scene();
+    const backdrop = createAtelierBackdrop();
+    scene.add(backdrop.mesh);
     const camera = new THREE.PerspectiveCamera(32, 1, .05, 50);
     const holder = new THREE.Group();
     scene.add(holder);
@@ -80,6 +84,8 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     let disposed=false, loaded=false, visible=true, raf=0, dirty=true;
     let shownProgress = reduced ? 0 : progressRef.current;
     let previousTime = performance.now();
+    let lastAmbientFrame = 0;
+    let ambientTime = 0;
     let pointerX=0, pointerY=0, lookX=0, lookY=0;
     const target = new THREE.Vector3();
     const draw = (time = performance.now()) => {
@@ -95,7 +101,9 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
       lookY = THREE.MathUtils.damp(lookY, pointerY, 9, delta);
       const moving = Math.abs(requestedProgress-shownProgress)>.00004;
       const looking = Math.abs(pointerX-lookX)+Math.abs(pointerY-lookY)>.0001;
-      if (dirty || moving || looking) {
+      ambientTime += reduced ? 0 : delta;
+      const ambient = !reduced && time-lastAmbientFrame>50;
+      if (dirty || moving || looking || ambient) {
         const p = shownProgress;
         const pose=sample(p), shot=sampleCamera(p), mobile=mount.clientWidth<700;
         holder.rotation.set(
@@ -105,21 +113,38 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
         );
         holder.position.set(0, pose.y*.1, 0);
         // Camera framing leaves room for each chapter; the object's rotation stays exactly 360°.
-        const cinematicDolly = mobile ? Math.min(shot.dolly, 1.2) : shot.dolly;
-        const cinematicFov = mobile ? Math.max(29, shot.fov) : shot.fov;
+        const cinematicDolly = mobile ? 1+(shot.dolly-1)*.38 : shot.dolly;
+        const cinematicFov = mobile ? Math.max(31, shot.fov) : shot.fov;
         const fit = mobile ? Math.max(2.25, 1.02/(2*Math.tan(THREE.MathUtils.degToRad(cinematicFov/2))*camera.aspect)) : 2.35;
         camera.fov = cinematicFov;
         camera.updateProjectionMatrix();
-        camera.position.set((mobile?0:shot.offset*.42)+lookX*.045, (mobile?.12:shot.focus*.22)+lookY*.035, fit/cinematicDolly);
-        target.set(mobile?0:shot.offset, mobile?.07:shot.focus, 0);
+        const orbit = THREE.MathUtils.degToRad(shot.azimuth*(mobile?.4:1));
+        const distance = fit/cinematicDolly;
+        camera.position.set(
+          Math.sin(orbit)*distance + shot.offset*(mobile?.08:.42)+lookX*.045,
+          shot.elevation*(mobile?.3:1) + (mobile?.12:shot.focus*.22)+lookY*.035,
+          Math.cos(orbit)*distance,
+        );
+        // No celular, a peça sobe quando a legenda entra; a abertura reserva o topo ao título.
+        const mobileFocus = .23-.38*THREE.MathUtils.smoothstep(p,.035,.13);
+        target.set(shot.offset*(mobile?.15:1), mobile?mobileFocus+shot.focus*.06:shot.focus, 0);
         camera.lookAt(target);
         camera.rotation.z += THREE.MathUtils.degToRad(mobile ? shot.roll*.35 : shot.roll);
-        key.position.x = -2.8 + Math.sin(p*Math.PI*2)*.7;
-        rim.position.x = 3.2 - Math.sin(p*Math.PI*2)*.55;
+        key.position.x = -2.8 + shot.azimuth*.04;
+        key.position.y = 4.2 + shot.elevation*1.8;
+        rim.position.x = 3.2 - shot.azimuth*.025;
         rim.intensity=.9+Math.sin(p*Math.PI)*.35;
+        backdrop.material.uniforms.uTime.value = ambientTime;
+        backdrop.material.uniforms.uProgress.value = p;
+        backdrop.material.uniforms.uLight.value.set(key.position.x*.3, key.position.y*.22);
+        // A luz ambiente respira sem recalcular a sombra da peça parada.
+        renderer.shadowMap.needsUpdate = dirty || moving;
         renderer.render(scene,camera);
         mount.dataset.angle=pose.deg.toFixed(2);
         mount.dataset.progress=p.toFixed(4);
+        mount.dataset.orbit=shot.azimuth.toFixed(2);
+        mount.dataset.dolly=cinematicDolly.toFixed(3);
+        lastAmbientFrame=time;
         dirty=false;
       }
       if (!reduced) raf=requestAnimationFrame(draw);
