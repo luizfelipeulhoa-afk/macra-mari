@@ -96,8 +96,8 @@ const CAMERA_KEYS: CameraKey[] = [
   { p: .565,dolly: .96, offset: -.18,  focus: -.08,fov: 35, roll: -1.2, azimuth: 7,  elevation: .17 },
   { p: .705,dolly: 1.24,offset: -.09,  focus: -.15,fov: 31, roll: .8,   azimuth: -14,elevation: -.18 },
   { p: .805,dolly: 1.6, offset: .12,   focus: -.12,fov: 27, roll: 1.3,  azimuth: 11, elevation: -.04 },
-  { p: .92, dolly: .98, offset: 0,     focus: .02, fov: 34, roll: 0,    azimuth: 0,  elevation: .08 },
-  { p: 1,   dolly: .92, offset: 0,     focus: 0,   fov: 35, roll: 0,    azimuth: 0,  elevation: .08 },
+  { p: .92, dolly: .84, offset: 0,     focus: .02, fov: 35, roll: 0,    azimuth: 0,  elevation: .08 },
+  { p: 1,   dolly: .68, offset: 0,     focus: 0,   fov: 36, roll: 0,    azimuth: 0,  elevation: .08 },
 ];
 
 export function sampleCamera(p: number): CameraShot {
@@ -120,7 +120,7 @@ export function sampleCamera(p: number): CameraShot {
       + (-2*t3+3*t2)*c[field] + (t3-t2)*span*m2;
   };
   return {
-    dolly: Math.max(.84, Math.min(1.65, curve('dolly'))),
+    dolly: Math.max(.66, Math.min(1.65, curve('dolly'))),
     offset: curve('offset'),
     focus: curve('focus'),
     fov: curve('fov'),

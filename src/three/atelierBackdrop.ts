@@ -5,6 +5,7 @@ import * as THREE from "three";
 export function createAtelierBackdrop() {
   const material = new THREE.ShaderMaterial({
     depthWrite: false,
+    transparent: true,
     uniforms: {
       uTime: { value: 0 },
       uProgress: { value: 0 },
@@ -49,7 +50,10 @@ export function createAtelierBackdrop() {
         color *= 1.0 + weave + (grain(gl_FragCoord.xy)-.5)*.055;
         float vignette = smoothstep(.45,3.2,length(p*vec2(.75,.6)));
         color *= 1.0-vignette*.24;
-        gl_FragColor = vec4(color,1.0);
+        // No último ato, o pigmento do estúdio se dissolve e revela a casa,
+        // enquanto a malha 3D continua presente sobre o novo cenário.
+        float studioAlpha = 1.0-smoothstep(.74,.94,uProgress);
+        gl_FragColor = vec4(color,studioAlpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }

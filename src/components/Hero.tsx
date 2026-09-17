@@ -189,6 +189,13 @@ export default function Hero() {
 
   return (
     <section id="inicio" ref={scopeRef} className="relative overflow-hidden">
+      <div className="hero-arrival relative h-[28svh] min-h-40 overflow-hidden" aria-hidden="true">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#caa277_0%,#e6d9bf_48%,#f3ecdd_100%)]" />
+        <div className="absolute -top-24 left-[18%] h-72 w-[44vw] rotate-[-18deg] bg-cream/35 blur-3xl" />
+        <p className="absolute bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.34em] text-bark/65 sm:text-[10px]">
+          da parede para o varal do atelier
+        </p>
+      </div>
       <AmbientThreads />
       <div className="weave relative mx-auto max-w-7xl px-4 pb-8 pt-24 sm:px-6 md:pt-28">
         <div className="grid items-center gap-12 lg:grid-cols-12">

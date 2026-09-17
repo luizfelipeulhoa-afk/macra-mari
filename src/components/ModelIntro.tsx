@@ -135,6 +135,7 @@ export default function ModelIntro() {
       gsap.set(".mi-head, .mi-chap, .mi-cue, .mi-slice, .mi-thread", { display: "none" });
       gsap.set(".mi-final", { autoAlpha: 1, y: 0 });
       gsap.set(".mi-handoff", { autoAlpha: 0 });
+      gsap.set(".mi-wall-piece", { autoAlpha: 1 });
       return;
     }
 
@@ -149,6 +150,9 @@ export default function ModelIntro() {
       gsap.set(".mi-slice", { scaleX: 0, autoAlpha: 0 });
       gsap.set(".mi-handoff", { autoAlpha: 0 });
       gsap.set(".mi-handoff-copy", { autoAlpha: 0, y: 28 });
+      gsap.set(".mi-wall-photo", { scale: 1.12, filter: "brightness(.58) saturate(.82) blur(5px)" });
+      gsap.set(".mi-wall-piece", { autoAlpha: 0, scale: 1.08, y: 18, filter: "blur(3px)" });
+      gsap.set(".mi-canvas-layer", { autoAlpha: 1 });
 
       const playhead = { value: 0 };
       const tl = gsap.timeline({
@@ -204,13 +208,14 @@ export default function ModelIntro() {
         tl.to(el, { autoAlpha: 0, duration: 0.28, ease: "power1.inOut" }, mid + 0.08);
       });
 
-      /* janela final — a ficha de venda entra e fica */
-      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.46, ease: "power2.out" }, pos(FINAL_AT - 0.03));
-
-      /* Dissolução contínua: a luz do próximo hero invade o estúdio sem corte. */
-      tl.to(".mi-handoff", { autoAlpha: 1, duration: 1.08, ease: "sine.inOut" }, pos(0.79));
-      tl.to(".mi-handoff-glow", { scale: 1.08, duration: 1.18, ease: "sine.inOut" }, pos(0.79));
-      tl.to(".mi-handoff-copy", { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, pos(0.88));
+      /* O estúdio vira uma casa: o 3D pousa, perde perspectiva e fecha como fotografia. */
+      tl.to(".mi-handoff", { autoAlpha: 1, duration: 0.72, ease: "sine.inOut" }, pos(0.76));
+      tl.to(".mi-wall-photo", { scale: 1, filter: "brightness(1) saturate(1) blur(0px)", duration: 1.18, ease: "power2.inOut" }, pos(0.76));
+      tl.to(".mi-handoff-copy", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power2.out" }, pos(0.82));
+      tl.to(".mi-handoff-copy", { autoAlpha: 0, y: -18, duration: 0.22, ease: "power2.in" }, pos(0.88));
+      tl.to(".mi-wall-piece", { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.48, ease: "sine.inOut" }, pos(0.925));
+      tl.to(".mi-canvas-layer", { autoAlpha: 0, duration: 0.48, ease: "sine.inOut" }, pos(0.925));
+      tl.to(".mi-final", { autoAlpha: 1, y: 0, duration: 0.42, ease: "power2.out" }, pos(0.955));
     }, section);
 
     const onResize = () => {
@@ -292,7 +297,7 @@ export default function ModelIntro() {
       </div>
 
       {/* camada 3D por cima, quando o GLB chega */}
-      <div className="pointer-events-none absolute inset-0 z-[12]">
+      <div className="mi-canvas-layer pointer-events-none absolute inset-0 z-[12]">
         <Suspense fallback={null}>
           <IntroCanvas
             progressRef={progressRef}
@@ -453,27 +458,34 @@ export default function ModelIntro() {
         </span>
       </div>
 
-      {/* A luz do atelier dissolve o fundo escuro antes do próximo hero. */}
-      <div className="mi-handoff pointer-events-none absolute inset-0 z-40 overflow-hidden bg-paper/95">
-        <div
-          className="mi-handoff-glow absolute inset-[-12%]"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 45%, rgba(251,246,234,1) 0%, rgba(243,236,221,.96) 42%, rgba(230,217,191,.9) 72%, rgba(243,236,221,1) 100%)",
-          }}
+      {/* A peça sai do estúdio e pousa numa parede real, sem trocar de quadro. */}
+      <div className="mi-handoff pointer-events-none absolute inset-0 z-[8] overflow-hidden bg-paper">
+        <img
+          src="/images/macrame-wall-room.png"
+          alt="Sala brasileira com parede de argamassa iluminada pelo fim de tarde"
+          className="mi-wall-photo absolute inset-0 h-full w-full object-cover object-center will-change-transform"
         />
-        <div className="weave absolute inset-0 opacity-55" />
-        <div className="mi-handoff-copy absolute inset-0 grid place-content-center px-6 text-center text-ink">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_44%,transparent_20%,rgba(44,30,19,.12)_100%)]" />
+        <div className="mi-handoff-copy absolute inset-0 z-20 grid place-content-center px-6 text-center text-cream [text-shadow:0_2px_18px_rgba(44,30,19,.7)]">
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-clay sm:text-[11px]">
-            do detalhe ao ambiente
+            do tear para a sua casa
           </p>
           <p className="mt-4 font-display text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.92] tracking-tight">
-            Uma peça muda
-            <span className="block text-clay">todo o espaço.</span>
+            Ela encontra
+            <span className="block text-ocre">o lugar dela.</span>
           </p>
           <span className="mx-auto mt-7 h-px w-20 bg-ocre" />
         </div>
       </div>
+
+      {/* Quadro final 2D: ocupa exatamente o pouso frontal do GLB. */}
+      <img
+        src={heroSrc}
+        onError={() => setHeroSrc(BRAND.catPaineisXL)}
+        alt={`${NAME} aplicado em uma parede de sala`}
+        className="mi-wall-piece pointer-events-none absolute left-1/2 top-[47%] z-[13] -translate-x-1/2 -translate-y-1/2 object-contain [filter:drop-shadow(0_22px_22px_rgba(44,30,19,.28))]"
+        style={{ height: "min(58vh, 560px)", maxWidth: "min(64vw, 520px)" }}
+      />
     </section>
   );
 }
