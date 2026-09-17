@@ -82,7 +82,7 @@ interface CameraKey extends CameraShot { p: number }
 
 /*
  * Travelling de campanha: plano geral → detalhe do nó → recuo → detalhe das
- * franjas → hero shot. Catmull-Rom mantém velocidade e direção contínuas nos
+ * franjas → hero shot. Hermite com tangentes no tempo mantém direção contínua nos
  * pontos de passagem, sem os platôs mecânicos da versão anterior.
  */
 const CAMERA_KEYS: CameraKey[] = [
@@ -96,27 +96,30 @@ const CAMERA_KEYS: CameraKey[] = [
   { p: 1,    dolly: .9,  offset: 0,     focus: -.02, fov: 35, roll: 0 },
 ];
 
-const catmull = (a: number, b: number, c: number, d: number, t: number) => {
-  const t2 = t * t;
-  const t3 = t2 * t;
-  return .5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
-};
-
 export function sampleCamera(p: number): CameraShot {
   const x = Math.max(0, Math.min(1, p));
-  let i = CAMERA_KEYS.findIndex((key) => x <= key.p);
-  if (i <= 0) return { ...CAMERA_KEYS[0] };
+  const i = CAMERA_KEYS.findIndex((key) => x <= key.p);
   if (i < 0) return { ...CAMERA_KEYS[CAMERA_KEYS.length - 1] };
+  if (i === 0) return { ...CAMERA_KEYS[0] };
   const b = CAMERA_KEYS[i - 1];
   const c = CAMERA_KEYS[i];
   const a = CAMERA_KEYS[Math.max(0, i - 2)];
   const d = CAMERA_KEYS[Math.min(CAMERA_KEYS.length - 1, i + 1)];
   const t = (x - b.p) / Math.max(c.p - b.p, 1e-6);
+  const curve = (field: keyof CameraShot) => {
+    const span = c.p - b.p;
+    const m1 = (c[field] - a[field]) / Math.max(c.p - a.p, 1e-6);
+    const m2 = (d[field] - b[field]) / Math.max(d.p - b.p, 1e-6);
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return (2*t3-3*t2+1)*b[field] + (t3-2*t2+t)*span*m1
+      + (-2*t3+3*t2)*c[field] + (t3-t2)*span*m2;
+  };
   return {
-    dolly: Math.max(.86, Math.min(1.52, catmull(a.dolly, b.dolly, c.dolly, d.dolly, t))),
-    offset: catmull(a.offset, b.offset, c.offset, d.offset, t),
-    focus: catmull(a.focus, b.focus, c.focus, d.focus, t),
-    fov: catmull(a.fov, b.fov, c.fov, d.fov, t),
-    roll: catmull(a.roll, b.roll, c.roll, d.roll, t),
+    dolly: Math.max(.86, Math.min(1.52, curve('dolly'))),
+    offset: curve('offset'),
+    focus: curve('focus'),
+    fov: curve('fov'),
+    roll: curve('roll'),
   };
 }

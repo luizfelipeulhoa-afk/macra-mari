@@ -39,7 +39,7 @@ export default function IntroCanvas({ progressRef, onReady, onFail }: IntroCanva
     let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, powerPreference:"high-performance"}); }
     catch { callbacks.current.onFail?.(); return; }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 1.75));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.75 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = .88;

@@ -194,7 +194,7 @@ body {
   top: 104px;
 }
 .stack-card {
-  will-change: transform, filter;
+  will-change: transform, opacity;
 }
 
 .reveal {

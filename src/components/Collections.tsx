@@ -41,14 +41,14 @@ export default function Collections() {
         if (i === items.length - 1) return;
         const next = items[i + 1];
         gsap.to(item.querySelector(".stack-card"), {
-          scale: 0.9,
-          filter: "brightness(0.55) saturate(0.8)",
+          scale: 0.97,
+          opacity: 0.92,
           ease: "none",
           scrollTrigger: {
             trigger: next,
             start: "top bottom",
             end: "top 12%",
-            scrub: true,
+            scrub: 0.35,
           },
         });
       });
@@ -114,7 +114,7 @@ export default function Collections() {
                 <div className="grid md:grid-cols-2">
                   {/* imagem */}
                   <span
-                    className={`breathe wipe img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
+                    className={`breathe img-zoom relative block aspect-[16/10] overflow-hidden border-b-2 border-ink md:aspect-auto md:min-h-[420px] md:border-b-0 ${
                       i % 2 === 1 ? "md:order-2 md:border-l-2" : "md:border-r-2"
                     }`}
                   >
