@@ -1,0 +1,453 @@
+{
+  "source": "https://mariulhoaq.wixsite.com/macramari",
+  "categories": {
+    "Bolsas": 18,
+    "Painéis": 6,
+    "Casa": 10
+  },
+  "resolution_note": "Edições na resolução nativa da ferramenta; não são arquivos 4K/8K. Qualidade aceita pelo usuário.",
+  "products": [
+    {
+      "id": "7c78a067-0a6a-9712-94bc-aecdd8c9a318",
+      "slug": "bolsa-concha-1",
+      "name": "Bolsa concha",
+      "category": "Bolsas",
+      "price": 179,
+      "currency": "BRL",
+      "description": "Fio náutico azul com 21cm de diâmetro",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-concha-1",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_9232a1776d944202813b64c83f9f62b2~mv2.jpg"
+      ]
+    },
+    {
+      "id": "1e39253e-5da6-1940-da81-d682add41be8",
+      "slug": "painel-flor-de-lótus",
+      "name": "Painel flor de lótus",
+      "category": "Painéis",
+      "price": 139,
+      "currency": "BRL",
+      "description": "Barbante 24 fios",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-flor-de-l%C3%B3tus",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_07a3d4f3fd5d4a0ca77a88b98de7b392~mv2.jpg"
+      ]
+    },
+    {
+      "id": "614710df-f719-55ed-04e3-0d2185f31de3",
+      "slug": "clucth-fio-de-cetim",
+      "name": "Clucth fio de cetim",
+      "category": "Bolsas",
+      "price": 299,
+      "currency": "BRL",
+      "description": "",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/clucth-fio-de-cetim",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_160726f2087e4ab099403cfd4a1e3daa~mv2.jpg"
+      ]
+    },
+    {
+      "id": "e26adb46-0687-99f6-8d6d-b4b122f02477",
+      "slug": "bolsa-para-celular",
+      "name": "Bolsa para celular",
+      "category": "Bolsas",
+      "price": 89,
+      "currency": "BRL",
+      "description": "Fio náutico de 3mm preto Tam Altura 17cm x Largura 11cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-para-celular",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_5c34d356832c427aace7ad151af32b3a~mv2.jpg"
+      ]
+    },
+    {
+      "id": "9b3e3021-1500-4a16-e18b-654fa8854572",
+      "slug": "bolsa-concha",
+      "name": "Bolsa concha",
+      "category": "Bolsas",
+      "price": 179,
+      "currency": "BRL",
+      "description": "Fio poliester 5mm verde millitar com lurex prata",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-concha",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_94dca4857c184ce0a08965e3af3c2d8e~mv2.jpg"
+      ]
+    },
+    {
+      "id": "3d708214-8688-27a7-f21b-15cf18e5a021",
+      "slug": "garrafão",
+      "name": "Garrafão",
+      "category": "Casa",
+      "price": 82,
+      "currency": "BRL",
+      "description": "Cordão de algodão cru 3mm Tam: 33cm de altura x 15cm de largura",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/garraf%C3%A3o",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_6a0243c90d864c88b23e871b658c1af5~mv2.jpg"
+      ]
+    },
+    {
+      "id": "3d68de5c-872c-86b1-87d0-6115d710176c",
+      "slug": "escultura-ondas",
+      "name": "Escultura ondas",
+      "category": "Casa",
+      "price": 160,
+      "currency": "BRL",
+      "description": "Escultura com cordão de algodão 8mm e fio de cetim. am: Largura 30cm x Altura 22cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/escultura-ondas",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_37ce216b04fa4ec1a904aea5901d3026~mv2.jpg"
+      ]
+    },
+    {
+      "id": "994c50e7-e1f7-29c9-6d2b-983668d56414",
+      "slug": "bolsa-celular-fio-náutico-5mm-cor-rami",
+      "name": "Bolsa Celular Fio Náutico 5mm cor Rami",
+      "category": "Bolsas",
+      "price": 79,
+      "currency": "BRL",
+      "description": "Bolsa para celular no fio náutico 5mm na cor rami. Tam Altura 23cm x Largura 13cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-celular-fio-n%C3%A1utico-5mm-cor-rami",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_2340c2d3f4cf475a820c0d0962d93a18~mv2.jpg"
+      ]
+    },
+    {
+      "id": "e964bf3b-27dc-4713-9c75-ec334c71055b",
+      "slug": "bolsa-preta-5mm-rattan",
+      "name": "Bolsa Fio Náutico 5mm/Rattan cor Preta",
+      "category": "Bolsas",
+      "price": 289,
+      "currency": "BRL",
+      "description": "Bolsa preta com fio náutico 5mm e alça em Rattan.  Tam: Largura 30cm x Altura 22cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-preta-5mm-rattan",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_5ac953eb626a4128b54d90533f9ee7e4~mv2.jpg"
+      ]
+    },
+    {
+      "id": "1ca8b3ce-7e0d-46ba-bcf7-56edd098829b",
+      "slug": "bolsa-royal-5mm-madeira",
+      "name": "Bolsa Fio Náutico 5mm/Madeira cor Royal",
+      "category": "Bolsas",
+      "price": 289,
+      "currency": "BRL",
+      "description": "Bolsa cor azul royal, fio náutico 5mm e alça em madeira.   Tam: Largura 36cm x Altura 24cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-royal-5mm-madeira",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_fd021b52e68a4465a8d3c45907ab0c6c~mv2.jpg"
+      ]
+    },
+    {
+      "id": "fed6effb-8604-42a1-8a5d-b706435d12fb",
+      "slug": "bolsa-cor-rami-5mm-madeira",
+      "name": "Bolsa Fio Náutico 5mm/madeira cor Rami",
+      "category": "Bolsas",
+      "price": 289,
+      "currency": "BRL",
+      "description": "Bolsa na cor rami com fio náutico 5mm e alça em madeira. Tam: Largura 36cm x Altura 24cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-cor-rami-5mm-madeira",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_607eae4859d04978bfdc2377fdd4f11e~mv2.jpg"
+      ]
+    },
+    {
+      "id": "d01ce166-1163-4c47-86ee-32011c4b790c",
+      "slug": "bolsa-praia-cor-bege-24-fios",
+      "name": "Bolsa Praia 24 fios cor Bege",
+      "category": "Bolsas",
+      "price": 179,
+      "currency": "BRL",
+      "description": "Bolsa de praia no barbante 24 fios, bege. Tam: Altura 39cm x Largura 34cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-praia-cor-bege-24-fios",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_30c5619ed6d04f64970152ad5fae388d~mv2.jpg"
+      ]
+    },
+    {
+      "id": "f63a7bfb-dfc2-4215-b8d0-ce93cbe1b974",
+      "slug": "bolsa-lurex-amêndoa-5mm-madeira",
+      "name": "Bolsa lurex  5mm/Madeira cor Amêndoa",
+      "category": "Bolsas",
+      "price": 299,
+      "currency": "BRL",
+      "description": "Bolsa na cor amêndoa com lurex, fio náutico 5mm e alça em madeira.   Tamanho Largura 36cm x Altura 24cm.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-lurex-am%C3%AAndoa-5mm-madeira",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_7d9592790b5e4688abaf3a33298bc656~mv2.jpg"
+      ]
+    },
+    {
+      "id": "4b3ada52-aab0-4bf6-8668-ced763940b7d",
+      "slug": "clutch-lurex-amêndoa-4mm",
+      "name": "Clutch lurex 4mm cor Amêndoa",
+      "category": "Bolsas",
+      "price": 159,
+      "currency": "BRL",
+      "description": "Clutch na cor amêndoa com lurex 4mm. Tam: Altura 19cm x Largura 25cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/clutch-lurex-am%C3%AAndoa-4mm",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_b64f5e997a6548f7a50a0961da127969~mv2.jpg"
+      ]
+    },
+    {
+      "id": "d55c61cf-cb63-437e-9d8c-2b8b3e99fa70",
+      "slug": "clutch-lurex-marrom-4mm",
+      "name": "Clutch lurex 4mm cor Marrom",
+      "category": "Bolsas",
+      "price": 159,
+      "currency": "BRL",
+      "description": "Clutch marrom com lurex poliamida 4mm. Tamanho Altura 19cm de altura x Largura 23 cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/clutch-lurex-marrom-4mm",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_a6073dd1158b49ebb2ab9a33060b5c58~mv2.jpg"
+      ]
+    },
+    {
+      "id": "7134c19e-3ef7-43d7-80dc-18fef0b35837",
+      "slug": "clutch-roxa-25mm",
+      "name": "Clutch Malha 25mm cor Roxo",
+      "category": "Bolsas",
+      "price": 92,
+      "currency": "BRL",
+      "description": "Clutch roxa no fio de malha 25mm. Tam: Altura 17cm x Largura 24cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/clutch-roxa-25mm",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_a31b82882e9543e5abf6e335e876cc0b~mv2.jpg"
+      ]
+    },
+    {
+      "id": "69528cfc-93ea-4814-8d43-ca73cef407b4",
+      "slug": "painel-flor-cor-marrom",
+      "name": "Painel Flor cor Marrom",
+      "category": "Painéis",
+      "price": 250,
+      "currency": "BRL",
+      "description": "Painel Flor cor Marrom. Medidas 108cm de largura X 71cm de altura.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-flor-cor-marrom",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_34e2ce54f5674a0fa197cfa4d3ef7fe9~mv2.jpg"
+      ]
+    },
+    {
+      "id": "25082562-22d5-41c4-9541-326f54a0c1cf",
+      "slug": "painel-macrawave-macramê-tapeçaria",
+      "name": "Painel Macrawave (Macramê + Tapeçaria)",
+      "category": "Painéis",
+      "price": 320,
+      "currency": "BRL",
+      "description": "Painel macrawave (Macramê +tapeçaria). Medidas: 1m de largura X 80cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-macrawave-macram%C3%AA-tape%C3%A7aria",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_9921c5226e2e4484ad3d900d948b8386~mv2.jpg"
+      ]
+    },
+    {
+      "id": "b8afbfc7-8ba5-499c-b4af-62cd4a73da7e",
+      "slug": "painel-azul-mar",
+      "name": "Painel Azul Mar",
+      "category": "Painéis",
+      "price": 240,
+      "currency": "BRL",
+      "description": "Painel Azul Mar. Medidas: 80cm de largura X 1,10cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-azul-mar",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_0d826dd3b6dc40e2bb4b7d415193fc41~mv2.jpg"
+      ]
+    },
+    {
+      "id": "0a034ae6-e804-4efa-aeb4-3bad080f0ba4",
+      "slug": "painel-verde-cura",
+      "name": "Painel Verde Cura",
+      "category": "Painéis",
+      "price": 290,
+      "currency": "BRL",
+      "description": "Painel verde cura. Medidas: 96cm de largura X 84cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-verde-cura",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_6b624e86b6224ae49bf74eda7d7ada94~mv2.jpg"
+      ]
+    },
+    {
+      "id": "f2a6fbfc-79cd-4e57-b96d-7fe38839ab60",
+      "slug": "painel-parede-colar-com-barbante",
+      "name": "Painel Parede Colar com Barbante",
+      "category": "Painéis",
+      "price": 190,
+      "currency": "BRL",
+      "description": "Painel de parede Colar com barbante 24 fios. Medidas: 88cm de largura x 1,18cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/painel-parede-colar-com-barbante",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_4e5d1c5b0781411c84e1060da8b130ac~mv2.jpg"
+      ]
+    },
+    {
+      "id": "6ec287c7-308b-4653-908b-04ae37dfe9e1",
+      "slug": "conjunto-porta-vela-trecos",
+      "name": "Conjunto Porta Vela/Trecos",
+      "category": "Casa",
+      "price": 58,
+      "currency": "BRL",
+      "description": "Conjunto Porta vela/trecos. Medidas: Grande (10cm de largura X 17cm de comprimento). Pequeno (8cm de largura x 9cm de comprimento).",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/conjunto-porta-vela-trecos",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_17f21c8b5c9b43ba95dddd3299d01efe~mv2.png"
+      ]
+    },
+    {
+      "id": "d48fbebf-a138-4e96-91bb-457afff13820",
+      "slug": "suporte-plantas-cor-verde-terra",
+      "name": "Suporte Plantas cor Verde/Terra",
+      "category": "Casa",
+      "price": 52,
+      "currency": "BRL",
+      "description": "Suporte de plantas (verde e terra). Medidas: 87cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/suporte-plantas-cor-verde-terra",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_8c3f93266d404134a8ac92d14be25391~mv2.jpg"
+      ]
+    },
+    {
+      "id": "db5e2af3-4f3c-497e-aa49-0bb59e81cbc6",
+      "slug": "suporte-plantas-cor-azul-mar",
+      "name": "Suporte Plantas cor Azul Mar",
+      "category": "Casa",
+      "price": 45,
+      "currency": "BRL",
+      "description": "Suporte de plantas azul mar. Medidas: 37cm de comprimento",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/suporte-plantas-cor-azul-mar",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_93ba32fe20bc4ff3850b9331d4c13a9e~mv2.jpg"
+      ]
+    },
+    {
+      "id": "adb3edbf-cfbd-4440-9204-874ccd1ce602",
+      "slug": "suporte-plantas-trançado-cor-verde-terra",
+      "name": "Suporte Plantas Trançado cor Verde/Terra",
+      "category": "Casa",
+      "price": 48,
+      "currency": "BRL",
+      "description": "Suporte de plantas trançado (verde e terra). Medidas: 92cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/suporte-plantas-tran%C3%A7ado-cor-verde-terra",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_28afd03c166c4fb8ac3624afa7997f91~mv2.png"
+      ]
+    },
+    {
+      "id": "f3ffdd3a-c91f-4be8-b794-288614e92e76",
+      "slug": "terço-algodão-cru-madeira",
+      "name": "Terço Algodão Cru/Madeira",
+      "category": "Casa",
+      "price": 280,
+      "currency": "BRL",
+      "description": "Terço em cordão de algodão cru 8mm, contas e crucifixo em madeira. Medidas: 1,10cm de comprimento.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/ter%C3%A7o-algod%C3%A3o-cru-madeira",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_81845ecde789422490eef41eb7a22e21~mv2.jpg"
+      ]
+    },
+    {
+      "id": "9cec3d33-dd99-4e3a-bd93-cad44dcd6516",
+      "slug": "cesto-barbante-24-fios-1",
+      "name": "Cesto Barbante 24 fios",
+      "category": "Casa",
+      "price": 140,
+      "currency": "BRL",
+      "description": "Cesto Barbante 24 fios. Medidas: 35cm de largura X 24cm de comprimento",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/cesto-barbante-24-fios-1",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_33054f5d583c4c0dabd19412d6d385fe~mv2.jpg"
+      ]
+    },
+    {
+      "id": "0f3ef57c-1ce8-4ec4-94fa-ef2b78e50702",
+      "slug": "cesto-barbante-24-fios",
+      "name": "Cesto Barbante 24 fios",
+      "category": "Casa",
+      "price": 120,
+      "currency": "BRL",
+      "description": "Cesto barbante 24 fios medindo 30cm de largura x 20cm de comprimento",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/cesto-barbante-24-fios",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_588d8f26c90a410487a6f5702055d5ab~mv2.jpg"
+      ]
+    },
+    {
+      "id": "73e184c6-1ca2-41dd-aa0a-aeac1bd24a31",
+      "slug": "suporte-tapete-de-yoga-5mm-cor-rami",
+      "name": "Suporte Tapete de Yoga 5mm cor Rami",
+      "category": "Casa",
+      "price": 69,
+      "currency": "BRL",
+      "description": "Suporte para tapete de Yoga no fio náutico 5mm na cor rami.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/suporte-tapete-de-yoga-5mm-cor-rami",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_39031f00655b4c7d827ec8c0d0367069~mv2.jpg"
+      ]
+    },
+    {
+      "id": "655e6fc6-d106-40d1-80dc-d7ff1f68b5b4",
+      "slug": "bolsa-prata-cordão-de-algodão-camurça-cor-preta",
+      "name": "Bolsa Cordão de Algodão/Camurça cor Preta",
+      "category": "Bolsas",
+      "price": 289,
+      "currency": "BRL",
+      "description": "Bolsa cordão de algodão preto 6mm, saco em algodão e alça em camurça. Tam Altura 46cm x Largura 17cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-prata-cord%C3%A3o-de-algod%C3%A3o-camur%C3%A7a-cor-preta",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_9f18c44d8a344840a77daecd0e8b8d9a~mv2.jpg"
+      ]
+    },
+    {
+      "id": "7fc3ad27-b321-4988-a876-f08f8286f719",
+      "slug": "bolsa-prada-cordão-algodão-cru-camurça",
+      "name": "Bolsa Cordão Algodão/Camurça cor Cru",
+      "category": "Bolsas",
+      "price": 249,
+      "currency": "BRL",
+      "description": "Bolsa cordão de algodão cru 6mm, saco em algodão e alça em camurça. Tam Altura 46cm x Largura 17cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-prada-cord%C3%A3o-algod%C3%A3o-cru-camur%C3%A7a",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_7719bd8899444af3a0a3a03f4c97b448~mv2.jpg"
+      ]
+    },
+    {
+      "id": "ba81c444-dab0-4549-90fe-6f31d73104f3",
+      "slug": "bolsa-cordão-algodão-cru-raffia-cor-malva",
+      "name": "Bolsa Cordão Algodão/Raffia cor Malva",
+      "category": "Bolsas",
+      "price": 290,
+      "currency": "BRL",
+      "description": "Bolsa com cordão de algodão cru e raffia na cor malva. Tam: Altura 40cm x Largura 25cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-cord%C3%A3o-algod%C3%A3o-cru-raffia-cor-malva",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_8c1371fb88d84993929b7b53b15077b4~mv2.jpg"
+      ]
+    },
+    {
+      "id": "50a412a7-e329-4c98-b2a9-eabda0e6feb2",
+      "slug": "clutch-franja-azul-25mm",
+      "name": "Clutch Malha 25mm Franja cor Azul",
+      "category": "Bolsas",
+      "price": 92,
+      "currency": "BRL",
+      "description": "Clutch azul com franja no fio de malha 25mm. Em várias cores, com ou sem franja. Tam: Altura 17cm x Largura 24cm.",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/clutch-franja-azul-25mm",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_6c56a4adbd0d4c13905d91769568a61f~mv2.jpg"
+      ]
+    },
+    {
+      "id": "08063545-373c-448f-b06c-945d3e18a813",
+      "slug": "bolsa-celular-lurex-4mm-cor-marrom",
+      "name": "Bolsa Celular Lurex 4mm cor Marrom",
+      "category": "Bolsas",
+      "price": 89,
+      "currency": "BRL",
+      "description": "Bolsa para celular no fio de poliéster 4mm marrom com lurex. Tam Altura 17cm x Largura 11cm",
+      "source_url": "https://mariulhoaq.wixsite.com/macramari/product-page/bolsa-celular-lurex-4mm-cor-marrom",
+      "original_images": [
+        "https://static.wixstatic.com/media/d25b8a_23ec8b1bb8ff4510a93147854b423186~mv2.jpg"
+      ]
+    }
+  ]
+}

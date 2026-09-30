@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BRAND, PIECE_ART, formatBRL } from "../data/atelier";
-import { useStore, toast } from "../store/useStore";
-import { prefersReducedMotion } from "../lib/motion";
+import { BRAND, PIECE_ART } from "../data/atelier";
+import { useStore } from "../store/useStore";
+import { prefersReducedMotion, scrollToId } from "../lib/motion";
 import { sample, HOLDS, MOVES, FINAL_AT } from "../lib/choreo";
 import { ArrowDownIcon, BagIcon } from "./Icons";
 
@@ -14,7 +14,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const LEN = 3000; /* viagem mais direta, mantendo os quatro capítulos */
 const DUR = 6; /* unidades da timeline = 100% do scroll */
-const PRICE = 420;
 const NAME = "Wall Hanging Trança";
 const pos = (p: number) => p * DUR;
 
@@ -81,8 +80,7 @@ export default function ModelIntro() {
   const modelReady = useRef(false);
   const progressRef = useRef(0);
 
-  const addItem = useStore((s) => s.addItem);
-  const setDrawer = useStore((s) => s.setDrawer);
+  const setFilter = useStore((s) => s.setFilter);
   const [glbStatus, setGlbStatus] = useState<"loading" | "ready" | "off">("loading");
   const [heroSrc, setHeroSrc] = useState(PIECE_ART.pngDrive);
 
@@ -234,16 +232,9 @@ export default function ModelIntro() {
     if (el) gsap.to(el, { autoAlpha: 0, duration: 0.8, ease: "power2.out" });
   };
 
-  const addToBag = () => {
-    addItem({
-      key: "wall-hanging-tranca",
-      name: `${NAME} — peça única`,
-      price: PRICE,
-      img: BRAND.catPaineis,
-      meta: "Algodão cru e urucum · 62 × 84 cm",
-    });
-    toast(`“${NAME}” foi pra sua sacola`);
-    setDrawer(true);
+  const viewPanels = () => {
+    setFilter("Painéis");
+    scrollToId("pecas");
   };
 
   return (
@@ -401,21 +392,21 @@ export default function ModelIntro() {
               </h2>
             </div>
             <span className="whitespace-nowrap border-2 border-ink bg-ocre px-3 py-1.5 font-display text-lg font-extrabold leading-none">
-              {formatBRL(PRICE)}
+              Painéis
             </span>
           </div>
           <p className="mt-1.5 text-[13px] leading-snug text-bark">
-            Algodão cru e fios tingidos com urucum · vara de demolição · 62 × 84 cm
+            Explore os painéis disponíveis no catálogo, com fotos e valores de cada peça.
           </p>
           <div className="mt-3.5 flex items-center gap-3">
             <button
-              onClick={addToBag}
+              onClick={viewPanels}
               data-magnetic
               className="btn-knot flex flex-1 items-center justify-center gap-2 border-2 border-ink bg-clay px-4 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-cream hover:text-clay"
               style={{ "--fill": "var(--color-cream)" } as React.CSSProperties}
             >
               <BagIcon className="h-4 w-4" />
-              adicionar à sacola
+              ver painéis
             </button>
             <a
               href="#pecas"
@@ -456,8 +447,8 @@ export default function ModelIntro() {
       {/* A peça sai do estúdio e pousa numa parede real, sem trocar de quadro. */}
       <div className="mi-handoff pointer-events-none absolute inset-0 z-[8] overflow-hidden bg-paper">
         <img
-          src="/images/macrame-wall-room.png"
-          alt="Sala brasileira com parede de argamassa iluminada pelo fim de tarde"
+          src={PIECE_ART.studioLocal}
+          alt="Painel de macramê do catálogo em um ambiente com luz natural"
           className="mi-wall-photo absolute inset-0 h-full w-full object-cover object-center will-change-transform"
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_44%,transparent_20%,rgba(44,30,19,.12)_100%)]" />
