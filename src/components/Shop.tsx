@@ -12,7 +12,6 @@ const cats: (Category | "Todas")[] = [
   "Todas",
   "Bolsas",
   "Painéis",
-  "Suportes",
   "Casa",
 ];
 
@@ -55,6 +54,7 @@ function Tilt({ children, className = "" }: { children: ReactNode; className?: s
 function ProductCard({ p, index }: { p: Product; index: number }) {
   const addItem = useStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
 
   const handleAdd = () => {
     addItem({
@@ -85,8 +85,9 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             className="breathe img-zoom relative aspect-[4/5] overflow-hidden border-b-2 border-ink bg-sand"
           >
             <SmartImg
-              src={p.img}
-              alt={p.name}
+              key={p.images[photoIndex]}
+              src={p.images[photoIndex]}
+              alt={`${p.name} — foto ${photoIndex + 1} de ${p.images.length}`}
               loading="lazy"
               className="h-full w-full object-cover"
             />
@@ -100,6 +101,22 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             <span className="absolute right-3 top-3 border-2 border-ink bg-cream px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-bark">
               {p.category}
             </span>
+            {p.images.length > 1 && (
+              <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2">
+                {p.images.map((src, photo) => (
+                  <button
+                    key={src}
+                    type="button"
+                    onClick={() => setPhotoIndex(photo)}
+                    aria-label={`Ver foto ${photo + 1} de ${p.name}`}
+                    aria-pressed={photoIndex === photo}
+                    className={`flex h-9 w-9 items-center justify-center border-2 border-ink font-mono text-xs font-bold ${photoIndex === photo ? "bg-ink text-cream" : "bg-cream text-ink"}`}
+                  >
+                    {photo + 1}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-1 flex-col p-4">
@@ -113,7 +130,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             </div>
             <p className="mt-1.5 text-[13px] leading-snug text-bark">{p.material}</p>
             <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-bark/80">
-              {p.size} · tingido: {p.dye}
+              {p.size} · cor: {p.dye}
             </p>
 
             <button

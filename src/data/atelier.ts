@@ -1,4 +1,6 @@
-export type Category = "Painéis" | "Bolsas" | "Suportes" | "Casa";
+import { catalogProducts } from "./catalog";
+
+export type Category = "Painéis" | "Bolsas" | "Casa";
 
 export interface Product {
   id: string;
@@ -6,171 +8,30 @@ export interface Product {
   category: Category;
   price: number;
   img: string;
+  images: string[];
+  sourceUrl: string;
   material: string;
   size: string;
   badge?: "nova" | "última peça" | "mais tecida";
   dye: string;
 }
 
-/* ————————————————————————————————————————————————
-   TODAS as fotos do app vêm da pasta pública do Drive
-   da Macra Mari — nenhuma outra fonte de imagem.
-   Servidas pelo endpoint de thumbnail, que já
-   redimensiona no servidor (nada de baixar 3 MB).
-   ———————————————————————————————————————————————— */
+export const products: Product[] = catalogProducts;
+
+// As capas passam a usar as fotografias dos produtos do catálogo real.
+const firstPanel = products.find((p) => p.category === "Painéis")!;
+const firstBag = products.find((p) => p.category === "Bolsas")!;
+const firstHome = products.find((p) => p.category === "Casa")!;
+
+export const BRAND = {
+  catPaineis: firstPanel.img,
+  catPaineisXL: firstPanel.images[1],
+  catBolsas: firstBag.img,
+};
+
+// Mantido para compatibilidade com o componente de imagens existente.
 export const driveThumb = (id: string, w = 1200) =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
-
-/* identidade visual — capas reais usadas no seletor de peças do hero */
-export const BRAND = {
-  catPaineis: driveThumb("1m_f-JIurokHemAB2f2hLerIgMIGLhZw2"),
-  /* versão grande: plano de fundo do intro (tela cheia) */
-  catPaineisXL: driveThumb("1m_f-JIurokHemAB2f2hLerIgMIGLhZw2", 2000),
-  catBolsas: driveThumb("1QJ1DYCmK3A0oyIrkSj1Oh3OJdtf95WEZ"),
-};
-
-const FOTOS = {
-  painelLotus: "1m_f-JIurokHemAB2f2hLerIgMIGLhZw2",
-  meiaLua: "19KtN284IweoNAsYF176CnlyhqiqXUJxI",
-  painelTranca: "119E54FAfZylhb6oeJya-kowblmvN9YCD",
-  painelDunas: "1MyAD0lSUmQRuQNpHL490Ap8yh6PsAyC-",
-  bolsaConcha: "1QJ1DYCmK3A0oyIrkSj1Oh3OJdtf95WEZ",
-  clutchFranja: "1jqabTRzpy-4qEROX52E8UuXjNPhVBq5a",
-  bolsaCordao: "18pNqzetxJsvgzqC_JeF5iT_eSQUlf9N8",
-  suporteSuspenso: "1hL_0_CC5qpM3-GGCyKcJ9_AaHw2WPYfC",
-  suporteDuplo: "1x5igZI_l6rRcZpa7Ea20_EKRsY9Sjkyl",
-  cesto: "1ZE2f9Vb4Etp_rE-8TAr72c_vZPLd2pX9",
-  caminhoMesa: "1aLZ_LUZF3rTNvdympStVlMjSqVuzM1ya",
-  portaVela: "16EFAO6y4TPMXVpbO_uUOA3HsqfDFTPf-",
-};
-
-export const products: Product[] = [
-  {
-    id: "painel-lotus",
-    name: "Painel Flor de Lótus",
-    category: "Painéis",
-    price: 179,
-    img: driveThumb(FOTOS.painelLotus),
-    material: "Algodão 4 mm · vara de madeira de demolição",
-    size: "60 × 90 cm",
-    badge: "mais tecida",
-    dye: "cru",
-  },
-  {
-    id: "painel-meia-lua",
-    name: "Painel Meia-Lua",
-    category: "Painéis",
-    price: 159,
-    img: driveThumb(FOTOS.meiaLua),
-    material: "Algodão 3 mm · arco de eucalipto tratado",
-    size: "Ø 60 cm",
-    badge: "nova",
-    dye: "terracota",
-  },
-  {
-    id: "painel-tranca",
-    name: "Painel Trança",
-    category: "Painéis",
-    price: 145,
-    img: driveThumb(FOTOS.painelTranca),
-    material: "Algodão 5 mm · tranças de três cabos",
-    size: "40 × 70 cm",
-    dye: "cru",
-  },
-  {
-    id: "painel-dunas",
-    name: "Painel Dunas",
-    category: "Painéis",
-    price: 129,
-    img: driveThumb(FOTOS.painelDunas),
-    material: "Algodão 3 mm · franja penteada",
-    size: "45 × 65 cm",
-    dye: "areia",
-  },
-  {
-    id: "bolsa-concha",
-    name: "Bolsa Concha",
-    category: "Bolsas",
-    price: 179,
-    img: driveThumb(FOTOS.bolsaConcha),
-    material: "Malha de algodão 25 mm · forro interno",
-    size: "32 × 38 cm",
-    badge: "última peça",
-    dye: "cru",
-  },
-  {
-    id: "clutch-franja",
-    name: "Clutch Franja",
-    category: "Bolsas",
-    price: 92,
-    img: driveThumb(FOTOS.clutchFranja),
-    material: "Malha 25 mm · franja azul à mão",
-    size: "26 × 18 cm",
-    dye: "azul",
-  },
-  {
-    id: "bolsa-cordao",
-    name: "Bolsa Cordão Cru",
-    category: "Bolsas",
-    price: 149,
-    img: driveThumb(FOTOS.bolsaCordao),
-    material: "Cordão de algodão · ráfia e alça trançada",
-    size: "35 × 40 cm",
-    badge: "nova",
-    dye: "malva",
-  },
-  {
-    id: "suporte-suspenso",
-    name: "Suporte de Planta Suspenso",
-    category: "Suportes",
-    price: 55,
-    img: driveThumb(FOTOS.suporteSuspenso),
-    material: "Algodão 3 mm · argola de latão",
-    size: "80 cm · vaso 15 cm",
-    dye: "cru",
-  },
-  {
-    id: "suporte-duplo",
-    name: "Suporte Duplo Terral",
-    category: "Suportes",
-    price: 89,
-    img: driveThumb(FOTOS.suporteDuplo),
-    material: "Algodão 4 mm · dois vasos de cerâmica",
-    size: "70 + 95 cm",
-    dye: "terracota",
-  },
-  {
-    id: "cesto-organizador",
-    name: "Cesto Organizador",
-    category: "Casa",
-    price: 68,
-    img: driveThumb(FOTOS.cesto),
-    material: "Cordão 5 mm · estrutura firme",
-    size: "Ø 28 × 20 cm",
-    dye: "cru",
-  },
-  {
-    id: "caminho-mesa",
-    name: "Caminho de Mesa Nó",
-    category: "Casa",
-    price: 79,
-    img: driveThumb(FOTOS.caminhoMesa),
-    material: "Algodão 2 mm · 14 fileiras de nós",
-    size: "40 × 150 cm",
-    badge: "nova",
-    dye: "cru",
-  },
-  {
-    id: "porta-vela",
-    name: "Porta-vela & Trecos",
-    category: "Casa",
-    price: 58,
-    img: driveThumb(FOTOS.portaVela),
-    material: "Algodão 2 mm · kit com 2 unidades",
-    size: "Ø 10 × 9 cm",
-    dye: "verde-musgo",
-  },
-];
 
 export interface Collection {
   id: string;
@@ -182,34 +43,34 @@ export interface Collection {
   pieces: number;
 }
 
-/* coleções usam as mesmas fotos do Drive (capas por categoria) */
+/* Capas e contagens das categorias do catálogo importado. */
 export const collections: Collection[] = [
   {
     id: "painel",
     name: "Parede Viva",
     desc: "Painéis que transformam qualquer parede em ateliê — fios crus, franjas ao vento e madeira de verdade.",
-    img: products[0].img,
+    img: firstPanel.img,
     category: "Painéis",
     tone: "clay",
-    pieces: 4,
+    pieces: products.filter((p) => p.category === "Painéis").length,
   },
   {
     id: "mao",
     name: "Na Mão",
     desc: "Bolsas e clutches tecidas em malha grossa. Leves, laváveis e prontas pra feira, praia e cidade.",
-    img: products[4].img,
+    img: firstBag.img,
     category: "Bolsas",
     tone: "moss",
-    pieces: 3,
+    pieces: products.filter((p) => p.category === "Bolsas").length,
   },
   {
     id: "cantos",
     name: "Cantos Verdes",
     desc: "Suportes e peças de casa que abraçam plantas, velas e a bagunça boa do dia a dia.",
-    img: products[7].img,
-    category: "Suportes",
+    img: firstHome.img,
+    category: "Casa",
     tone: "ocre",
-    pieces: 5,
+    pieces: products.filter((p) => p.category === "Casa").length,
   },
 ];
 
@@ -251,8 +112,8 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
-/* foto do ateliê — também do Drive */
-export const atelierImg = driveThumb(FOTOS.caminhoMesa);
+/* Foto contextual de uma peça de casa do catálogo. */
+export const atelierImg = firstHome.images[1];
 
 export const marqueeWords = [
   "feito à mão em pequena escala",
@@ -282,11 +143,10 @@ export const MODELS = {
    "flutua" recortada sobre o fundo de estúdio.
    ———————————————————————————————————————————————— */
 export const PIECE_ART = {
-  pngLocal: "/images/peca.png",
-  studioLocal: "/images/peca-estudio.jpg",
-  /* Design sem nome.png / Gemini_Generated_Image... — pasta MMari */
-  pngDrive: driveThumb("1JvHMi9KjbZD-5mmzgm9dECIT24_lISFt", 1400),
-  studioDrive: driveThumb("1YvSlquMezh3HTpeaeEUjflntis1z9GNI", 1600),
+  pngLocal: firstPanel.img,
+  studioLocal: firstPanel.images[1],
+  pngDrive: firstPanel.img,
+  studioDrive: firstPanel.images[1],
 };
 
 export const CONTACT = {
