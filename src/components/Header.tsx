@@ -7,7 +7,6 @@ import {
   BagIcon,
   CloseIcon,
   InstagramIcon,
-  KnotMark,
   MailIcon,
   WhatsIcon,
 } from "./Icons";
@@ -239,12 +238,7 @@ export default function Header() {
             </svg>
 
             <div className="flex items-center justify-between border-b-2 border-cream/20 px-5 py-4 sm:px-8">
-              <span className="flex items-center gap-2.5">
-                <KnotMark className="h-8 w-8 text-ocre" />
-                <span className="font-display text-[22px] font-extrabold tracking-tight">
-                  Macra<span className="text-ocre">Mari</span>
-                </span>
-              </span>
+              <Logo dark />
               <button
                 onClick={closeMenu}
                 className="flex h-11 w-11 items-center justify-center border-2 border-cream/40 transition-colors hover:border-ocre hover:text-ocre"
