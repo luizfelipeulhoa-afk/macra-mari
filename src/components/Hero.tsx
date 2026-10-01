@@ -208,7 +208,7 @@ export default function Hero() {
               </p>
             </div>
 
-            <h1 className="font-display font-extrabold leading-[0.92] tracking-tight">
+            <h2 className="font-display font-extrabold leading-[0.92] tracking-tight">
               <span className="hline text-[clamp(2.9rem,8.5vw,6.8rem)]">
                 <span className="hline-inner">Cada nó,</span>
               </span>
@@ -226,7 +226,7 @@ export default function Hero() {
                   </span>
                 </span>
               </span>
-            </h1>
+            </h2>
 
             <div className="hero-fade">
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-bark">

@@ -4,10 +4,10 @@ import { scrollToId } from "../lib/motion";
 export default function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <a
-      href="#inicio"
+      href="#abertura"
       onClick={(e) => {
         e.preventDefault();
-        scrollToId("inicio");
+        scrollToId("abertura");
       }}
       className="group flex items-center gap-2.5"
       aria-label="Macra Mari — voltar ao início"
