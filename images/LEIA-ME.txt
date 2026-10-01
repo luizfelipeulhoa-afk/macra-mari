@@ -1,0 +1,11 @@
+IMAGENS DA PEÇA DE ENTRADA — Macra Mari
+========================================
+
+Salve aqui (com estes nomes exatos) as duas imagens da pasta MMari:
+
+  · Design sem nome.png            →  peca.png
+  · Gemini_Generated_Image...jfif  →  peca-estudio.jpg
+
+Depois rode: npm run build
+
+(Se preferir, veja as instruções completas em public/models/LEIA-ME.txt)
