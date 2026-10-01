@@ -96,7 +96,6 @@ export default function ModelIntro() {
   /* aplica a pose da coreografia à peça 2D + mostrador + fio contador */
   const onProgress = (p: number) => {
     progressRef.current = p;
-    if (sectionRef.current) sectionRef.current.dataset.headerTheme = p >= 0.85 ? "light" : "dark";
     const pose = sample(p);
     if (!modelReady.current && spinRef.current) {
       spinRef.current.style.transform =
@@ -241,7 +240,6 @@ export default function ModelIntro() {
   return (
     <section
       id="entrada"
-      data-header-theme="dark"
       ref={sectionRef}
       className="mi-showroom relative h-screen overflow-hidden"
       style={{
@@ -346,10 +344,10 @@ export default function ModelIntro() {
         <p className="mb-3 inline-block border border-ocre/50 bg-ink/30 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-ocre">
           peça única · nº 001 · saiu do tear hoje
         </p>
-        <h2 className="font-display text-[clamp(2.5rem,7.5vw,5.6rem)] font-extrabold leading-[0.95] tracking-tight">
+        <h1 className="font-display text-[clamp(2.5rem,7.5vw,5.6rem)] font-extrabold leading-[0.95] tracking-tight">
           Wall Hanging
           <span className="block text-ocre">Trança</span>
-        </h2>
+        </h1>
         <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-cream/70 sm:text-[15px]">
           Gire a peça com o scroll — cada volta conta um pedaço de como ela nasceu.
         </p>

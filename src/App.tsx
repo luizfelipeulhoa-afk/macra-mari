@@ -5,7 +5,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import Header from "./components/Header";
 import ModelIntro from "./components/ModelIntro";
-import ConstructionHero from "./components/ConstructionHero";
 import Hero from "./components/Hero";
 import Shop from "./components/Shop";
 import FreshPieces from "./components/FreshPieces";
@@ -134,7 +133,7 @@ export default function App() {
       <Header />
 
       <main>
-        <ConstructionHero />
+        <ModelIntro />
         <Hero />
         <FreshPieces />
         <Shop />
@@ -147,7 +146,6 @@ export default function App() {
         <KnotDivider label="nova carreira" />
         <Atelier />
         <HemDivider />
-        <ModelIntro />
       </main>
 
       <Footer />

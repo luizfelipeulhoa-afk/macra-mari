@@ -39,7 +39,7 @@ export default function Header() {
   const count = cartCount(items);
 
   const [scrolled, setScrolled] = useState(false);
-  const [overIntro, setOverIntro] = useState(false);
+  const [overIntro, setOverIntro] = useState(true);
   const [active, setActive] = useState("inicio");
   const [menuOpen, setMenuOpen] = useState(false);
   const [bump, setBump] = useState(false);
@@ -56,9 +56,12 @@ export default function Header() {
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
+      const hero = document.getElementById("inicio");
+      const heroTop = hero ? hero.getBoundingClientRect().top + y : Infinity;
       setScrolled(y > 30);
-      setOverIntro([...document.querySelectorAll<HTMLElement>('[data-header-theme="dark"]')]
-        .some(section => { const rect = section.getBoundingClientRect(); return rect.top <= 80 && rect.bottom > 80; }));
+      /* A pele clara entra junto da dissolução do showroom, antes do hero. */
+      const handoffStart = Math.max(0, heroTop - window.innerHeight * 1.5);
+      setOverIntro(y < handoffStart);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -73,7 +76,7 @@ export default function Header() {
 
   /* scroll-spy: destaca o capítulo visível */
   useEffect(() => {
-    const ids = ["abertura", "inicio", ...navLinks.map((l) => l.id)];
+    const ids = ["inicio", ...navLinks.map((l) => l.id)];
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((en) => {
